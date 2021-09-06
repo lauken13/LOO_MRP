@@ -1,5 +1,5 @@
 library(tidyverse)
-library(brms) # You'll cmdstanr to us with brms
+library(brms) # You'll cmdstanr to use with brms
 library(survey)
 library(loo)
 
@@ -18,7 +18,7 @@ fit1 <- brm(bin_value ~ (1|x), data = test_data,
             backend = "cmdstanr",
             family = binomial(link = "logit"))
 
-ranef(fit1)
+ranef(fit1) ## random effects 
 
 # Use loo
 

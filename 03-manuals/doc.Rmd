@@ -1,0 +1,32 @@
+---
+title: "LOO_MRP Simulation Design document"
+author: "Swen Kuh"
+date: "13/09/2021"
+output: html_document
+---
+
+This document will describe the simulations we plan to conduct and the expected results from using `loo` and `weighted_loo` to do model comparisons. 
+
+Say we have a simple case of two predictor variables, $X_1$ and $X_2$ and an outcome $Y$. Lets suppose:
+
+\
+
+<center>
+$X_1 \xrightarrow{\text{strongly predictive}} Y$
+
+$X_2 \xrightarrow{\text{weakly predictive}} Y$
+</center>
+
+\ 
+
+Both $X_1$ and $X_2$ were sampled unevenly from the population, which gives us strong indication for incorporating inclusion probability in our models. 
+
+If we ran three different models (in `R` syntax):
+
+1) $Y \sim X_1 + X_2$
+2) $Y \sim X_1$
+3) $Y \sim X_2$
+
+We would expect model 1) to give us the highest _elpd_ value, followed by 2) and 3). In the case of using weighted loo's, we should expect it would give us similar results too. 
+
+

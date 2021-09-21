@@ -88,37 +88,57 @@ model2 = brm(bin_value ~ factor(sex) + (1|eth) +
              family = bernoulli(link = "logit"), 
              control = list(adapt_delta = 0.99)) 
 
-
+## comparing loo for two models, with weights and without weights
 # calculating loo
 loo1 <- loo(model1)
 loo2 <- loo(model2)
 
 loo_compare(list(loo1,loo2))
 
+## wrapper function for calculating weighted loo's for two models ####
+loo_compare_wtd <- function(loo_a, loo_b, svydesign_obj){
+  # load survey package
+  library(survey)
+  
+  # computing differences in elpd_loo 
+  elpd_diffs <- function(loo_a, loo_b) {
+    pt_a <- loo_a$pointwise
+    pt_b <- loo_b$pointwise
+    elpd <- grep("^elpd", colnames(pt_a))
+    pt_b[, elpd] - pt_a[, elpd]
+  }
+  
+  # differences between models
+  elpd_diff_11 = elpd_diffs(loo_a, loo_a)
+  elpd_diff_21 = elpd_diffs(loo_a, loo_b)
+  
+  # using svytotal to calculate weighted elpd
+  diff_11 = svytotal(elpd_diff_11, svydesign_obj)
+  diff_12 = svytotal(elpd_diff_21, svydesign_obj)
+  
+  # tabulate the differences
+  tbl = rbind(as.data.frame(diff_11), as.data.frame(diff_12))
+  rownames(tbl) = c('model1', 'model2')
+  colnames(tbl) = c('elpd_diff', 'se_diff')
+  print(tbl)
+  
+}
+
+loo_compare_wtd(loo1, loo2, svy_rake)
+
+## manual way of calculating weighted loo's
 # getting the elpd
 samp_data$elpd_loo1 <- loo1$pointwise[,1]
 samp_data$elpd_loo2 <- loo2$pointwise[,1]
 sum(samp_data$elpd_loo)
 samp_data$elpd_diff = samp_data$elpd_loo2 - samp_data$elpd_loo1
 
-## manual calculation of the std error of diff
-# sqrt(samp_size) * sd(loo2$pointwise[,1] - loo1$pointwise[,1]) 
-
-# # If you have weights
-# weighted_sum <- sum(elpd_loo1*samp_data$wts)
-
 ## creating survey raked weights
 svy_rake = svydesign(ids=~1, # cluster id, ~1 for no clusters
                  weights=~wts, # including raked weights in the survey design
                  data=samp_data)
 
-svytotal(~samp_data$elpd_diff, svy_rake) # weighted elpd
+svytotal(~samp_data$elpd_diff, svy_rake) # weighted elpd (should get the same as loo_compare_wtd)
 
 
-## checking using svytotal() and loo_compare() for equal weights
-svy_rake1 = svydesign(ids=~1, # cluster id, ~1 for no clusters
-                     weights=~1, # including raked weights in the survey design
-                     data=samp_data)
 
-svytotal(~samp_data$elpd_diff, svy_rake1) # weighted elpd
-loo_compare(loo1, loo2)

@@ -172,20 +172,65 @@ pre code {
 
 
 <p>This document will describe the simulations we plan to conduct and the expected results from using <code>loo</code> and <code>weighted_loo</code> to do model comparisons.</p>
-<p>Say we have a simple case of two predictor variables, <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> and an outcome <span class="math inline">\(Y\)</span>. Lets suppose:</p>
-<p><br />
-</p>
-<center>
-<p><span class="math inline">\(X_1 \xrightarrow{\text{strongly predictive}} Y\)</span></p>
-<span class="math inline">\(X_2 \xrightarrow{\text{weakly predictive}} Y\)</span>
-</center>
-<p> </p>
-<p>Both <span class="math inline">\(X_1\)</span> and <span class="math inline">\(X_2\)</span> were sampled unevenly from the population, which gives us strong indication for incorporating inclusion probability in our models.</p>
-<p>If we ran three different models (in <code>R</code> syntax):</p>
+<p>Say we want to explore having variables that are strongly/weakly predictive of the outcome and strongly/weakly predictive of the response. We will have 4 variables <span class="math inline">\(X_1\)</span>, <span class="math inline">\(X_2\)</span>, <span class="math inline">\(X_3\)</span> and <span class="math inline">\(X_4\)</span>, and an outcome <span class="math inline">\(Y\)</span>. Lets suppose:</p>
+<!-- +-------------------+----------------------+----------------------+ -->
+<!-- | Variable type     |  Strongly predictive |  Strongly predictive | -->
+<!-- |                   |    of the outcome    |    of the response   | -->
+<!-- +===================+======================+======================+ -->
+<!-- | Weakly predictive |        $X_1$         |        $X_2$         | -->
+<!-- | of the outcome    |                      |                      | -->
+<!-- +-------------------+----------------------+----------------------+ -->
+<!-- | Weakly predictive |        $X_3$         |        $X_4$         | -->
+<!-- | of the response   |                      |                      | -->
+<!-- +-------------------+----------------------+----------------------+ -->
+<table>
+<colgroup>
+<col width="32%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Variable type</th>
+<th align="center">Weakly predictive of the response</th>
+<th align="center">Strongly predictive of the response</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><strong>Weakly predictive of the outcome</strong></td>
+<td align="center"><span class="math inline">\(X_1\)</span></td>
+<td align="center"><span class="math inline">\(X_3\)</span></td>
+</tr>
+<tr class="even">
+<td align="center"><strong>Strongly predictive of the outcome</strong></td>
+<td align="center"><span class="math inline">\(X_2\)</span></td>
+<td align="center"><span class="math inline">\(X_4\)</span></td>
+</tr>
+</tbody>
+</table>
+<!-- <center> -->
+<!-- $X_1 \xrightarrow{\text{strongly predictive}} Y$ -->
+<!-- $X_2 \xrightarrow{\text{weakly predictive}} Y$ -->
+<!-- </center> -->
+<p>All the <span class="math inline">\(X\)</span>’s were sampled unevenly from the population, which gives us strong indication for incorporating inclusion probability in our models.</p>
+<p>We expect <span class="math inline">\(2^4 - 1 = 15\)</span> different models for the combination of these variables. If we ran these models (in <code>R</code> syntax):</p>
 <ol style="list-style-type: decimal">
+<li><span class="math inline">\(Y \sim X_1 + X_2 + X_3 + X_4\)</span></li>
+<li><span class="math inline">\(Y \sim X_1 + X_2 + X_3\)</span></li>
+<li><span class="math inline">\(Y \sim X_1 + X_2 + X_4\)</span></li>
+<li><span class="math inline">\(Y \sim X_1 + X_3 + X_4\)</span></li>
+<li><span class="math inline">\(Y \sim X_2 + X_3 + X_4\)</span></li>
 <li><span class="math inline">\(Y \sim X_1 + X_2\)</span></li>
+<li><span class="math inline">\(Y \sim X_1 + X_3\)</span></li>
+<li><span class="math inline">\(Y \sim X_1 + X_4\)</span></li>
+<li><span class="math inline">\(Y \sim X_2 + X_3\)</span></li>
+<li><span class="math inline">\(Y \sim X_2 + X_4\)</span></li>
+<li><span class="math inline">\(Y \sim X_3 + X_4\)</span></li>
 <li><span class="math inline">\(Y \sim X_1\)</span></li>
 <li><span class="math inline">\(Y \sim X_2\)</span></li>
+<li><span class="math inline">\(Y \sim X_3\)</span></li>
+<li><span class="math inline">\(Y \sim X_4\)</span></li>
 </ol>
 <p>We would expect model 1) to give us the highest <em>elpd</em> value, followed by 2) and 3). In the case of using weighted loo’s, we should expect it would give us similar results too.</p>
 

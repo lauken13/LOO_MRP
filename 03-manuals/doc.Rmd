@@ -7,26 +7,36 @@ output: html_document
 
 This document will describe the simulations we plan to conduct and the expected results from using `loo` and `weighted_loo` to do model comparisons. 
 
-Say we have a simple case of two predictor variables, $X_1$ and $X_2$ and an outcome $Y$. Lets suppose:
+## Description of variables 
+Say we want to explore having variables that are **strongly/weakly predictive of the outcome** and **strongly/weakly predictive of the response**. We will have 4 variables $X_1$, $X_2$, $X_3$ and $X_4$, and an outcome $Y$. Lets suppose:
 
-\
+| Variable type                      |  Weakly predictive of the response  |  Strongly predictive of the response |
+|:----------------------------------:|:------------------------------------:|:------------------------------------:|
+| **Weakly predictive of the outcome**   |        $X_1$                         |        $X_3$                         |
+| **Strongly predictive  of the outcome** |        $X_2$                         |        $X_4$                         |
 
-<center>
-$X_1 \xrightarrow{\text{strongly predictive}} Y$
 
-$X_2 \xrightarrow{\text{weakly predictive}} Y$
-</center>
+All the $X$'s were sampled unevenly from the population, which gives us strong indication for incorporating inclusion probability in our models. 
 
-\ 
+We expect $2^4 - 1 = 15$ different models for the combination of these variables. If we ran these models (in `R` syntax):
 
-Both $X_1$ and $X_2$ were sampled unevenly from the population, which gives us strong indication for incorporating inclusion probability in our models. 
+1) $Y \sim X_1 + X_2 + X_3 + X_4$
+2) $Y \sim X_1 + X_2 + X_3$
+3) $Y \sim X_1 + X_2 + X_4$
+4) $Y \sim X_1 + X_3 + X_4$
+5) $Y \sim X_2 + X_3 + X_4$
+6) $Y \sim X_1 + X_2$
+7) $Y \sim X_1 + X_3$
+8) $Y \sim X_1 + X_4$
+9) $Y \sim X_2 + X_3$
+10) $Y \sim X_2 + X_4$
+11) $Y \sim X_3 + X_4$
+12) $Y \sim X_1$
+13) $Y \sim X_2$
+14) $Y \sim X_3$
+15) $Y \sim X_4$
 
-If we ran three different models (in `R` syntax):
-
-1) $Y \sim X_1 + X_2$
-2) $Y \sim X_1$
-3) $Y \sim X_2$
-
-We would expect model 1) to give us the highest _elpd_ value, followed by 2) and 3). In the case of using weighted loo's, we should expect it would give us similar results too. 
+## Expected performance
+What should we expect? 
 
 

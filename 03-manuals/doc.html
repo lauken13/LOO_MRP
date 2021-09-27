@@ -172,17 +172,9 @@ pre code {
 
 
 <p>This document will describe the simulations we plan to conduct and the expected results from using <code>loo</code> and <code>weighted_loo</code> to do model comparisons.</p>
-<p>Say we want to explore having variables that are strongly/weakly predictive of the outcome and strongly/weakly predictive of the response. We will have 4 variables <span class="math inline">\(X_1\)</span>, <span class="math inline">\(X_2\)</span>, <span class="math inline">\(X_3\)</span> and <span class="math inline">\(X_4\)</span>, and an outcome <span class="math inline">\(Y\)</span>. Lets suppose:</p>
-<!-- +-------------------+----------------------+----------------------+ -->
-<!-- | Variable type     |  Strongly predictive |  Strongly predictive | -->
-<!-- |                   |    of the outcome    |    of the response   | -->
-<!-- +===================+======================+======================+ -->
-<!-- | Weakly predictive |        $X_1$         |        $X_2$         | -->
-<!-- | of the outcome    |                      |                      | -->
-<!-- +-------------------+----------------------+----------------------+ -->
-<!-- | Weakly predictive |        $X_3$         |        $X_4$         | -->
-<!-- | of the response   |                      |                      | -->
-<!-- +-------------------+----------------------+----------------------+ -->
+<div id="description-of-variables" class="section level2">
+<h2>Description of variables</h2>
+<p>Say we want to explore having variables that are <strong>strongly/weakly predictive of the outcome</strong> and <strong>strongly/weakly predictive of the response</strong>. We will have 4 variables <span class="math inline">\(X_1\)</span>, <span class="math inline">\(X_2\)</span>, <span class="math inline">\(X_3\)</span> and <span class="math inline">\(X_4\)</span>, and an outcome <span class="math inline">\(Y\)</span>. Lets suppose:</p>
 <table>
 <colgroup>
 <col width="32%" />
@@ -209,10 +201,6 @@ pre code {
 </tr>
 </tbody>
 </table>
-<!-- <center> -->
-<!-- $X_1 \xrightarrow{\text{strongly predictive}} Y$ -->
-<!-- $X_2 \xrightarrow{\text{weakly predictive}} Y$ -->
-<!-- </center> -->
 <p>All the <span class="math inline">\(X\)</span>’s were sampled unevenly from the population, which gives us strong indication for incorporating inclusion probability in our models.</p>
 <p>We expect <span class="math inline">\(2^4 - 1 = 15\)</span> different models for the combination of these variables. If we ran these models (in <code>R</code> syntax):</p>
 <ol style="list-style-type: decimal">
@@ -232,7 +220,11 @@ pre code {
 <li><span class="math inline">\(Y \sim X_3\)</span></li>
 <li><span class="math inline">\(Y \sim X_4\)</span></li>
 </ol>
-<p>We would expect model 1) to give us the highest <em>elpd</em> value, followed by 2) and 3). In the case of using weighted loo’s, we should expect it would give us similar results too.</p>
+</div>
+<div id="expected-performance" class="section level2">
+<h2>Expected performance</h2>
+<p>What should we expect?</p>
+</div>
 
 
 

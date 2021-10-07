@@ -126,19 +126,19 @@ loo_compare_wtd <- function(loo_a, loo_b, svydesign_obj){
 
 loo_compare_wtd(loo1, loo2, svy_rake)
 
-## manual way of calculating weighted loo's
-# getting the elpd
-samp_data$elpd_loo1 <- loo1$pointwise[,1]
-samp_data$elpd_loo2 <- loo2$pointwise[,1]
-sum(samp_data$elpd_loo)
-samp_data$elpd_diff = samp_data$elpd_loo2 - samp_data$elpd_loo1
-
-## creating survey raked weights
-svy_rake = svydesign(ids=~1, # cluster id, ~1 for no clusters
-                 weights=~wts, # including raked weights in the survey design
-                 data=samp_data)
-
-svytotal(~samp_data$elpd_diff, svy_rake) # weighted elpd (should get the same as loo_compare_wtd)
+# ## manual way of calculating weighted loo's ####
+# # getting the elpd
+# samp_data$elpd_loo1 <- loo1$pointwise[,1]
+# samp_data$elpd_loo2 <- loo2$pointwise[,1]
+# sum(samp_data$elpd_loo)
+# samp_data$elpd_diff = samp_data$elpd_loo2 - samp_data$elpd_loo1
+# 
+# ## creating survey raked weights
+# svy_rake = svydesign(ids=~1, # cluster id, ~1 for no clusters
+#                  weights=~wts, # including raked weights in the survey design
+#                  data=samp_data)
+# 
+# svytotal(~samp_data$elpd_diff, svy_rake) # weighted elpd (should get the same as loo_compare_wtd)
 
 
 

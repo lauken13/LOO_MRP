@@ -171,7 +171,7 @@ pre code {
 </div>
 
 
-<p>This document will describe the simulations we plan to conduct and the expected results from using <code>loo</code> and <code>weighted_loo</code> to do model comparisons.</p>
+<p>This document will describe the simulations we plan to conduct and the expected results from using <code>loo</code> and <code>weighted_loo</code> (<code>wtd_loo</code>) to do model comparisons.</p>
 <div id="description-of-variables" class="section level2">
 <h2>Description of variables</h2>
 <p>Say we want to explore having variables that are <strong>strongly/weakly predictive of the outcome</strong> and <strong>strongly/weakly predictive of the response</strong>. We will have 4 variables <span class="math inline">\(X_1\)</span>, <span class="math inline">\(X_2\)</span>, <span class="math inline">\(X_3\)</span> and <span class="math inline">\(X_4\)</span>, and an outcome <span class="math inline">\(Y\)</span>. Lets suppose:</p>
@@ -184,8 +184,8 @@ pre code {
 <thead>
 <tr class="header">
 <th align="center">Variable type</th>
-<th align="center">Weakly predictive of the response</th>
-<th align="center">Strongly predictive of the response</th>
+<th align="center">Weakly predictive of the (svy) response</th>
+<th align="center">Strongly predictive of the (svy) response</th>
 </tr>
 </thead>
 <tbody>
@@ -221,9 +221,9 @@ pre code {
 <li><span class="math inline">\(Y \sim X_4\)</span></li>
 </ol>
 </div>
-<div id="expected-performance" class="section level2">
-<h2>Expected performance</h2>
-<p>What should we expect?</p>
+<div id="what-should-we-expect" class="section level2">
+<h2>What should we expect?</h2>
+<p>If we only look at models #12-15, the expected performance is that using <code>loo</code> as comparison, it should pick out <span class="math inline">\(X_2\)</span> and <span class="math inline">\(X_4\)</span> as they are <strong>strongly predictive of the outcome</strong>. But if we use the <code>wtd_loo</code> as comparisons, it should pick out <span class="math inline">\(X_4\)</span> as we now take into account the survey design and weights accordingly, and <span class="math inline">\(X_4\)</span> is <strong>strongly predictive of the survey response</strong>.</p>
 </div>
 
 

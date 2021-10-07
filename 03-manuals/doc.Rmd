@@ -5,12 +5,12 @@ date: "13/09/2021"
 output: html_document
 ---
 
-This document will describe the simulations we plan to conduct and the expected results from using `loo` and `weighted_loo` to do model comparisons. 
+This document will describe the simulations we plan to conduct and the expected results from using `loo` and `weighted_loo` (`wtd_loo`) to do model comparisons. 
 
 ## Description of variables 
 Say we want to explore having variables that are **strongly/weakly predictive of the outcome** and **strongly/weakly predictive of the response**. We will have 4 variables $X_1$, $X_2$, $X_3$ and $X_4$, and an outcome $Y$. Lets suppose:
 
-| Variable type                      |  Weakly predictive of the response  |  Strongly predictive of the response |
+| Variable type                      |  Weakly predictive of the (svy) response  |  Strongly predictive of the (svy) response |
 |:----------------------------------:|:------------------------------------:|:------------------------------------:|
 | **Weakly predictive of the outcome**   |        $X_1$                         |        $X_3$                         |
 | **Strongly predictive  of the outcome** |        $X_2$                         |        $X_4$                         |
@@ -36,7 +36,9 @@ We expect $2^4 - 1 = 15$ different models for the combination of these variables
 14) $Y \sim X_3$
 15) $Y \sim X_4$
 
-## Expected performance
-What should we expect? 
+
+## What should we expect? 
+
+If we only look at models #12-15, the expected performance is that using `loo` as comparison, it should pick out $X_2$ and $X_4$ as they are **strongly predictive of the outcome**. But if we use the `wtd_loo` as comparisons, it should pick out $X_4$ as we now take into account the survey design and weights accordingly, and $X_4$ is **strongly predictive of the survey response**. 
 
 

@@ -23,20 +23,20 @@ popn_data <- data.frame(X1 = sample(1:J[1], N, replace= TRUE),
 ## generating a binary outcome 
 # weakly predictive - 2 (sd), strongly predictive - 0.2 (sd)
 set.seed(03210321)
-popn_data$bin_outcome <- inv_logit_scaled(round(rnorm(J[1], sd=2),2)[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
-                                            round(rnorm(J[2], sd=0.2),2)[popn_data$X2] +
-                                            round(rnorm(J[3], sd=2),2)[popn_data$X3] +
-                                            round(rnorm(J[4], sd=0.2),2)[popn_data$X4])
+popn_data$bin_outcome <- inv_logit_scaled(round(rnorm(J[1], sd=0.1),2)[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
+                                            round(rnorm(J[2], sd=1),2)[popn_data$X2] +
+                                            round(rnorm(J[3], sd=0.1),2)[popn_data$X3] +
+                                            round(rnorm(J[4], sd=1),2)[popn_data$X4])
 popn_data$bin_value <- rbinom(N,1,popn_data$bin_outcome)
 hist(popn_data$bin_outcome)
 hist(popn_data$bin_value)
 
 ## generate inclusion prob. for each individual
 # weakly predictive - 2 (sd), strongly predictive - 0.2 (sd)
-popn_data$inclusion <- inv_logit_scaled(round(rnorm(J[1], sd=2),2)[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
-                                          round(rnorm(J[2], sd=2),2)[popn_data$X2] +
-                                          round(rnorm(J[3], sd=0.2),2)[popn_data$X3] +
-                                          round(rnorm(J[4], sd=0.2),2)[popn_data$X4])
+popn_data$inclusion <- inv_logit_scaled(round(rnorm(J[1], sd=0.1),2)[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
+                                          round(rnorm(J[2], sd=0.1),2)[popn_data$X2] +
+                                          round(rnorm(J[3], sd=1),2)[popn_data$X3] +
+                                          round(rnorm(J[4], sd=1),2)[popn_data$X4])
 hist(popn_data$inclusion)
 
 
@@ -120,9 +120,4 @@ rownames(loo_wtd_tab) = c(paste0('model',1:4))
 
 loo_compare(loo1, loo2)
 loo_compare_wtd(loo1,loo2, svy_rake)
-loo_compare_wtd(loo1,loo2, svy_rake)
-loo_compare_wtd(loo1,loo3, svy_rake)
-loo_compare_wtd(loo1,loo4, svy_rake)
-loo_compare_wtd(loo2,loo3, svy_rake)
-loo_compare_wtd(loo2,loo4, svy_rake)
-loo_compare_wtd(loo3,loo4, svy_rake)
+

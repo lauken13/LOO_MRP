@@ -1,12 +1,15 @@
+source('LOO_wtd_sim_popn.R')
+
 ITE = 100
 sim_list = lapply(1:ITE, function(x)matrix(NA, nrow=4, ncol=6))
+samp_data_list = lapply(1:ITE, function(x)matrix(NA))
+
 
 for (i in 1:100){
   samp_size = 500
   samp_loc = sample(1:nrow(popn_data), size = samp_size, replace=F, prob = popn_data$inclusion)
   samp_data = popn_data[samp_loc,]
-  str(samp_data)
-  
+ 
   ## creating survey design
   svy1 = svydesign(ids=~1, # cluster id, ~1 for no clusters
                    weights=~rep(1,nrow(samp_data)), # equal weights for each unit
@@ -78,4 +81,19 @@ for (i in 1:100){
   
   sim_list[[i]] = cbind(loo_tab, loo_wtd_tab, loo_rank, loo_wtd_rank)
   
+  samp_data <- samp_data %>% 
+    mutate(elpd_1 = loo1$pointwise[,1],
+           elpd_2 = loo2$pointwise[,1],
+           elpd_3 = loo3$pointwise[,1],
+           elpd_4 = loo4$pointwise[,1]) 
+  
+  samp_data_list[[i]] = samp_data
+  
+  if (i%%5 == 0){
+    save(samp_data_list, sim_list, file="simulated100temp.RData")
+  }else{}
 }
+
+save(samp_data_list, sim_list, file="simulated100.RData")
+
+

@@ -1,3 +1,5 @@
+## running models #1-4 for 100 times
+
 source('LOO_wtd_sim_popn.R')
 
 ITE = 100
@@ -64,7 +66,9 @@ for (i in 1:100){
   loo_all = list(loo1, loo2, loo3, loo4)
   
   ## extracting loo estimates to rank them
-  loo_tab = lapply(loo_all,function(x)x$estimates[1,]) %>% do.call(rbind,.) %>% data.frame(.)
+  loo_tab = lapply(loo_all,function(x)x$estimates[1,]) %>% 
+    do.call(rbind,.) %>%
+    data.frame(.)
   rownames(loo_tab) = c(paste0('model',1:4))
   colnames(loo_tab) = c('elpd_loo', 'SE')
   
@@ -73,7 +77,9 @@ for (i in 1:100){
                        weights=~wts, # including raked weights in the survey design
                        data=samp_data)
   
-  loo_wtd_tab = lapply(loo_all, function(x)loo_wtd(x,svy_rake)) %>% do.call(rbind,.) %>% data.frame(.)
+  loo_wtd_tab = lapply(loo_all, function(x)loo_wtd(x,svy_rake)) %>% 
+    do.call(rbind,.) %>% 
+    data.frame(.)
   rownames(loo_wtd_tab) = c(paste0('model',1:4))
   
   loo_rank = rank(-loo_tab[,1])

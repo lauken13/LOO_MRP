@@ -2,7 +2,7 @@
 library(dplyr)
 library(magrittr)
 library(ggplot2)
-load("~/MRP project/tests/simulated100temp_1.RData")
+load("~/MRP project/tests/simulated60temp_1.RData")
 sim_list[1:60]
 samp_data_list[1:60]
 N = nrow(samp_data_list[[1]])
@@ -50,7 +50,7 @@ ggplot(loo_wtd_tab, aes(value, freq, fill=Model)) +
 dev.off()
 
 # second set of population ------------------------------------------------
-load("~/MRP project/tests/simulated100temp_2.RData")
+load("~/MRP project/tests/simulated85temp_2.RData")
 sim_list2 = sim_list[1:85]
 
 
@@ -88,7 +88,6 @@ dev.off()
 
 
 # plotting pairwise comparisons -------------------------------------------
-
 test = samp_data_list[[1]]
 sqrt(N) * sd(test$elpd_2 - test$elpd_4)
 

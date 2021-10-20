@@ -204,26 +204,26 @@ pre code {
 <p>All the <span class="math inline">\(X\)</span>’s were sampled unevenly from the population, which gives us strong indication for incorporating inclusion probability in our models.</p>
 <p>We expect <span class="math inline">\(2^4 - 1 = 15\)</span> different models for the combination of these variables. If we ran these models (in <code>R</code> syntax):</p>
 <ol style="list-style-type: decimal">
-<li><span class="math inline">\(Y \sim X_1 + X_2 + X_3 + X_4\)</span></li>
-<li><span class="math inline">\(Y \sim X_1 + X_2 + X_3\)</span></li>
-<li><span class="math inline">\(Y \sim X_1 + X_2 + X_4\)</span></li>
-<li><span class="math inline">\(Y \sim X_1 + X_3 + X_4\)</span></li>
-<li><span class="math inline">\(Y \sim X_2 + X_3 + X_4\)</span></li>
+<li><span class="math inline">\(Y \sim X_1\)</span></li>
+<li><span class="math inline">\(Y \sim X_2\)</span></li>
+<li><span class="math inline">\(Y \sim X_3\)</span></li>
+<li><span class="math inline">\(Y \sim X_4\)</span></li>
 <li><span class="math inline">\(Y \sim X_1 + X_2\)</span></li>
 <li><span class="math inline">\(Y \sim X_1 + X_3\)</span></li>
 <li><span class="math inline">\(Y \sim X_1 + X_4\)</span></li>
 <li><span class="math inline">\(Y \sim X_2 + X_3\)</span></li>
 <li><span class="math inline">\(Y \sim X_2 + X_4\)</span></li>
 <li><span class="math inline">\(Y \sim X_3 + X_4\)</span></li>
-<li><span class="math inline">\(Y \sim X_1\)</span></li>
-<li><span class="math inline">\(Y \sim X_2\)</span></li>
-<li><span class="math inline">\(Y \sim X_3\)</span></li>
-<li><span class="math inline">\(Y \sim X_4\)</span></li>
+<li><span class="math inline">\(Y \sim X_1 + X_2 + X_3\)</span></li>
+<li><span class="math inline">\(Y \sim X_1 + X_2 + X_4\)</span></li>
+<li><span class="math inline">\(Y \sim X_1 + X_3 + X_4\)</span></li>
+<li><span class="math inline">\(Y \sim X_2 + X_3 + X_4\)</span></li>
+<li><span class="math inline">\(Y \sim X_1 + X_2 + X_3 + X_4\)</span></li>
 </ol>
 </div>
 <div id="what-should-we-expect" class="section level2">
 <h2>What should we expect?</h2>
-<p>If we only look at models #12-15, the expected performance is that using <code>loo</code> as comparison, it should pick out <span class="math inline">\(X_2\)</span> and <span class="math inline">\(X_4\)</span> as they are <strong>strongly predictive of the outcome</strong>. But if we use the <code>wtd_loo</code> as comparisons, it should pick out <span class="math inline">\(X_4\)</span> as we now take into account the survey design and weights accordingly, and <span class="math inline">\(X_4\)</span> is <strong>strongly predictive of the survey response</strong>.</p>
+<p>If we only look at models #1-4, the expected performance is that using <code>loo</code> as comparison, it should pick out <span class="math inline">\(X_2\)</span> and <span class="math inline">\(X_4\)</span> as they are <strong>strongly predictive of the outcome</strong>. But if we use the <code>wtd_loo</code> as comparisons, it should pick out <span class="math inline">\(X_4\)</span> as we now take into account the survey design and weights accordingly, and <span class="math inline">\(X_4\)</span> is <strong>strongly predictive of the survey response</strong>.</p>
 </div>
 
 

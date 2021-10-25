@@ -24,9 +24,9 @@ popn_data <- data.frame(X1 = sample(1:J[1], N, replace= TRUE),
 # weakly predictive - 2 (sd), strongly predictive - 0.2 (sd)
 set.seed(03210321)
 popn_data$bin_outcome <- inv_logit_scaled(round(rnorm(J[1], sd=0.1),2)[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
-                                            round(rnorm(J[2], sd=1),2)[popn_data$X2] +
-                                            round(rnorm(J[3], sd=0.1),2)[popn_data$X3] +
-                                            round(rnorm(J[4], sd=1),2)[popn_data$X4])
+                                          round(rnorm(J[2], sd=1),2)[popn_data$X2] +
+                                          round(rnorm(J[3], sd=0.1),2)[popn_data$X3] +
+                                          round(rnorm(J[4], sd=1),2)[popn_data$X4])
 popn_data$bin_value <- rbinom(N,1,popn_data$bin_outcome)
 hist(popn_data$bin_outcome)
 hist(popn_data$bin_value)
@@ -101,7 +101,9 @@ loo4 <- loo(model4)
 loo_all = list(loo1, loo2, loo3, loo4)
 
 ## extracting loo estimates to rank them
-loo_tab = lapply(loo_all,function(x)x$estimates[1,]) %>% do.call(rbind,.) %>% data.frame(.)
+loo_tab = lapply(loo_all,function(x)x$estimates[1,]) %>%
+  do.call(rbind,.) %>% 
+  data.frame(.)
 rownames(loo_tab) = c(paste0('model',1:4))
 colnames(loo_tab) = c('elpd_loo', 'SE')
 (loo_sort = arrange(loo_tab, desc(elpd_loo)))
@@ -112,7 +114,10 @@ svy_rake = svydesign(ids=~1, # cluster id, ~1 for no clusters
                  weights=~wts, # including raked weights in the survey design
                  data=samp_data)
 
-loo_wtd_tab = lapply(loo_all, function(x)loo_wtd(x,svy_rake)) %>% do.call(rbind,.) %>% data.frame(.)
+## rank weighted_loo according to raked weights
+loo_wtd_tab = lapply(loo_all, function(x)loo_wtd(x,svy_rake)) %>% 
+  do.call(rbind,.) %>% 
+  data.frame(.)
 rownames(loo_wtd_tab) = c(paste0('model',1:4))
 (loo_wtd_sort = arrange(loo_wtd_tab, desc(wtd_elpd_loo)))
 

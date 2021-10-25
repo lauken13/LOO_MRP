@@ -1,4 +1,4 @@
-source('LOO_wtd_sim_popn.R')
+source('../LOO_wtd_sim_popn.R')
 
 ITE = 100
 sim_doub_list = lapply(1:ITE, function(x)matrix(NA, nrow=4, ncol=6))
@@ -6,7 +6,7 @@ sim_trip_list = lapply(1:ITE, function(x)matrix(NA, nrow=4, ncol=6))
 samp_data_list = lapply(1:ITE, function(x)matrix(NA))
 
 
-for (i in 1:ITE){
+for (i in 2:3){
   samp_size = 500
   samp_loc = sample(1:nrow(popn_data), size = samp_size, replace=F, prob = popn_data$inclusion)
   samp_data = popn_data[samp_loc,]
@@ -111,7 +111,7 @@ for (i in 1:ITE){
   loo_doub_tab = lapply(loo_doub,function(x)x$estimates[1,]) %>% 
     do.call(rbind,.) %>% 
     data.frame(.) %>% 
-    mutate(loo_doub_rank = rank(-loo_doub_tab[,1])) %>% 
+    mutate(loo_doub_rank = rank(-.[,1])) %>% 
     rename(elpd_loo = Estimate)
   
   rownames(loo_doub_tab) = c(paste0('model', c(5:10,15)))
@@ -119,7 +119,7 @@ for (i in 1:ITE){
   loo_trip_tab = lapply(loo_trip,function(x)x$estimates[1,]) %>% 
     do.call(rbind,.) %>% 
     data.frame(.) %>% 
-    mutate(loo_trip_rank = rank(-loo_trip_tab[,1])) %>% 
+    mutate(loo_trip_rank = rank(-.[,1])) %>% 
     rename(elpd_loo = Estimate)
   rownames(loo_trip_tab) = c(paste0('model', 11:15))
   
@@ -131,13 +131,13 @@ for (i in 1:ITE){
   loo_wtd_doub_tab = lapply(loo_doub, function(x)loo_wtd(x,svy_rake)) %>% 
     do.call(rbind,.) %>% 
     data.frame(.) %>% 
-    mutate(loo_wtd_doub_rank =  rank(-loo_wtd_doub_tab[,1]))
+    mutate(loo_wtd_doub_rank =  rank(-.[,1]))
   rownames(loo_wtd_doub_tab) =  c(paste0('model', c(5:10,15)))
   
   loo_wtd_trip_tab = lapply(loo_trip, function(x)loo_wtd(x,svy_rake)) %>% 
     do.call(rbind,.) %>% 
     data.frame(.) %>% 
-    mutate(loo_wtd_trip_rank =  rank(-loo_wtd_trip_tab[,1]))
+    mutate(loo_wtd_trip_rank =  rank(-.[,1]))
   rownames(loo_wtd_trip_tab) =  c(paste0('model', c(11:15)))
   
   sim_doub_list[[i]] = cbind(loo_doub_tab, loo_wtd_doub_tab) %>% 

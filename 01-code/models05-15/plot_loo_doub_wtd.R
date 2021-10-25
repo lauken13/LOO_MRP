@@ -53,8 +53,78 @@ ggplot(loo_wtd_tab, aes(value, freq, fill=Model)) +
   labs(title='Weighted LOO', x="Ranking")
 dev.off()
 
-# plotting pairwise comparisons -------------------------------------------
 
+# plotting raw elpd values ------------------------------------------------
+# unweighted
+loo_elpd_tab = sim_list2 %>% 
+  lapply(., function(x)x[sort(rownames(x)),]) %>% 
+  lapply(., function(x)(x[,'elpd_loo'])) %>% 
+  do.call(rbind, .) %>% 
+  set_colnames(c("model10", "model15", "model05", "model06", "model07", "model08", "model09")) %>% 
+  melt(.) %>% 
+  rename(Model = Var2) %>% 
+  mutate(Model = factor(Model, levels=c("model05", "model06", "model07", "model08", "model09", "model10", "model15")))
+
+gg1 = ggplot(loo_elpd_tab, aes(Model, value, fill=Model)) +
+  geom_violin() + labs(title="Unweighted elpd") +
+  scale_fill_brewer(palette = "Dark2") 
+
+# weighted
+loo_wtd_elpd_tab = sim_list2 %>% 
+  lapply(., function(x)x[sort(rownames(x)),]) %>% 
+  lapply(., function(x)(x[,'wtd_elpd_loo'])) %>% 
+  do.call(rbind, .) %>% 
+  set_colnames(c("model10", "model15", "model05", "model06", "model07", "model08", "model09")) %>% 
+  melt(.) %>% 
+  rename(Model = Var2) %>% 
+  mutate(Model = factor(Model, levels=c("model05", "model06", "model07", "model08", "model09", "model10", "model15")))
+
+
+gg2 = ggplot(loo_wtd_elpd_tab, aes(Model, value, fill=Model)) +
+  geom_violin() + labs(title="Weighted elpd")  + 
+  scale_fill_brewer(palette = "RdYlGn") 
+
+#png(file="loo_elpd_WtdvUnwtd.png", width=600, height=790)
+gridExtra::grid.arrange(gg1,gg2)
+dev.off()
+
+# plotting raw se elpd values ------------------------------------------------
+
+# unweighted
+loo_se_tab = sim_list2 %>% 
+  lapply(., function(x)x[sort(rownames(x)),]) %>% 
+  lapply(., function(x)(x[,'SE'])) %>% 
+  do.call(rbind, .) %>% 
+  set_colnames(c("model10", "model15", "model05", "model06", "model07", "model08", "model09")) %>% 
+  melt(.) %>% 
+  rename(Model = Var2) %>% 
+  mutate(Model = factor(Model, levels=c("model05", "model06", "model07", "model08", "model09", "model10", "model15")))
+
+
+gg1 = ggplot(loo_se_tab, aes(Model, value, fill=Model)) +
+  geom_violin() + labs(title="Unweighted elpd") +
+  scale_fill_brewer(palette = "Dark2") 
+
+# weighted
+loo_wtd_se_tab = sim_list2 %>% 
+  lapply(., function(x)x[sort(rownames(x)),]) %>% 
+  lapply(., function(x)(x[,'wtd_SE'])) %>% 
+  do.call(rbind, .) %>% 
+  set_colnames(c("model10", "model15", "model05", "model06", "model07", "model08", "model09")) %>% 
+  melt(.) %>% 
+  rename(Model = Var2) %>% 
+  mutate(Model = factor(Model, levels=c("model05", "model06", "model07", "model08", "model09", "model10", "model15")))
+
+
+gg2 = ggplot(loo_wtd_se_tab, aes(Model, value, fill=Model)) +
+  geom_violin() + labs(title="Weighted elpd") +
+  scale_fill_brewer(palette = "Dark2") 
+
+gridExtra::grid.arrange(gg1,gg2)
+
+
+
+# plotting pairwise comparisons -------------------------------------------
 elpdcol = grep('^elpd',colnames(samp_data_list[[1]]))
 
 pairdiff <- function(a, b, colname1, colname2){

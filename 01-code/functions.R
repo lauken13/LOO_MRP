@@ -1,7 +1,7 @@
 ## List of external functions 
 
 ## wrapper function for calculating weighted loo's for two models ####
-loo_compare_wtd <- function(loo_a, loo_b, svydesign_obj){
+loo_compare_wtd_t1 <- function(loo_a, loo_b, svydesign_obj){
   # load survey package
   library(survey)
   

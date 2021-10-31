@@ -1,4 +1,4 @@
-### data simulation to test the hypothesis on weighted loo
+## data simulation to test the hypothesis on weighted loo
 ## 28/10/2021
 ## generating population
 ## fixing multiplier when generating
@@ -11,7 +11,7 @@ library(survey) # creating raked weights
 options(mc.cores = 4)
 
 ## loading external functions
-source("~/Documents/GitHub/LOO_MRP/01-code/functions.R")
+source("../functions.R")
 
 ## generating 5 levels of predictors/covariates
 N = 10000
@@ -43,3 +43,4 @@ popn_data$inclusion <- inv_logit_scaled(wkly2[popn_data$X1] + # apply inv-logit 
                                         strg2[popn_data$X3] +
                                         strg2[popn_data$X4])
 hist(popn_data$inclusion)
+

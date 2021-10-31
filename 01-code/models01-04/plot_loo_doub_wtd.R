@@ -84,12 +84,11 @@ gg2 = ggplot(loo_wtd_elpd_tab, aes(Model, value, fill=Model)) +
   geom_violin() + labs(title="Weighted elpd")  + 
   scale_fill_brewer(palette = "RdYlGn") 
 
-#png(file="loo_elpd_WtdvUnwtd.png", width=600, height=790)
+png(file="loo_elpd_0510.png", width=600, height=790)
 gridExtra::grid.arrange(gg1,gg2)
 dev.off()
 
 # plotting raw se elpd values ------------------------------------------------
-
 # unweighted
 loo_se_tab = sim_list2 %>% 
   lapply(., function(x)x[sort(rownames(x)),]) %>% 
@@ -100,9 +99,8 @@ loo_se_tab = sim_list2 %>%
   rename(Model = Var2) %>% 
   mutate(Model = factor(Model, levels=c("model05", "model06", "model07", "model08", "model09", "model10", "model15")))
 
-
 gg1 = ggplot(loo_se_tab, aes(Model, value, fill=Model)) +
-  geom_violin() + labs(title="Unweighted elpd") +
+  geom_violin() + labs(title="Unweighted std. error") +
   scale_fill_brewer(palette = "Dark2") 
 
 # weighted
@@ -117,11 +115,12 @@ loo_wtd_se_tab = sim_list2 %>%
 
 
 gg2 = ggplot(loo_wtd_se_tab, aes(Model, value, fill=Model)) +
-  geom_violin() + labs(title="Weighted elpd") +
-  scale_fill_brewer(palette = "Dark2") 
+  geom_violin() + labs(title="Weighted std. error") +
+  scale_fill_brewer(palette = "RdYlGn") 
 
+png(file="loo_elpd_se_0510.png", width=600, height=790)
 gridExtra::grid.arrange(gg1,gg2)
-
+dev.off()
 
 
 # plotting pairwise comparisons -------------------------------------------

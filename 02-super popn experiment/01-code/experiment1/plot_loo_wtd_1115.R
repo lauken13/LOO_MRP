@@ -169,8 +169,8 @@ loo_comb_tab2 = bind_rows(loo_mrp_elpd_tab, loo_wtd_elpd_tab)
 
 png('plot_rakedVmrp.png', width=890, height=650)
 ggplot(loo_comb_tab, aes(Model, value, fill=type)) +
-  geom_violin(position=position_dodge(1)) + 
-  labs(title="Weighted LOO") 
+  geom_violin() + 
+  labs(title="Weighted LOO") + ylim(-7000,-3000) 
 dev.off()
 
 ## plotting against the 'benchmark' ----------------------------------------

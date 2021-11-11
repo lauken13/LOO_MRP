@@ -123,7 +123,7 @@ loo_comb_elpd_tab1 = bind_rows(loo_mrp_elpd_tab, loo_wtd_elpd_tab) %>%
 png('plot_rakedVmrp.png', width=890, height=650)
 ggplot(loo_comb_elpd_tab1, aes(Model, value, fill=type)) +
   geom_violin() +
-  labs(title="Weighted LOO")
+  labs(title="Weighted LOO")  + ylim(-7000,-3000) 
 dev.off()
 
 

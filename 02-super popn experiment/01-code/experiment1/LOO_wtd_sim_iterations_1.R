@@ -6,8 +6,10 @@ ITE = 100
 sim_list = lapply(1:ITE, function(x)matrix(NA, nrow=4, ncol=6))
 samp_data_list = lapply(1:ITE, function(x)matrix(NA))
 prob_truth = matrix(NA, nrow=ITE)
-  
-for (i in 1:ITE){
+elpd_popnest_list = list()
+
+
+for (i in 1:3){
   ## generating diff. population in each iteration
   set.seed(seed[i])
   wkly1 = round(rnorm(J[1], sd=0.1),2)
@@ -186,6 +188,8 @@ for (i in 1:ITE){
                          elpd_model3_popnest,
                          elpd_model4_popnest,
                          elpd_model15_popnest)
+
+ elpd_popnest_list[[length(elpd_popnest_list)+1]] = elpd_popnest_all
  
  popnest_tab = lapply(popnest_all, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
    do.call(rbind,.) %>% 
@@ -207,7 +211,7 @@ for (i in 1:ITE){
   
   samp_data_list[[i]] = samp_data
   
-  save(samp_data_list, sim_list, prob_truth, file="simulated100temp_1.RData")
+  #save(samp_data_list, sim_list, prob_truth, file="simulated100temp_1.RData")
 }
 
 save(samp_data_list, sim_list, prob_truth, file="simulated100_1.RData")

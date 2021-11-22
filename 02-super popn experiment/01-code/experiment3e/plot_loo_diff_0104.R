@@ -9,7 +9,7 @@ load("~/GitHub/LOO_MRP/02-super popn experiment/03-results/experiment3e/simulate
 
 
 ## difference in elpd_loo values
-sim_list2[[1]][,'elpd_loo']
+sim_list[[1]][,'elpd_loo']
 
 ## extracting elpd_loo and calculating difference with model15
 elpd_tab = sim_list %>% 
@@ -73,9 +73,9 @@ wtd_elpd_se_tab4 = do.call(rbind, wtd_elpd_se_tab4)
 wtd_elpd_se_tab4$model = "model04"
 
 wtd_elpd_se_tab = bind_rows(wtd_elpd_se_tab1,
-                        wtd_elpd_se_tab2,
-                        wtd_elpd_se_tab3,
-                        wtd_elpd_se_tab4)
+                            wtd_elpd_se_tab2,
+                            wtd_elpd_se_tab3,
+                            wtd_elpd_se_tab4)
 
 ## calculating upper and lower bound of the elpd values
 wtd_elpd_se_tab$low_elpd = wtd_elpd_se_tab[,'total'] - 1.64*wtd_elpd_se_tab[,'SE']
@@ -98,7 +98,7 @@ ggplot(wtd_elpd_se_tab, aes(x = total, y = model, group = iter, colour = model))
   scale_y_discrete(limits = rev) +
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) 
 
-ph1 = wtd_elpd_se_tab
+ph1 = wtd_elpd_se_tab #weighted elpd
 
 # non-weighted elpd -------------------------------------------------------
 elpd_se_tab01 = sapply(loo_diff_01, sum) %>% as.data.frame() %>% set_colnames(., 'total')
@@ -128,7 +128,7 @@ elpd_se_tab = bind_rows(elpd_se_tab01,
 
 elpd_se_tab$low_elpd = elpd_se_tab[,'total'] - 1.64*elpd_se_tab[,'SE'] 
 elpd_se_tab$upp_elpd = elpd_se_tab[,'total'] + 1.64*elpd_se_tab[,'SE'] 
-elpd_se_tab$iter = rep(1:length(samp_data), 4)
+elpd_se_tab$iter = rep(1:length(samp_data_list), 4)
 
 
 #Example plot
@@ -148,7 +148,7 @@ ggplot(elpd_se_tab, aes(x = total, y = model, group = iter, colour = model))+
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
   labs(title="Difference in elpd values") 
 
-pu1 = elpd_se_tab
+pu1 = elpd_se_tab #unweighted elpd
 
 
 

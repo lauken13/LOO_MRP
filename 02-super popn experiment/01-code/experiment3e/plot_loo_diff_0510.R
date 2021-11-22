@@ -124,10 +124,7 @@ ggplot(wtd_elpd_se_tab, aes(x = total, y = model, group = iter, colour = model))
 ggsave("plot_loo_diff_0510.pdf", g, width=6, height=7.5, units="in", device="pdf")
 
 
-ph2 = wtd_elpd_se_tab
-
-
-
+ph2 = wtd_elpd_se_tab #weighted
 
 # non-weighted elpd -------------------------------------------------------
 elpd_se_tab05 = sapply(loo_diff_05, sum) %>% as.data.frame() %>% set_colnames(., 'total')
@@ -189,5 +186,5 @@ ggplot(elpd_se_tab, aes(x = total, y = model, group = iter, colour = model))+
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
   labs(title="Difference in elpd values") 
 
-pu2 = elpd_se_tab
+pu2 = elpd_se_tab #unweighted
 

@@ -52,7 +52,7 @@ for(i in 1:len){
 popnest_mean = popnest_diff %>% 
   set_colnames(c(paste0('model0',1:4))) %>% 
   melt(.) %>% 
-  rename(iter = Var1, model = Var2, pe_mean = value)
+  rename(iter = Var1, model = Var2, mean_pe = value)
 
 popnest_low = popnest_low_diff %>% 
   set_colnames(c(paste0('model0',1:4))) %>% 
@@ -66,12 +66,13 @@ popnest_upp = popnest_upp_diff %>%
   select(.,-Var1, -Var2) %>% 
   rename(upp_pe = value)
 
-popnest_comb = cbind(popnest_mean, popnest_low, popnest_upp)
+popnest_comb = cbind(popnest_mean, popnest_low, popnest_upp) %>% 
+  mutate(range_pe = upp_pe - low_pe)
 
 pc1 = popnest_comb
 
-## plot
-ggplot(pc1, aes(x = pe_mean, y = model, group = iter, colour = model))+
+## plot diff in mean
+ggplot(pc1, aes(x = mean_pe, y = model, group = iter, colour = model))+
   geom_vline(aes(xintercept = 0)) +
   geom_point(position = position_dodge(width = .5)) +
   xlim(c(-0.25, 0.25)) +
@@ -83,6 +84,28 @@ ggplot(pc1, aes(x = pe_mean, y = model, group = iter, colour = model))+
         axis.title = element_blank()) +
   scale_y_discrete(limits = rev) +
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
+  labs(title="Difference in MRP estimate and truth") 
+
+## plotting mean as violin 
+ggplot(pc1, aes(group = model, fill = model))+
+  geom_vline(aes(xintercept = 0)) +
+  geom_violin(aes(x = low_pe, y = model),alpha=0.3) +
+  geom_violin(aes(x = upp_pe, y = model), alpha=0.3) +
+  geom_violin(aes(x = mean_pe, y = model), alpha=1) +
+  xlim(c(-0.25, 0.25)) +
+  scale_y_discrete(limits = rev) +
+  scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) 
+  
+
+## plotting range
+ggplot(pc1, aes(x = range_pe, y = model, group = model, fill = model))+
+  geom_vline(aes(xintercept = 0)) +
+  geom_violin() +
+  xlim(c(-0.05, 0.1)) +
+  scale_y_discrete(limits = rev) +
+  scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) +
+  theme(legend.position = "none",
+        axis.title = element_blank()) +
   labs(title="Difference in MRP estimate and truth") 
 
 

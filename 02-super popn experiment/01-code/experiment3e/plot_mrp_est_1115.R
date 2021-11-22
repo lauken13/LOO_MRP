@@ -47,7 +47,7 @@ for(i in 1:len){
 popnest_mean = popnest_diff %>% 
   set_colnames(c(paste0('model',11:15))) %>% 
   melt(.) %>% 
-  rename(model = Var2, iter = Var1, pe_mean = value)
+  rename(model = Var2, iter = Var1, mean_pe = value)
 
 popnest_low = popnest_low_diff %>% 
   set_colnames(c(paste0('model',11:15))) %>% 
@@ -61,11 +61,15 @@ popnest_upp = popnest_upp_diff %>%
   select(.,-Var1, -Var2) %>% 
   rename(upp_pe = value)
 
-popnest_comb = cbind(popnest_mean, popnest_low, popnest_upp)
+popnest_comb = cbind(popnest_mean, popnest_low, popnest_upp) %>% 
+  mutate(range_pe = upp_pe - low_pe)
 
+## combining with other models
+pc3 = popnest_comb 
+pc = bind_rows(pc1,pc2,pc3)
 
 ## plot
-ggplot(popnest_comb, aes(x = pe_mean, y = model, group = iter, colour = model))+
+ggplot(popnest_comb, aes(x = mean_pe, y = model, group = iter, colour = model))+
   geom_vline(aes(xintercept = 0)) +
   geom_point(position = position_dodge(width = .5)) +
   xlim(c(-0.25, 0.25)) +
@@ -79,12 +83,9 @@ ggplot(popnest_comb, aes(x = pe_mean, y = model, group = iter, colour = model))+
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
   labs(title="Difference in MRP estimate and truth") 
 
-## combining with other models
-pc3 = popnest_comb
-pc = bind_rows(pc1,pc2,pc3)
 
 ## plot
-g1 = ggplot(pc, aes(x = pe_mean, y = model, group = iter, colour = model))+
+g1 = ggplot(pc, aes(x = mean_pe, y = model, group = iter, colour = model))+
   geom_vline(aes(xintercept = 0)) +
   geom_point(position = position_dodge(width = .5)) +
   xlim(c(-0.25, 0.25)) +
@@ -98,8 +99,45 @@ g1 = ggplot(pc, aes(x = pe_mean, y = model, group = iter, colour = model))+
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18,20)]) + 
   labs(title="Difference in MRP estimate and truth") 
 
-ggsave("plot_mrp_diff.pdf", g1, width=6, height=7.5, units="in", device="pdf")
+#ggsave("plot_mrp_diff.pdf", g1, width=6, height=7.5, units="in", device="pdf")
 
+## plotting mean as violin 
+g2 = ggplot(pc, aes(group = model, fill = model))+
+  geom_vline(aes(xintercept = 0)) +
+  geom_violin(aes(x = low_pe, y = model),alpha=0.3) +
+  geom_violin(aes(x = upp_pe, y = model), alpha=0.3) +
+  geom_violin(aes(x = mean_pe, y = model), alpha=1) +
+  xlim(c(-0.25, 0.25)) +
+  scale_y_discrete(limits = rev) +
+  scale_fill_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18,12)]) +
+  theme(legend.position = "none",
+      axis.title = element_blank()) +
+  labs(title="Difference in MRP estimate and truth (mean and 90% quantile)") 
 
+ggsave("plot_mrp_diff_qt.pdf", g2, width=6, height=7.5, units="in", device="pdf")
 
+g3 = ggplot(pc, aes(group = model, fill = model))+
+  geom_vline(aes(xintercept = 0)) +
+  geom_violin(aes(x = mean_pe, y = model), alpha=1) +
+  xlim(c(-0.25, 0.25)) +
+  scale_y_discrete(limits = rev) +
+  scale_fill_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18,12)]) +
+  theme(legend.position = "none",
+        axis.title = element_blank()) +
+  labs(title="Difference in MRP estimate and truth (mean)") 
+
+ggsave("plot_mrp_diff_mean.pdf", g3, width=6, height=7.5, units="in", device="pdf")
+
+## plotting range
+g4 = ggplot(pc, aes(x = range_pe, y = model, group = model, fill = model))+
+  geom_vline(aes(xintercept = 0)) +
+  geom_violin() +
+  xlim(c(-0.01, 0.12)) +
+  scale_y_discrete(limits = rev) +
+  scale_fill_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18,12)]) +
+  theme(legend.position = "none",
+        axis.title = element_blank()) +
+  labs(title="Difference in MRP estimate and truth (quantile range)") 
+
+ggsave("plot_mrp_diff_qt_range.pdf", g4, width=6, height=7.5, units="in", device="pdf")
 

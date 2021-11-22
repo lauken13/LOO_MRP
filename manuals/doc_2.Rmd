@@ -1,0 +1,62 @@
+---
+title: "LOO_MRP Simulation Experiments Document"
+author: "Swen Kuh"
+date: "22/11/2021"
+output: html_document
+---
+
+
+# Simulation 1 
+## Finite-population approach
+We started with a finite population approach, using a fixed population each time in the simulation iteration, by sampling according to the inclusion probability. Then we calculate the `loo`'s and `wtd_loo`'s to compare between the models. We even tried running different seeds for different populations.
+
+```{r eval=F}
+## generating 5 levels of predictors/covariates
+N = 10000
+J = c(5,5,5,5) # levels for each variable
+popn_data <- data.frame(X1 = sample(1:J[1], N, replace= TRUE), 
+                        X2 = sample(1:J[2], N, replace= TRUE),
+                        X3 = sample(1:J[3], N, replace= TRUE), 
+                        X4 = sample(1:J[4], N, replace= TRUE))
+
+## generating a binary outcome 
+# weakly predictive - 0.1 (sd), strongly predictive - 1 (sd)
+set.seed(748593)
+popn_data$bin_outcome <- inv_logit_scaled(round(rnorm(J[1], sd=0.1),2)[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
+                                          round(rnorm(J[2], sd=1),2)[popn_data$X2] +
+                                          round(rnorm(J[3], sd=0.1),2)[popn_data$X3] +
+                                          round(rnorm(J[4], sd=1),2)[popn_data$X4])
+
+## generate inclusion prob. for each individual
+# weakly predictive - 0.1 (sd), strongly predictive - 1 (sd)
+popn_data$inclusion <- inv_logit_scaled(round(rnorm(J[1], sd=0.1),2)[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
+                                        round(rnorm(J[2], sd=0.1),2)[popn_data$X2] +
+                                        round(rnorm(J[3], sd=1),2)[popn_data$X3] +
+                                        round(rnorm(J[4], sd=1),2)[popn_data$X4])
+```
+
+We were expecting to see models with $X_2$ and $X_4$ getting picked up when using `loo` and `wtd_loo`, but we were getting mixed results. So we moved on to a super population approach by sampling a different population each time. 
+
+
+# Simulation 2 
+## Super-population approach
+Now, we have the above code in the for-loop, generating different population and samples from that population each time. 
+
+In addition, we also introduced '`LOOP`' -- a weighted loo estimate by weighting using the MRP estimates. 
+
+### **Using LOO**: 
+This time with a super-population approach, the trend is a bit clearer to what we have expected. Models with $X_2$ and $X_4$ (models #9, #12, #14) are slightly preferred when compared to the full model (model #15) with all the variables $X_1, X_2, X_3, X_4$. That means with the variables that are strongly predictive of the outcome and survey response, we do not need the variables that are weakly predictive. The results are the same whether we use `loo`, `wtd_loo`, or `LOOP`. 
+
+![](images/image-1.png)
+![](images/image-2.png)
+![](images/image-3.png)
+
+### **Using MRP estimates**: 
+When we assess the model performance based on its predictive power of the (binary) outcome, we can see that any model with $X_4$ in it (models #4, #7, #9, #10, #11, #12, #13, #14, #15) has less uncertainty in the biases. 
+
+![](images/image.png)
+
+
+
+> LOO suggests equivalence of any models with $X_2 + X_4$ $\leftrightarrow$ \newline MRP estimates: models with $X_4$ ?
+

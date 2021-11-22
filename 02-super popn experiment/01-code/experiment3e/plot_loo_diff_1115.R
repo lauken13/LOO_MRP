@@ -104,8 +104,27 @@ g = ggplot(ph, aes(x = total, y = model, group = iter, colour = model))+
   scale_y_discrete(limits = rev) +
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
   labs(title="Difference in elpd values (weighted)") 
-  
+
 ggsave("plot_loo_diff_wtd.pdf", g, width=6, height=7.5, units="in", device="pdf")
+
+# violin plot
+gv = ggplot(ph, aes(group = model, fill = model))+
+  geom_vline(aes(xintercept = 0), size=1) +
+  xlim(c(-3800, 2200)) +
+  geom_violin(aes(x = low_elpd, y = model),alpha=0.3) +
+  geom_violin(aes(x = upp_elpd, y = model), alpha=0.3) +
+  geom_violin(aes(x = total, y = model), alpha=1) +
+  theme(legend.position = "none",
+        axis.title = element_blank()) +
+  annotate("label", x = -1000, y = 0.8, label = "Model 15 preferred") +
+  annotate("label", x = 1000, y = 0.8, label = "Alt model preferred") +
+  scale_y_discrete(limits = rev) +
+  scale_fill_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
+  labs(title="Difference in elpd values (weighted)") 
+
+ggsave("plot_loo_diff_wtd_violin.pdf", gv, width=6, height=7.5, units="in", device="pdf")
+
+
 
 # non-weighted elpd -------------------------------------------------------
 elpd_se_tab11 = sapply(loo_diff_11, sum) %>% as.data.frame() %>% set_colnames(., 'total')
@@ -176,6 +195,23 @@ g2 = ggplot(pu, aes(x = total, y = model, group = iter, colour = model))+
   labs(title="Difference in elpd values (unweighted)") 
 
 ggsave("plot_loo_diff_unwtd.pdf", g2, width=6, height=7.5, units="in", device="pdf")
+
+## violin plot
+g3 = ggplot(pu, aes(group = model, fill = model))+
+  geom_vline(aes(xintercept = 0), size=1) +
+  xlim(c(-200, 100)) +
+  geom_violin(aes(x = low_elpd, y = model),alpha=0.3) +
+  geom_violin(aes(x = upp_elpd, y = model), alpha=0.3) +
+  geom_violin(aes(x = total, y = model), alpha=1) +
+  theme(legend.position = "none",
+        axis.title = element_blank()) +
+  annotate("label", x = -50, y = 0.8, label = "Model 15 preferred") +
+  annotate("label", x = 50, y = 0.8, label = "Alt model preferred") +
+  scale_y_discrete(limits = rev) +
+  scale_fill_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
+  labs(title="Difference in elpd values (unweighted)") 
+ggsave("plot_loo_diff_unwtd_violin.pdf", g3, width=6, height=7.5, units="in", device="pdf")
+
 
 
 

@@ -11,12 +11,10 @@ library(survey) # creating raked weights
 options(mc.cores = 1)
 
 ## loading external functions
-source("~/GitHub/LOO_MRP/02-super popn experiment/01-code/functions.R")
+source("../functions.R")
 
 ## generating 5 continuous predictors/covariates
 N = 10000
-
-
 
 ## generating a binary outcome 
 # weakly predictive - 0.1 (sd), strongly predictive - 1 (sd)

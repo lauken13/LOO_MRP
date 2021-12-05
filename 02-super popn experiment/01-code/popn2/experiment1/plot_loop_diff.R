@@ -213,7 +213,7 @@ loop_tab = bind_rows(loop1,
 ## plot all models together
 g1 = ggplot(loop_tab, aes(x = LOOP.X50, y = model, group = iter, colour = model))+
   geom_vline(aes(xintercept = 0)) +
-  xlim(c(-3800, 2200)) +
+  xlim(c(-500, 300)) +
   geom_point(position = position_dodge(width = .5)) +
   geom_errorbarh(mapping = aes(xmin = LOOP.X5, 
                                xmax = LOOP.X95), 
@@ -221,8 +221,8 @@ g1 = ggplot(loop_tab, aes(x = LOOP.X50, y = model, group = iter, colour = model)
                  height = 0, alpha = .7) +
   theme(legend.position = "none",
         axis.title = element_blank()) +
-  annotate("label", x = -1000, y = 0.8, label = "Model 15 preferred") +
-  annotate("label", x = 1000, y = 0.8, label = "Alt model preferred") +
+  annotate("label", x = -200, y = 0.8, label = "Model 15 preferred") +
+  annotate("label", x = 200, y = 0.8, label = "Alt model preferred") +
   scale_y_discrete(limits = rev) +
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
   labs(title="LOOP values")
@@ -232,14 +232,14 @@ ggsave("plot_loop_diff.pdf", g1, width=6, height=7.5, units="in", device="pdf")
 
 g2 = ggplot(loop_tab, aes(group = model, fill = model))+
   geom_vline(aes(xintercept = 0)) +
-  xlim(c(-3800, 2200)) +
+  xlim(c(-500, 300)) +
   geom_violin(aes(x = LOOP.X5, y = model),alpha=0.3) +
   geom_violin(aes(x = LOOP.X95, y = model), alpha=0.3) +
   geom_violin(aes(x = LOOP.X50, y = model), alpha=1) +
   theme(legend.position = "none",
         axis.title = element_blank()) +
-  annotate("label", x = -1000, y = 0.8, label = "Model 15 preferred") +
-  annotate("label", x = 1000, y = 0.8, label = "Alt model preferred") +
+  annotate("label", x = -200, y = 0.8, label = "Model 15 preferred") +
+  annotate("label", x = 200, y = 0.8, label = "Alt model preferred") +
   scale_y_discrete(limits = rev) +
   scale_fill_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
   labs(title="LOOP values")

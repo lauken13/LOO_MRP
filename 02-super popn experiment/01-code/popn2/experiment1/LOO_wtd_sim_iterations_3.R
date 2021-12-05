@@ -11,32 +11,38 @@ prob_truth = matrix(NA, nrow=ITE)
 coef_list = lapply(1:ITE, function(x)matrix(NA))
 elpd_popnest_list = list()
 
-for (i in 1:ITE){
+for (i in 67:ITE){
   ## generating diff. population in each iteration
   set.seed(seed[i])
-  wkly1 = 0.2
-  strg1 = 2
+  popn_data <- data.frame(X1_cont = rnorm(N, 0, 2), 
+                        X2_cont = rnorm(N, 0, 2),
+                        X3_cont = rnorm(N, 0, 2), 
+                        X4_cont = rnorm(N, 0, 2))
+
+
+  wkly1 = 0.1
+  strg1 = 1
   
   ## generating continuous and binary outcome
-  popn_data$outcome <- inv_logit_scaled(inv_logit_scaled(wkly1*popn_data$X1_cont)-
-                                          inv_logit_scaled(strg1*popn_data$X2_cont) -
-                                          inv_logit_scaled(wkly1*popn_data$X3_cont) -
-                                          inv_logit_scaled(strg1*popn_data$X4_cont) )
+  popn_data$outcome <- inv_logit_scaled(wkly1*popn_data$X1_cont +
+                                          strg1*popn_data$X2_cont +
+                                          wkly1*popn_data$X3_cont +
+                                          strg1*popn_data$X4_cont)
   popn_data$bin_value <- rbinom(N,1,popn_data$outcome)
   
   
   ## generate inclusion prob. for each individual
   # weakly predictive - 0.1 (sd), strongly predictive - 1 (sd)
-  wkly2 = 0.2
-  strg2 = 2
-  popn_data$incl_prob <- inv_logit_scaled(-inv_logit_scaled(wkly2*popn_data$X1_cont) - 
-                                            inv_logit_scaled(wkly2*popn_data$X2_cont) + 
-                                            inv_logit_scaled(strg2*popn_data$X3_cont) -
-                                            inv_logit_scaled(strg2*popn_data$X4_cont) )
+  wkly2 = 0.1
+  strg2 = 1
+  popn_data$incl_prob <- inv_logit_scaled(wkly2*popn_data$X1_cont + 
+                                          wkly2*popn_data$X2_cont + 
+                                          strg2*popn_data$X3_cont +
+                                          strg2*popn_data$X4_cont)
   
   
   ## categorising the continuous covariates 
-  J = 4
+  J = 5
   
   popn_data <- popn_data %>% 
     mutate(X1_fct = cut_interval(X1_cont,J),
@@ -59,8 +65,18 @@ for (i in 1:ITE){
            X4 = X4_fct)
   
   ## generating samples
-  samp_size = 500
-  samp_loc = sample(1:nrow(popn_data), size = samp_size, replace=F, prob = popn_data$incl_prob)
+  samp_size = 1500
+  
+  samp_loc = sample(1:nrow(popn_data), size = samp_size-25, replace=F, prob = popn_data$incl_prob)
+  
+  ## making sure at least each level of the covariates are sampled
+  for(j in 1:5){
+    samp_loc[length(samp_loc)+1] = sample(which(popn_data$X1 == j), size=1)
+    samp_loc[length(samp_loc)+1] = sample(which(popn_data$X2 == j), size=1)
+    samp_loc[length(samp_loc)+1] = sample(which(popn_data$X3 == j), size=1)
+    samp_loc[length(samp_loc)+1] = sample(which(popn_data$X4 == j), size=1)
+  }
+  
   samp_data = popn_data[samp_loc,]
   
   # random sample

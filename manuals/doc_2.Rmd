@@ -56,7 +56,30 @@ When we assess the model performance based on its predictive power of the (binar
 
 ![](images/image.png)
 
-
-
 > LOO suggests equivalence of any models with $X_2 + X_4$ $\leftrightarrow$ \newline MRP estimates: models with $X_4$ ?
+
+# Simulation 2b
+## Super-population approach with continuous covariates
+
+Now instead of generating the outcome using discrete covariates, we generate the outcome variable using the continuous covariates so that it has a stronger relationship with the outcome. 
+
+We have also sampled part of the data using 'brute-force', by making sure we sample at least one from each level of covariate, so that we don't run into issue when calculating the weights. 
+
+
+![](images/2b_prob_truth.png)
+
+If we look at LOO values, models #1,3,6 (the ones with $X_1$ and $X_3$ only) are distinctively 'un-preferred', models #9,12,14 (the ones with both $X_2$ and $X_4$) are preferred or on-par with the full model (model #15). 
+
+![](images/2b_loo_diff_unwtd.png)
+
+
+![](images/2b_loo_diff_wtd.png){width=.5\textwidth}
+
+
+
+If we look at the MRP estimates (bias), the models with $X_4$ in it are distinctively less biased, as would be expected as $X_4$ can be seen as a bias reduction variable. 
+
+![](images/2b_mrp_diff_2.png)
+
+
 

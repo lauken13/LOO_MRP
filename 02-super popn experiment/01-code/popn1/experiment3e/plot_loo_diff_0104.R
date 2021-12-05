@@ -96,7 +96,8 @@ ggplot(wtd_elpd_se_tab, aes(x = total, y = model, group = iter, colour = model))
   annotate("label", x = -1000, y = 0.5, label = "Model 15 preferred") +
   annotate("label", x = 1000, y = 0.5, label = "Alt model preferred") +
   scale_y_discrete(limits = rev) +
-  scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) 
+  scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) +
+  labs(title="Difference in elpd values (weighted)") 
 
 ph1 = wtd_elpd_se_tab #weighted elpd
 
@@ -146,7 +147,7 @@ ggplot(elpd_se_tab, aes(x = total, y = model, group = iter, colour = model))+
   annotate("label", x = 50, y = 0.5, label = "Alt model preferred") +
   scale_y_discrete(limits = rev) +
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
-  labs(title="Difference in elpd values") 
+  labs(title="Difference in elpd values (unweighted)") 
 
 pu1 = elpd_se_tab #unweighted elpd
 

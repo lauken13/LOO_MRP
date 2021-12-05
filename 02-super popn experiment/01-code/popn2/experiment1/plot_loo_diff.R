@@ -15,7 +15,7 @@ plot(1:17,prob_truth[1:17], ylim=c(0.26,.3))
 points(1:17, sim_out, pch=19)
 
 
-## extracting elpd_loo and calculating difference with model15
+¬## extracting elpd_loo and calculating difference with model15
 elpd_tab = sim_list[1:17] %>% 
   lapply(., function(x)(x[,'elpd_loo'])) %>% 
   do.call(rbind, .) %>%   
@@ -431,7 +431,7 @@ ph = bind_rows(ph1,ph2,ph3)
 #Example plot
 g = ggplot(ph, aes(x = total, y = model, group = iter, colour = model))+
   geom_vline(aes(xintercept = 0), size=1) +
-  xlim(c(-3800, 2200)) +
+  xlim(c(-500, 300)) +
   geom_point(position = position_dodge(width = .5)) +
   geom_errorbarh(mapping = aes(xmin = low_elpd, 
                                xmax = upp_elpd), 
@@ -439,8 +439,8 @@ g = ggplot(ph, aes(x = total, y = model, group = iter, colour = model))+
                  height = 0, alpha = .5) +
   theme(legend.position = "none",
         axis.title = element_blank()) +
-  annotate("label", x = -1000, y = 0.8, label = "Model 15 preferred") +
-  annotate("label", x = 1000, y = 0.8, label = "Alt model preferred") +
+  annotate("label", x = -200, y = 0.8, label = "Model 15 preferred") +
+  annotate("label", x = 200, y = 0.8, label = "Alt model preferred") +
   scale_y_discrete(limits = rev) +
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
   labs(title="Difference in elpd values (weighted)") 
@@ -450,14 +450,14 @@ ggsave("plot_loo_diff_wtd.pdf", g, width=6, height=7.5, units="in", device="pdf"
 # violin plot
 gv = ggplot(ph, aes(group = model, fill = model))+
   geom_vline(aes(xintercept = 0), size=1) +
-  xlim(c(-3800, 2200)) +
+  xlim(c(-500, 300)) +
   geom_violin(aes(x = low_elpd, y = model),alpha=0.3) +
   geom_violin(aes(x = upp_elpd, y = model), alpha=0.3) +
   geom_violin(aes(x = total, y = model), alpha=1) +
   theme(legend.position = "none",
         axis.title = element_blank()) +
-  annotate("label", x = -1000, y = 0.8, label = "Model 15 preferred") +
-  annotate("label", x = 1000, y = 0.8, label = "Alt model preferred") +
+  annotate("label", x = -200, y = 0.8, label = "Model 15 preferred") +
+  annotate("label", x = 200, y = 0.8, label = "Alt model preferred") +
   scale_y_discrete(limits = rev) +
   scale_fill_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
   labs(title="Difference in elpd values (weighted)") 

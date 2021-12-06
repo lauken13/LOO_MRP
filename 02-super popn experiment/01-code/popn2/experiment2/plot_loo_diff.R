@@ -15,7 +15,7 @@ plot(1:100,prob_truth, ylim=c(0.45,.7))
 points(1:100, sim_out, pch=19)
 
 
-¬## extracting elpd_loo and calculating difference with model15
+## extracting elpd_loo and calculating difference with model15
 elpd_tab = sim_list %>% 
   lapply(., function(x)(x[,'elpd_loo'])) %>% 
   do.call(rbind, .) %>%   
@@ -64,27 +64,25 @@ for(i in 1:100){
     as.data.frame(.)
 }
 
-wtd_elpd_se_tab1 = do.call(rbind, wtd_elpd_se_tab1)
-wtd_elpd_se_tab1$model = "model01"
+wtd_elpd_se_tab1 = do.call(rbind, wtd_elpd_se_tab1) %>% 
+  mutate(model = "model01")
 
-wtd_elpd_se_tab2 = do.call(rbind, wtd_elpd_se_tab2)
-wtd_elpd_se_tab2$model = "model02"
+wtd_elpd_se_tab2 = do.call(rbind, wtd_elpd_se_tab2) %>% 
+  mutate(model = "model02")
 
-wtd_elpd_se_tab3 = do.call(rbind, wtd_elpd_se_tab3)
-wtd_elpd_se_tab3$model = "model03"
+wtd_elpd_se_tab3 = do.call(rbind, wtd_elpd_se_tab3) %>% 
+  mutate(model = "model03")
 
-wtd_elpd_se_tab4 = do.call(rbind, wtd_elpd_se_tab4)
-wtd_elpd_se_tab4$model = "model04"
+wtd_elpd_se_tab4 = do.call(rbind, wtd_elpd_se_tab4) %>% 
+  mutate(model = "model04")
 
 wtd_elpd_se_tab = bind_rows(wtd_elpd_se_tab1,
                             wtd_elpd_se_tab2,
                             wtd_elpd_se_tab3,
-                            wtd_elpd_se_tab4)
-
-## calculating upper and lower bound of the elpd values
-wtd_elpd_se_tab$low_elpd = wtd_elpd_se_tab[,'total'] - 1.64*wtd_elpd_se_tab[,'SE']
-wtd_elpd_se_tab$upp_elpd = wtd_elpd_se_tab[,'total'] + 1.64*wtd_elpd_se_tab[,'SE']
-wtd_elpd_se_tab$iter = rep(1:100, 4)
+                            wtd_elpd_se_tab4) %>% 
+  mutate(low_elpd = .$total - (.$SE*1.64), # calculating upper and lower bound of the elpd values
+         upp_elpd = .$total + (.$SE*1.64),
+         iter = rep(1:100, 4))
 
 #Example plot
 ggplot(wtd_elpd_se_tab, aes(x = total, y = model, group = iter, colour = model))+
@@ -345,7 +343,6 @@ pu2 = elpd_se_tab #unweighted
 
 # -------------------------------------------------------------------------
 # models 11-15 ------------------------------------------------------------
-
 load("~/GitHub/LOO_MRP/02-super popn experiment/01-code/popn2/experiment2/simulated100temp_3.RData")
 sim_list2 = sim_trip_list[1:52]
 samp_data = samp_data_list[1:52]
@@ -427,7 +424,6 @@ wtd_elpd_se_tab$iter = rep(1:length(samp_data), 4)
 ph3 = wtd_elpd_se_tab
 ph = bind_rows(ph1,ph2,ph3)
 
-
 #Example plot
 g = ggplot(ph, aes(x = total, y = model, group = iter, colour = model))+
   geom_vline(aes(xintercept = 0), size=1) +
@@ -445,7 +441,7 @@ g = ggplot(ph, aes(x = total, y = model, group = iter, colour = model))+
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18)]) + 
   labs(title="Difference in elpd values (weighted)") 
 
-ggsave("plot_loo_diff_wtd.pdf", g, width=6, height=7.5, units="in", device="pdf")
+ggsave("plot_loo_diff_wtd.png", g, width=6, height=7.5, units="in", device="png")
 
 # violin plot
 ggplot(ph, aes(group = model, fill = model))+

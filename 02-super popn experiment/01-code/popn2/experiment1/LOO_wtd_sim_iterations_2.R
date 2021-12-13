@@ -11,7 +11,7 @@ prob_truth = matrix(NA, nrow=ITE)
 coef_list = lapply(1:ITE, function(x)matrix(NA))
 elpd_popnest_list = list()
 
-for (i in 1:ITE){
+for (i in 53:ITE){
   set.seed(seed[i])
   popn_data <- data.frame(X1_cont = rnorm(N, 0, 2), 
                           X2_cont = rnorm(N, 0, 2),

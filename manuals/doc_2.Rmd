@@ -106,7 +106,7 @@ for (i in 1:ITE){
 
 
 <center>
-![](images/2b/prob_truth.png){width=300px}
+![](images/3b/probTruth.png){width=300px}
 </center>
 
 If we look at the unweighted elpd LOO values, models #9,12,14 (the ones with both $X_2$ and $X_4$) are preferred, followed by the models with $X_2$ in it, then with $X_4$, and finally the ones with $X_1$ and $X_3$ only) are distinctively 'un-preferred'. But we have higher precision for the the LOO estimates using just $X_4$ only. 
@@ -115,13 +115,13 @@ If we weigh the elpd values, the distinctions between using $X_4$ and $X_2$ only
 
 We see similar conclusion by looking at the LOOP values (adjust using MRP).
 
-![](images/2b/plot_loo_raw_unwtd.png){width=450px} ![](images/2b/plot_loo_raw_wtd.png){width=450px}
+![](images/3b/plot_loo_raw_unwtd.png){width=450px} ![](images/3b/plot_loo_raw_wtd.png){width=450px}
 
-![](images/2b/plot_loop.png){width=450px}
+![](images/3b/plot_loop.png){width=450px}
 
 If we look at the MRP estimates (bias), the models with both $X_2$ and $X_4$ in it are distinctively less biased, as would be expected as $X_4$ can be seen as a bias reduction variable. 
 
 However we have higher precision (?) when we have $X_2$ in the model. 
 
-![](images/2b/plot_mrp_truth.png){width=450px} ![](images/2b/plot_mrp_qt_range.png){width=450px}
+![](images/3b/plot_mrp_truth.png){width=450px} ![](images/3b/plot_mrp_qt_range.png){width=450px}
 

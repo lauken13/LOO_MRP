@@ -1,5 +1,5 @@
 ## loading first iteration of the bash loop results
-setwd("~/GitHub/LOO_MRP/02-super popn experiment/02-data/popn2/experiment3b")
+setwd("~/MRP project/02-super popn/02-data")
 load("simulated_1.RData")
 
 coef_list_list = list(coef_list)

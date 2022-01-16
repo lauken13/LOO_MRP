@@ -18,7 +18,7 @@ legend(78, 0.58, pch=c(19,1), legend = c('sample', 'popn'))
 plot(sim_out, prob_truth, xlim=c(0.47,0.68), ylim=c(0.47,0.68), pch=19)
 abline(a=0, b=1)
 
-## extracting wtd_elpd_loo 
+## extracting wtd_elpd_loo (sum)
 elpd_wtd_tab = sim_list1 %>% 
   lapply(., function(x)(x[,'wtd_elpd_loo'])) %>% 
   do.call(rbind, .) %>%   

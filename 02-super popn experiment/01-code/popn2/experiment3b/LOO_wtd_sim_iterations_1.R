@@ -342,7 +342,7 @@ popn_data <- data.frame(X1_cont = rnorm(N, 0, 2),
   elpd_model09 = brm(elpd_9 ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
                      backend = "cmdstanr", 
                      control = list(adapt_delta = 0.99))
-  elpd_model09_predict = posterior_predict(elpd_model09, newdata = popn_ps) 
+  elpd_model09_predict = posterior_predict(elpd_model09, newdata = popn_ps)  # getting model estimate for each cell 
   elpd_model09_popnest = apply(elpd_model09_predict, 1, function(x)sum(x*popn_ps$Nj)) ## ~~equivalent to weighted elpd
   
   elpd_model10 = brm(elpd_10 ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,

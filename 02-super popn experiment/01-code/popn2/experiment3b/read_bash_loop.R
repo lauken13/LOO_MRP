@@ -1,5 +1,7 @@
 ## loading first iteration of the bash loop results
 setwd("~/MRP project/02-super popn/02-data")
+
+# loading the first file
 load("simulated_1.RData")
 
 coef_list_list = list(coef_list)

@@ -1,5 +1,5 @@
 ## loading first iteration of the bash loop results
-setwd("~/MRP project/02-super popn/02-data")
+setwd("~/MRP project/02-super popn/02-data/experiment3b")
 
 # loading the first file
 load("simulated_1.RData")
@@ -21,5 +21,3 @@ for(ite in c(2:64,66:76,78:100)) {
   sim_list1[[ite]] = sim_list
   pt_list[ite] = prob_truth
 }
-
-

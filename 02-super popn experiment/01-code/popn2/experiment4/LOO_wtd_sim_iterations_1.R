@@ -168,8 +168,25 @@ model15 = brm(sum_y | trials(n_j) ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = sa
 ## make MRP estimates
 popn_ps = popn_data %>% 
   group_by(X1, X2, X3, X4) %>% 
-  summarise(Nj = n()) %>% 
+  summarise(Nj = n(), n_j = n(), sum_y = sum(bin_value)) %>% 
   ungroup()
+
+model1_popnest = posterior_linpred(model01, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model2_popnest = posterior_linpred(model02, newdata = popn_ps, transform = T) # getting estimate for each cell
+model3_popnest = posterior_linpred(model03, newdata = popn_ps, transform = T) # getting estimate for each cell
+model4_popnest = posterior_linpred(model04, newdata = popn_ps, transform = T) # getting estimate for each cell
+model05_popnest = posterior_linpred(model05, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model06_popnest = posterior_linpred(model06, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model07_popnest = posterior_linpred(model07, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model08_popnest = posterior_linpred(model08, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model09_popnest = posterior_linpred(model09, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model10_popnest = posterior_linpred(model10, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model11_popnest = posterior_linpred(model11, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model12_popnest = posterior_linpred(model12, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model13_popnest = posterior_linpred(model13, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model14_popnest = posterior_linpred(model14, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model15_popnest = posterior_linpred(model15, newdata = popn_ps, transform = T) # getting estimate for each cell
+
 
 ## calculating loo
 loo1 <- loo(model01)
@@ -318,6 +335,22 @@ elpd_model15 = brm(elpd_15 ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_ps,
 elpd_model15_predict = posterior_predict(elpd_model15, newdata = popn_ps) 
 elpd_model15_popnest = apply(elpd_model15_predict, 1, function(x)sum(x*popn_ps$Nj)) ## ~~equivalent to weighted elpd
 
+popnest_all = list(model1_popnest, 
+                   model2_popnest, 
+                   model3_popnest,
+                   model4_popnest,
+                   model05_popnest, 
+                   model06_popnest, 
+                   model07_popnest,
+                   model08_popnest,
+                   model09_popnest,
+                   model10_popnest,
+                   model11_popnest, 
+                   model12_popnest, 
+                   model13_popnest,
+                   model14_popnest,
+                   model15_popnest)
+
 elpd_popnest_all = list(elpd_model1_popnest, 
                         elpd_model2_popnest, 
                         elpd_model3_popnest,
@@ -334,6 +367,11 @@ elpd_popnest_all = list(elpd_model1_popnest,
                         elpd_model14_popnest,
                         elpd_model15_popnest)
 
+popnest_tab = lapply(popnest_all, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
+  do.call(rbind,.) %>% 
+  data.frame(.) %>% 
+  rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.)
+
 elpd_popnest_tab = lapply(elpd_popnest_all, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
   do.call(rbind,.) %>% 
   data.frame(.) %>% 
@@ -343,7 +381,7 @@ elpd_popnest_rank = rank(-elpd_popnest_tab[,2])
 
 ## saving the results
 sim_list = cbind(loo_tab, loo_rank, elpd_popnest_rank,
-                  elpd_popnest_tab)
+                  elpd_popnest_tab, popnest_tab )
 
 prob_truth = mean(popn_data$bin_value)
 

@@ -82,11 +82,12 @@ g2 = ggplot(pu, aes(x = total, y = model, group = iter, colour = model))+
         axis.title = element_blank()) +
   scale_y_discrete(limits = rev) +
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18,12)]) + 
-  labs(title="Raw elpd values (unweighted)") +
+  labs(title="Raw elpd values (unweighted) [Binomial model]") +
   annotate("label", x = -200, y = 13.5, label = "X2 and X4") +
   annotate("label", x = -60, y = 9.5, label = "X4 only") +
   annotate("label", x = -60, y = 5.5,  label = "X2 only") +
   annotate("label", x = -60, y = 2, label = "None") 
 
+setwd("~/GitHub/LOO_MRP/02-super popn experiment/03-results/popn2/experiment4")
 ggsave("plot_loo_raw_unwtd.png", g2, width=6, height=7.5, units="in", device="png")
 

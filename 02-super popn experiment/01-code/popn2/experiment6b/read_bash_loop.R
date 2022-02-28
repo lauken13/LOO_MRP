@@ -1,8 +1,8 @@
 ## loading first iteration of the bash loop results
-setwd("~/MRP project/02-super popn/02-data/experiment3b")
+setwd("~/GitHub/LOO_MRP/02-super popn experiment/01-code/popn2/experiment6b")
 
 # loading the first file
-load("simulated_1.RData")
+load("simulated_2.RData")
 
 coef_list_list = list(coef_list)
 elpd_popnest_list = list(elpd_popnest_all)
@@ -12,7 +12,7 @@ sim_list1 = list(sim_list)
 pt_list = prob_truth
 
 # loading the rest of the results
-for(ite in c(2:64,66:76,78:100)) {
+for(ite in c(3:13,15,16,19:30,32:39,41,43,56,59:69,72:77,79:81,83:88,90,91,93:100)) {
   load(paste0("simulated_",ite,".RData")) 
   coef_list_list[[ite]] = coef_list
   elpd_popnest_list[[ite]] = elpd_popnest_all

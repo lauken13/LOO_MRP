@@ -124,4 +124,4 @@ If we look at the MRP estimates (bias), the models with both $X_2$ and $X_4$ in 
 However we have higher precision (?) when we have $X_2$ in the model. 
 
 ![](images/3b/plot_mrp_truth.png){width=450px} ![](images/3b/plot_mrp_qt_range.png){width=450px}
-
+## Simulation 3b - Different priors

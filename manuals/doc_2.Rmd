@@ -2,41 +2,10 @@
 title: "LOO_MRP Simulation Experiments Document"
 author: "Swen Kuh"
 date: "22/11/2021"
-output: html_document
+output: pdf_document
 ---
 
-
-# Simulation 1 
-## Finite-population approach
-We started with a finite population approach, using a fixed population each time in the simulation iteration, by sampling according to the inclusion probability. Then we calculate the `loo`'s and `wtd_loo`'s to compare between the models. We even tried running different seeds for different populations.
-
-```{r eval=F}
-## generating 5 levels of predictors/covariates
-N = 10000
-J = c(5,5,5,5) # levels for each variable
-popn_data <- data.frame(X1 = sample(1:J[1], N, replace= TRUE), 
-                        X2 = sample(1:J[2], N, replace= TRUE),
-                        X3 = sample(1:J[3], N, replace= TRUE), 
-                        X4 = sample(1:J[4], N, replace= TRUE))
-
-## generating a binary outcome 
-# weakly predictive - 0.1 (sd), strongly predictive - 1 (sd)
-set.seed(748593)
-popn_data$bin_outcome <- inv_logit_scaled(round(rnorm(J[1], sd=0.1),2)[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
-                                          round(rnorm(J[2], sd=1),2)[popn_data$X2] +
-                                          round(rnorm(J[3], sd=0.1),2)[popn_data$X3] +
-                                          round(rnorm(J[4], sd=1),2)[popn_data$X4])
-
-## generate inclusion prob. for each individual
-# weakly predictive - 0.1 (sd), strongly predictive - 1 (sd)
-popn_data$inclusion <- inv_logit_scaled(round(rnorm(J[1], sd=0.1),2)[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
-                                        round(rnorm(J[2], sd=0.1),2)[popn_data$X2] +
-                                        round(rnorm(J[3], sd=1),2)[popn_data$X3] +
-                                        round(rnorm(J[4], sd=1),2)[popn_data$X4])
-```
-
-We were expecting to see models with $X_2$ and $X_4$ getting picked up when using `loo` and `wtd_loo`, but we were getting mixed results. So we moved on to a super population approach by sampling a different population each time. 
-
+<!-- ## Simulation 3b - Different priors -->
 
 # Simulation 2 
 ## Super-population approach
@@ -124,4 +93,36 @@ If we look at the MRP estimates (bias), the models with both $X_2$ and $X_4$ in 
 However we have higher precision (?) when we have $X_2$ in the model. 
 
 ![](images/3b/plot_mrp_truth.png){width=450px} ![](images/3b/plot_mrp_qt_range.png){width=450px}
-## Simulation 3b - Different priors
+
+# Simulation 1 
+## Finite-population approach
+We started with a finite population approach, using a fixed population each time in the simulation iteration, by sampling according to the inclusion probability. Then we calculate the `loo`'s and `wtd_loo`'s to compare between the models. We even tried running different seeds for different populations.
+
+```{r eval=F}
+## generating 5 levels of predictors/covariates
+N = 10000
+J = c(5,5,5,5) # levels for each variable
+popn_data <- data.frame(X1 = sample(1:J[1], N, replace= TRUE), 
+                        X2 = sample(1:J[2], N, replace= TRUE),
+                        X3 = sample(1:J[3], N, replace= TRUE), 
+                        X4 = sample(1:J[4], N, replace= TRUE))
+
+## generating a binary outcome 
+# weakly predictive - 0.1 (sd), strongly predictive - 1 (sd)
+set.seed(748593)
+popn_data$bin_outcome <- inv_logit_scaled(round(rnorm(J[1], sd=0.1),2)[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
+                                          round(rnorm(J[2], sd=1),2)[popn_data$X2] +
+                                          round(rnorm(J[3], sd=0.1),2)[popn_data$X3] +
+                                          round(rnorm(J[4], sd=1),2)[popn_data$X4])
+
+## generate inclusion prob. for each individual
+# weakly predictive - 0.1 (sd), strongly predictive - 1 (sd)
+popn_data$inclusion <- inv_logit_scaled(round(rnorm(J[1], sd=0.1),2)[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
+                                        round(rnorm(J[2], sd=0.1),2)[popn_data$X2] +
+                                        round(rnorm(J[3], sd=1),2)[popn_data$X3] +
+                                        round(rnorm(J[4], sd=1),2)[popn_data$X4])
+```
+
+We were expecting to see models with $X_2$ and $X_4$ getting picked up when using `loo` and `wtd_loo`, but we were getting mixed results. So we moved on to a super population approach by sampling a different population each time. 
+
+

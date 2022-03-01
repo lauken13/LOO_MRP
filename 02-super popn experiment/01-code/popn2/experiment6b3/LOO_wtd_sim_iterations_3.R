@@ -8,7 +8,7 @@ slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 ITE = as.numeric(slurm_arrayid)
 
 ## putting samp size here to test the script
-samp_size = 50
+samp_size = 500
 
 
 
@@ -157,7 +157,7 @@ model04 = brm(bin_value ~ (1|X4), data = samp_data,
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99) )
 
-model04a = brm(bin_value ~ (1|X4),
+model04a = brm(bin_value ~ 1,
                autocor = cor_arma(~1|X4,p=1, cov=T),
               data = samp_data,
               backend = "cmdstanr",

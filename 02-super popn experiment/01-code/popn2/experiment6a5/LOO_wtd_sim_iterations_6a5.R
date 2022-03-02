@@ -4,7 +4,6 @@
 source('LOO_wtd_sim_popn.R')
 
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
-
 ITE = as.numeric(slurm_arrayid)
 
 samp_size = 1000 # placing this at the top to test the script

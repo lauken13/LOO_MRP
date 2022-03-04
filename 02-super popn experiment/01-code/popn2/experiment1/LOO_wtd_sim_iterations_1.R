@@ -1,19 +1,13 @@
 ## models 1-4, 15
 source('LOO_wtd_sim_popn.R')
 
-ITE = 100
-sim_list = lapply(1:ITE, function(x)matrix(NA, nrow=4, ncol=6))
-samp_data_list = lapply(1:ITE, function(x)matrix(NA))
-samp_data2_list = lapply(1:ITE, function(x)matrix(NA))
-df_list = lapply(1:ITE, function(x)matrix(NA))
+slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 
-prob_truth = matrix(NA, nrow=ITE)
-coef_list = lapply(1:ITE, function(x)matrix(NA))
-elpd_popnest_list = list()
+ITE = as.numeric(slurm_arrayid)
 
-for (i in 1:25){
-  set.seed(seed[i])
-  popn_data <- data.frame(X1_cont = rnorm(N, 0, 2), 
+# setting seed using array ID
+set.seed(seed[ITE])
+popn_data <- data.frame(X1_cont = rnorm(N, 0, 2), 
                           X2_cont = rnorm(N, 0, 2),
                           X3_cont = rnorm(N, 0, 2), 
                           X4_cont = rnorm(N, 0, 2))
@@ -348,7 +342,7 @@ for (i in 1:25){
   elpd_model09 = brm(elpd_9 ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
                      backend = "cmdstanr", 
                      control = list(adapt_delta = 0.99))
-  elpd_model09_predict = posterior_predict(elpd_model09, newdata = popn_ps) 
+  elpd_model09_predict = posterior_predict(elpd_model09, newdata = popn_ps)  # getting model estimate for each cell 
   elpd_model09_popnest = apply(elpd_model09_predict, 1, function(x)sum(x*popn_ps$Nj)) ## ~~equivalent to weighted elpd
   
   elpd_model10 = brm(elpd_10 ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
@@ -424,8 +418,6 @@ for (i in 1:25){
                          elpd_model14_popnest,
                          elpd_model15_popnest)
 
- elpd_popnest_list[[length(elpd_popnest_list)+1]] = elpd_popnest_all
- 
  popnest_tab = lapply(popnest_all, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
    do.call(rbind,.) %>% 
    data.frame(.) %>% 
@@ -439,22 +431,16 @@ for (i in 1:25){
  elpd_popnest_rank = rank(-elpd_popnest_tab[,2])
 
  ## saving the results
- sim_list[[i]] = cbind(loo_tab, loo_wtd_tab, loo_rank, loo_wtd_rank,
+ sim_list = cbind(loo_tab, loo_wtd_tab, loo_rank, loo_wtd_rank,
                        elpd_popnest_rank, popnest_tab, elpd_popnest_tab)
 
-  prob_truth[i,] = mean(popn_data$bin_value)
+  prob_truth = mean(popn_data$bin_value)
   
-  samp_data_list[[i]] = samp_data
-  
-  samp_data2_list[[i]] = samp_data2
-  
-  df_list[[i]] = df
-  
-  coef_list[[i]] = c(coef(model01), coef(model02), coef(model03), coef(model04), 
+  coef_list = c(coef(model01), coef(model02), coef(model03), coef(model04), 
                      coef(model05), coef(model06), coef(model07), coef(model08),
                      coef(model09), coef(model10), coef(model11), coef(model12),
                      coef(model13), coef(model14), coef(model15))
-  names(coef_list[[i]]) = c(paste0("01.",names(coef(model01))[grep("*", names(coef(model01)))]),
+  names(coef_list) = c(paste0("01.",names(coef(model01))[grep("*", names(coef(model01)))]),
                             paste0("02.",names(coef(model02))[grep("*", names(coef(model02)))]),
                             paste0("03.",names(coef(model03))[grep("*", names(coef(model03)))]),
                             paste0("04.",names(coef(model04))[grep("*", names(coef(model04)))]),
@@ -470,13 +456,8 @@ for (i in 1:25){
                             paste0("14.",names(coef(model14))[grep("*", names(coef(model14)))]),
                             paste0("15.",names(coef(model15))[grep("*", names(coef(model15)))]))
   
-  
-  save(samp_data_list, samp_data2_list, df_list,
+  save(samp_data, samp_data2,
        sim_list, prob_truth, coef_list,
-       elpd_popnest_list, file="simulated25temp_1.RData")
-}
+       elpd_popnest_all, file = paste0("simulated_", ITE, ".RData"))
 
-save(samp_data_list, samp_data2_list, df_list, 
-     sim_list, prob_truth, coef_list, 
-     elpd_popnest_list, file="simulated25_1.RData")
 

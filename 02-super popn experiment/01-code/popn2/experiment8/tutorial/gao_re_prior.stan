@@ -45,11 +45,17 @@ transformed parameters {
 
   // noncentered parameterization for U_state_transformed
   for (j in 1:51) {
-    U_state_transformed[j] = (U_state[j] * sigma_state) + ( U_region_transformed[region_index[j]] + (beta_state * state_vs[j]) + (beta_relig * relig[j]) );
+    U_state_transformed[j] = (U_state[j] * sigma_state) + 
+    ( U_region_transformed[region_index[j]] +
+    (beta_state * state_vs[j]) +
+    (beta_relig * relig[j]) );
   }
 
   for (i in 1:N) {
-    yhat[i] = intercept + U_age_transformed[age[i]] + U_income_transformed[income[i]] + U_state_transformed[state_index[i]]; // the linear predictor at each point
+    yhat[i] = intercept + 
+    U_age_transformed[age[i]] +
+    U_income_transformed[income[i]] + 
+    U_state_transformed[state_index[i]]; // the linear predictor at each point
   }
   
 }

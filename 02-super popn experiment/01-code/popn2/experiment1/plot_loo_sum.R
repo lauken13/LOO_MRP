@@ -4,8 +4,22 @@ library(ggplot2)
 library(reshape2)
 library(dplyr)
 library(magrittr)
+library(tidyverse)
 
-## extracting wtd_elpd_loo 
+## plotting prob of truth
+ite = c(1:64,66:76,78:100)
+samp_data_list2 = samp_data_list[ite]
+sim_out = sapply(samp_data_list2, function(x)mean(x$outcome))
+prob_truth = pt_list[ite]
+
+plot(1:length(ite), prob_truth, ylim=c(0.45,.7), pch=1)
+points(1:length(ite), sim_out, pch=19)
+legend(78, 0.58, pch=c(19,1), legend = c('sample', 'popn'))
+
+plot(sim_out, prob_truth, xlim=c(0.47,0.68), ylim=c(0.47,0.68), pch=19)
+abline(a=0, b=1)
+
+## extracting wtd_elpd_loo (sum)
 elpd_wtd_tab = sim_list1 %>% 
   lapply(., function(x)(x[,'wtd_elpd_loo'])) %>% 
   do.call(rbind, .) %>%   
@@ -103,7 +117,7 @@ elpd_se_tab2 = cbind(tmp1, tmp2[,-1]) %>%
   rename(SE = "tmp2[, -1]") %>% 
   mutate(low_elpd = .$total - (.$SE*1.64), # calculating upper and lower bound of the elpd values
          upp_elpd = .$total + (.$SE*1.64),
-         iter = rep(1:98, 15))
+         iter = rep(1:length(ite), 15))
 
 pu = elpd_se_tab2 %>% 
   mutate(model = factor(model)) %>% 

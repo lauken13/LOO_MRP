@@ -370,7 +370,7 @@ wtd_elpd_se_tab = bind_rows(wtd_elpd_se_tab11,
 ph3 = wtd_elpd_se_tab
 ph = bind_rows(ph1,ph2,ph3) %>% 
   mutate(model = factor(model)) %>% 
-  mutate(model = revalue(model, c('model01' = 'X1',
+  mutate(model = plyr::revalue(model, c('model01' = 'X1',
                                   'model02' = 'X2',
                                   'model03' = 'X3',
                                   'model04' = 'X4',
@@ -386,8 +386,8 @@ ph = bind_rows(ph1,ph2,ph3) %>%
                                   'model14' = 'X2 + X3 + X4', 
                                   'model15' = 'X1 + X2 + X3 + X4'))) 
 ph$model = fct_relevel(ph$model, c('X2 + X4', 'X1 + X2 + X4', 'X2 + X3 + X4', 'X1 + X2 + X3 + X4', 
-                                   'X2', 'X1 + X2', 'X2 + X3', 'X1 + X2 + X3',
                                    'X4', 'X1 + X4', 'X3 + X4', 'X1 + X3 + X4',
+                                   'X2', 'X1 + X2', 'X2 + X3', 'X1 + X2 + X3',
                                    'X1', 'X3', 'X1 + X3'))
 
 #Example plot
@@ -403,8 +403,8 @@ g = ggplot(ph, aes(x = total, y = model, group = iter, colour = model))+
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18,12)]) + 
   labs(title="Raw elpd values (weighted)") +
   annotate("label", x = -6100, y = 13.5, label = "X2 and X4") +
-  annotate("label", x = -4100, y = 9.5, label = "X2 only") +
-  annotate("label", x = -4100, y = 5.5, label = "X4 only") +
+  annotate("label", x = -4100, y = 9.5, label = "X4 only") +
+  annotate("label", x = -4100, y = 5.5, label = "X2 only") +
   annotate("label", x = -4100, y = 2, label = "None") 
   
 ggsave("plot_loo_raw_wtd.png", g, width=6, height=7.5, units="in", device="png")
@@ -472,7 +472,7 @@ pu3 = elpd_se_tab
 
 pu = bind_rows(pu1, pu2, pu3) %>% 
   mutate(model = factor(model)) %>% 
-  mutate(model = revalue(model, c('model01' = 'X1',
+  mutate(model = plyr::revalue(model, c('model01' = 'X1',
                                   'model02' = 'X2',
                                   'model03' = 'X3',
                                   'model04' = 'X4',
@@ -488,8 +488,8 @@ pu = bind_rows(pu1, pu2, pu3) %>%
                                   'model14' = 'X2 + X3 + X4', 
                                   'model15' = 'X1 + X2 + X3 + X4'))) 
 pu$model = fct_relevel(pu$model, c('X2 + X4', 'X1 + X2 + X4', 'X2 + X3 + X4', 'X1 + X2 + X3 + X4', 
-                                   'X2', 'X1 + X2', 'X2 + X3', 'X1 + X2 + X3',
                                    'X4', 'X1 + X4', 'X3 + X4', 'X1 + X3 + X4',
+                                   'X2', 'X1 + X2', 'X2 + X3', 'X1 + X2 + X3',
                                    'X1', 'X3', 'X1 + X3'))
 
 
@@ -506,10 +506,10 @@ g2 = ggplot(pu, aes(x = total, y = model, group = iter, colour = model))+
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18,12)]) + 
   labs(title="Raw elpd values (unweighted)") +
   annotate("label", x = -850, y = 13.5, label = "X2 and X4") +
-  annotate("label", x = -610, y = 9.5, label = "X2 only") +
-  annotate("label", x = -610, y = 5.5,  label = "X4 only") +
+  annotate("label", x = -610, y = 9.5, label = "X4 only") +
+  annotate("label", x = -610, y = 5.5,  label = "X2 only") +
   annotate("label", x = -610, y = 2, label = "None") 
 
 
-ggsave("plot_loo_raw_unwtd.pdf", g2, width=6, height=7.5, units="in", device="pdf")
+ggsave("plot_loo_raw_unwtd.png", g2, width=6, height=7.5, units="in", device="png")
 

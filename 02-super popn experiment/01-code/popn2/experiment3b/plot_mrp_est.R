@@ -6,8 +6,11 @@ library(magrittr)
 library(survey)
 library(forcats)
 
+<<<<<<< Updated upstream
 samp_data_list[[1]][,c('elpd_1', 'X1')]
 
+=======
+>>>>>>> Stashed changes
 ## extracting popn. estimates and upper and lower bound
 popnest_tab = sim_list1[c(1:64,66:76,78:100)] %>% 
   lapply(., function(x)(x[,c('popnestX5','popnestX50', 'popnestX95')])) %>% 

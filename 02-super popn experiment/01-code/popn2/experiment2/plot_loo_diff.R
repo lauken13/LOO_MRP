@@ -11,8 +11,8 @@ samp_data_list2 = samp_data_list
 sim_out = sapply(samp_data_list2, function(x)mean(x$outcome))
 prob_truth
 
-plot(1:100,prob_truth, ylim=c(0.45,.7))
-points(1:100, sim_out, pch=19)
+plot(prob_truth, sim_out, ylim=c(0,1))
+abline(a=0, b=1)
 
 
 ## extracting elpd_loo and calculating difference with model15

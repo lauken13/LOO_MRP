@@ -167,7 +167,7 @@ loop3 = loop_se_tab
 
 loop_tab = bind_rows(loop1,loop2,loop3) %>% 
   mutate(model = factor(model)) %>% 
-  mutate(model = revalue(model, c('model01' = 'X1',
+  mutate(model = plyr::revalue(model, c('model01' = 'X1',
                                   'model02' = 'X2',
                                   'model03' = 'X3',
                                   'model04' = 'X4',
@@ -183,9 +183,9 @@ loop_tab = bind_rows(loop1,loop2,loop3) %>%
                                   'model14' = 'X2 + X3 + X4', 
                                   'model15' = 'X1 + X2 + X3 + X4'))) 
 loop_tab$model = fct_relevel(loop_tab$model, c('X2 + X4', 'X1 + X2 + X4', 'X2 + X3 + X4', 'X1 + X2 + X3 + X4', 
-                                   'X2', 'X1 + X2', 'X2 + X3', 'X1 + X2 + X3',
-                                   'X4', 'X1 + X4', 'X3 + X4', 'X1 + X3 + X4',
-                                   'X1', 'X3', 'X1 + X3'))
+                                               'X4', 'X1 + X4', 'X3 + X4', 'X1 + X3 + X4',
+                                               'X2', 'X1 + X2', 'X2 + X3', 'X1 + X2 + X3',
+                                               'X1', 'X3', 'X1 + X3'))
 
 
 ## plot all models together
@@ -201,8 +201,8 @@ g1 = ggplot(loop_tab, aes(x = LOOP.X50, y = model, group = iter, colour = model)
   scale_colour_manual(values = pals::tableau20(20)[c(1,2,9,10,3,4,7,8,13,14,5,6,17,18,12)]) + 
   labs(title="Raw LOOP values") +
   annotate("label", x = -7000, y = 13.5, label = "X2 and X4") +
-  annotate("label", x = -3100, y = 9.5, label = "X2 only") +
-  annotate("label", x = -3100, y = 5.5,  label = "X4 only") +
+  annotate("label", x = -3100, y = 9.5, label = "X4 only") +
+  annotate("label", x = -3100, y = 5.5,  label = "X2 only") +
   annotate("label", x = -3100, y = 2, label = "None") 
 
 ggsave("plot_loop.png", g1, width=6, height=7.5, units="in", device="png")

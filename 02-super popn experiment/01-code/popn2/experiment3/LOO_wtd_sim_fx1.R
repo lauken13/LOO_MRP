@@ -9,7 +9,6 @@ ITE = as.numeric(slurm_arrayid)
 
 samp_size = 1000 # placing this at the top to test the script
 
-
 # setting seed using array ID
 set.seed(seed[ITE])
 popn_data <- data.frame(X1_cont = rnorm(N, 0, 2), 

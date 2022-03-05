@@ -3,3 +3,6 @@ bernoulli model for individual (leave-one-out)
 
 ## experiment2 
 trialling binomial model (leave-one-GROUP/CELL-out rather than individual)
+
+## experiment3
+trying AR prior on X4 (X4 also set to have different relationships with the outcome)

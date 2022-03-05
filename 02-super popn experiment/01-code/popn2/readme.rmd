@@ -5,4 +5,8 @@ bernoulli model for individual (leave-one-out)
 trialling binomial model (leave-one-GROUP/CELL-out rather than individual)
 
 ## experiment3
-trying AR prior on X4 (X4 also set to have different relationships with the outcome)
+- trying AR prior on X4 
+- X4 set to have different relationships with the outcome
+  - fx1 (smiley face reln. with the outcome)
+  - fx2 (sad face reln. ")
+  - fx3 (tick mark reln. ")

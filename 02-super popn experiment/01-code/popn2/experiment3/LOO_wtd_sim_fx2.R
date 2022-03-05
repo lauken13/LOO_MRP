@@ -8,7 +8,7 @@ slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 ITE = as.numeric(slurm_arrayid)
 
 ## putting samp size here to test the script
-samp_size = 500
+samp_size = 1000
 
 
 
@@ -644,7 +644,7 @@ model03_popnest = apply(model03_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model04_predict = posterior_linpred(model04, newdata = popn_ps, transform = T) # getting estimate for each cell
 model04_popnest = apply(model04_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model04a_predict = posterior_epred(model04a, newdata = popn_ps) # getting estimate for each cell
+model04a_predict = posterior_linpred(model04a, newdata = popn_ps, transform = T) # getting estimate for each cell
 model04a_popnest = apply(model04a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -657,7 +657,7 @@ model06_popnest = apply(model06_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model07_predict = posterior_linpred(model07, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model07_popnest = apply(model07_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model07a_predict = posterior_epred(model07a, newdata = popn_ps) # getting model estimate for each cell
+model07a_predict = posterior_linpred(model07a, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model07a_popnest = apply(model07a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -667,7 +667,7 @@ model08_popnest = apply(model08_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model09_predict = posterior_linpred(model09, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model09_popnest = apply(model09_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model09a_predict = posterior_epred(model09a, newdata = popn_ps) # getting model estimate for each cell
+model09a_predict = posterior_linpred(model09a, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model09a_popnest = apply(model09a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -675,7 +675,7 @@ model09a_popnest = apply(model09a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(p
 model10_predict = posterior_linpred(model10, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model10_popnest = apply(model10_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model10a_predict = posterior_epred(model10a, newdata = popn_ps) # getting model estimate for each cell
+model10a_predict = posterior_linpred(model10a, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model10a_popnest = apply(model10a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -686,27 +686,27 @@ model11_popnest = apply(model11_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model12_predict = posterior_linpred(model12, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model12_popnest = apply(model12_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model12a_predict = posterior_epred(model12a, newdata = popn_ps) # getting model estimate for each cell
+model12a_predict = posterior_linpred(model12a, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model12a_popnest = apply(model12a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
 model13_predict = posterior_linpred(model13, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model13_popnest = apply(model13_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model13a_predict = posterior_epred(model13a, newdata = popn_ps) # getting model estimate for each cell
+model13a_predict = posterior_linpred(model13a, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model13a_popnest = apply(model13a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
 model14_predict = posterior_linpred(model14, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model14_popnest = apply(model14_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model14a_predict = posterior_epred(model14a, newdata = popn_ps) # getting model estimate for each cell
+model14a_predict = posterior_linpred(model14a, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model14a_popnest = apply(model14a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 model15_predict = posterior_linpred(model15, newdata = popn_ps, transform = T) # getting estimate for each cell
 model15_popnest = apply(model15_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model15a_predict = posterior_epred(model15a, newdata = popn_ps) # getting estimate for each cell
+model15a_predict = posterior_linpred(model15a, newdata = popn_ps, transform = T) # getting estimate for each cell
 model15a_popnest = apply(model15a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 

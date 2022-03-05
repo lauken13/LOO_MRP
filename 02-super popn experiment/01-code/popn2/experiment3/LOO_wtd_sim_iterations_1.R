@@ -7,6 +7,9 @@ slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 
 ITE = as.numeric(slurm_arrayid)
 
+samp_size = 500 # placing this at the top to test the script
+
+
 # setting seed using array ID
 set.seed(seed[ITE])
 popn_data <- data.frame(X1_cont = rnorm(N, 0, 2), 
@@ -31,7 +34,7 @@ summary(popn_data$X4_cont)
 popn_data$outcome <- inv_logit_scaled(wkly1*popn_data$X1_cont +
                                         strg1*popn_data$X2_cont +
                                         wkly1*popn_data$X3_cont +
-                                        fx3(popn_data$X4_tr))
+                                        fx1(popn_data$X4_tr))
 # par(mfrow=c(2,2))
 # plot((popn_data$X4_tr), fx1(popn_data$X4_tr))
 # plot((popn_data$X4_tr), fx2(popn_data$X4_tr))
@@ -74,20 +77,28 @@ popn_data <- popn_data %>%
          X4 = X4_fct)
 
 ## generating samples
-samp_size = 500
-
 samp_loc = sample(1:nrow(popn_data), size = samp_size-(J*3 + K), replace=F, prob = popn_data$incl_prob)
 
 ## making sure at least each level of the covariates are sampled
 for(j in 1:J){
+  if(length(which(popn_data$X1 == j)) == 1){
+    samp_loc[length(samp_loc)+1] = which(popn_data$X1 == j)
+    samp_loc[length(samp_loc)+1] = which(popn_data$X2 == j)
+    samp_loc[length(samp_loc)+1] = which(popn_data$X3 == j)
+  } else{
   samp_loc[length(samp_loc)+1] = sample(which(popn_data$X1 == j), size=1)
   samp_loc[length(samp_loc)+1] = sample(which(popn_data$X2 == j), size=1)
   samp_loc[length(samp_loc)+1] = sample(which(popn_data$X3 == j), size=1)
+  }
 }
 
-for(j in 1:K){
-  samp_loc[length(samp_loc)+1] = sample(which(popn_data$X4 == j), size=1)
+for(k in 1:K){
+  if( length(which(popn_data$X4 == k)) == 1 ){
+    samp_loc[length(samp_loc)+1] = which(popn_data$X4 == k)
+  } else
+    samp_loc[length(samp_loc)+1] = sample(which(popn_data$X4 == k), size=1)
 }
+
 
 samp_data = popn_data[samp_loc,]
 
@@ -144,14 +155,14 @@ model04 = brm(bin_value ~ (1|X4), data = samp_data,
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99) )
-ptm = proc.time()
+
 model04a = brm(bin_value ~ (1|X4),
                autocor = cor_arma(~1|X4,p=1, cov=T),
               data = samp_data,
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.9) )
-proc.time() - ptm
+
 
 model05 = brm(bin_value ~ (1|X1) + (1|X2), data = samp_data,
               backend = "cmdstanr",
@@ -172,7 +183,7 @@ model07a = brm(bin_value ~ (1|X1) + (1|X4), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
                backend = "cmdstanr",
                family = bernoulli(link = "logit"), 
-               control = list(adapt_delta = 0.85))
+               control = list(adapt_delta = 0.9))
 
 model08 = brm(bin_value ~ (1|X2) + (1|X3), data = samp_data,
               backend = "cmdstanr",
@@ -184,13 +195,12 @@ model09 = brm(bin_value ~ (1|X2) + (1|X4), data = samp_data,
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99)) 
 
-ptm = proc.time()
 model09a = brm(bin_value ~ (1|X2) + (1|X4), data = samp_data,
               autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.87)) 
-proc.time() - ptm
+              control = list(adapt_delta = 0.9)) 
+
 model10 = brm(bin_value ~ (1|X3) + (1|X4), data = samp_data,
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
@@ -200,7 +210,7 @@ model10a = brm(bin_value ~ (1|X3) + (1|X4), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.85)) 
+              control = list(adapt_delta = 0.9)) 
 
 model11 = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3), data = samp_data,
               backend = "cmdstanr",
@@ -217,7 +227,7 @@ model12a = brm(bin_value ~ (1|X1) + (1|X2) + (1|X4), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99)) 
+              control = list(adapt_delta = 0.9)) 
 
 
 model13 = brm(bin_value ~ (1|X1) + (1|X3) + (1|X4), data = samp_data,
@@ -226,10 +236,10 @@ model13 = brm(bin_value ~ (1|X1) + (1|X3) + (1|X4), data = samp_data,
               control = list(adapt_delta = 0.99))
 
 model13a = brm(bin_value ~ (1|X1) + (1|X3) + (1|X4), data = samp_data,
-               autocor = cor_arma(~1|X4,p=1, cov=TRUE),
+               autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99))
+              control = list(adapt_delta = 0.9))
 
 model14 = brm(bin_value ~ (1|X2) + (1|X3) + (1|X4), data = samp_data,
               backend = "cmdstanr",
@@ -237,10 +247,10 @@ model14 = brm(bin_value ~ (1|X2) + (1|X3) + (1|X4), data = samp_data,
               control = list(adapt_delta = 0.99)) 
 
 model14a = brm(bin_value ~ (1|X2) + (1|X3) + (1|X4), data = samp_data,
-              autocor = cor_arma(~1|X4,p=1, cov=TRUE),
+              autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99)) 
+              control = list(adapt_delta = 0.9)) 
 
 model15 = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
               backend = "cmdstanr",
@@ -248,10 +258,10 @@ model15 = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
               control = list(adapt_delta = 0.99)) 
 
 model15a = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
-              autocor = cor_arma(~1|X4,p=1, cov=TRUE),
+              autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99)) 
+              control = list(adapt_delta = 0.9)) 
 
 
 ## make MRP estimates
@@ -284,8 +294,347 @@ names(coef_list) = c(paste0("01.",names(coef(model01))[grep("*", names(coef(mode
                      paste0("14.",names(coef(model14))[grep("*", names(coef(model14)))]),
                      paste0("15.",names(coef(model15))[grep("*", names(coef(model15)))]))
 
+## saving stan summaries
+summ01 = model01 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ02 = model02 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ03 = model03 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ04 = model04 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ05 = model05 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ06 = model06 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ07 = model07 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ08 = model08 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ09 = model09 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ10 = model10 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ11 = model11 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ12 = model12 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ13 = model13 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ14 = model14 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ15 = model15 %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ04a = model04a %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ07a = model07a %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ09a = model09a %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ10a = model10a %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ12a = model12a %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ13a = model13a %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ14a = model14a %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ15a = model15a %>% 
+  spread_draws(c(treedepth__, energy__, divergent__)) %>% 
+  summarise(mean_td = mean(treedepth__), 
+            mean_en = mean(energy__),
+            mean_di = mean(divergent__),
+            median_td = median(treedepth__),
+            median_en = median(energy__),
+            median_di = median(divergent__))
+
+summ_all = list(summ01, summ02, summ03, summ04, summ05,
+                summ06, summ07, summ08, summ09, summ10,
+                summ11, summ12, summ13, summ14, summ15,
+                summ04a, summ07a, summ09a, summ10a, summ12a,
+                summ13a, summ14a, summ15a)
+
+names(summ_all) =  c(paste0('model0', 1:9), paste0('model', 10:15),  
+                     paste0('model', c(4,7,9,10,12:15), 'a'))
+
+## save prediction 
+pred01 = model01 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred02 = model02 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred03 = model03 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred04 = model04 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred05 = model05 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred06 = model06 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred07 = model07 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred08 = model08 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred09 = model09 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred10 = model10 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred11 = model11 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred12 = model12 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred13 = model13 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred14 = model14 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred15 = model15 %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred04a = model04a %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred07a = model07a %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred09a = model09a %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred10a = model10a %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred12a = model12a %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred13a = model13a %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred14a = model14a %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred15a = model15a %>% 
+  predict(.) %>% 
+  as_tibble() %>%
+  select(Estimate, Est.Error)
+
+pred_all = list(pred01, pred02, pred03, pred04, pred05,
+                pred06, pred07, pred08, pred09, pred10,
+                pred11, pred12, pred13, pred14, pred15,
+                pred04a, pred07a, pred09a, pred10a, pred12a,
+                pred13a, pred14a, pred15a)
+
 save(samp_data, samp_data2,
-     prob_truth, coef_list,
+     prob_truth, coef_list, summ_all, pred_all,
      file = paste0("simulated_temp", ITE, ".RData"))
 
 
@@ -302,8 +651,6 @@ model03_popnest = apply(model03_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model04_predict = posterior_linpred(model04, newdata = popn_ps, transform = T) # getting estimate for each cell
 model04_popnest = apply(model04_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model04a2_predict = posterior_linpred(model04a, newdata = popn_ps, transform = T) # getting estimate for each cell
-
 model04a_predict = posterior_epred(model04a, newdata = popn_ps) # getting estimate for each cell
 model04a_popnest = apply(model04a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
@@ -317,7 +664,7 @@ model06_popnest = apply(model06_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model07_predict = posterior_linpred(model07, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model07_popnest = apply(model07_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model07a_predict = posterior_epred(model07a, newdata = popn_ps, transform=T) # getting model estimate for each cell
+model07a_predict = posterior_epred(model07a, newdata = popn_ps) # getting model estimate for each cell
 model07a_popnest = apply(model07a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -370,6 +717,41 @@ model15a_predict = posterior_epred(model15a, newdata = popn_ps) # getting estima
 model15a_popnest = apply(model15a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
+popnest_all = list(model01_popnest, 
+                   model02_popnest, 
+                   model03_popnest,
+                   model04_popnest,
+                   model05_popnest, 
+                   model06_popnest, 
+                   model07_popnest,
+                   model08_popnest,
+                   model09_popnest,
+                   model10_popnest,
+                   model11_popnest, 
+                   model12_popnest, 
+                   model13_popnest,
+                   model14_popnest,
+                   model15_popnest,
+                   model04a_popnest,
+                   model07a_popnest,
+                   model09a_popnest,
+                   model10a_popnest,
+                   model12a_popnest,
+                   model13a_popnest,
+                   model14a_popnest,
+                   model15a_popnest)
+
+
+popnest_tab = lapply(popnest_all, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
+  do.call(rbind,.) %>% 
+  data.frame(.) %>% 
+  rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.)
+
+
+save(samp_data, samp_data2,
+     prob_truth, coef_list, summ_all, pred_all,
+      popnest_tab, file = paste0("simulated_temp", ITE, ".RData"))
+
 ## comparing loo for two models, with weights and without weights
 # calculating loo
 loo1 <- loo(model01)
@@ -388,8 +770,8 @@ loo13 <- loo(model13)
 loo14 <- loo(model14)
 loo15 <- loo(model15)
 
-loo4a <- loo(model04a, moment_match=T)
-loo7a <- loo(model07a, moment_match = T)
+loo4a <- loo(model04a)
+loo7a <- loo(model07a)
 loo9a <- loo(model09a)
 loo10a <- loo(model10a)
 loo12a <- loo(model12a)
@@ -443,7 +825,7 @@ samp_data <- samp_data %>%
          elpd_15 = loo15$pointwise[,1],
          elpd_04a = loo4a$pointwise[,1],
          elpd_07a = loo7a$pointwise[,1],
-         elpd_08a = loo8a$pointwise[,1],
+         elpd_09a = loo9a$pointwise[,1],
          elpd_10a = loo10a$pointwise[,1],
          elpd_12a = loo12a$pointwise[,1],
          elpd_13a = loo13a$pointwise[,1],
@@ -565,12 +947,12 @@ elpd_model07a = brm(elpd_07a ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_da
 elpd_model07a_predict = posterior_predict(elpd_model07a, newdata = popn_ps) 
 elpd_model07a_popnest = apply(elpd_model07a_predict, 1, function(x)sum(x*popn_ps$Nj)) ## ~~equivalent to weighted elpd
 
-elpd_model08a = brm(elpd_15 ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
+elpd_model09a = brm(elpd_09a ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
                    backend = "cmdstanr", 
                    control = list(adapt_delta = 0.99))
 
-elpd_model08a_predict = posterior_predict(elpd_model08a, newdata = popn_ps) 
-elpd_model08a_popnest = apply(elpd_model08a_predict, 1, function(x)sum(x*popn_ps$Nj)) ## ~~equivalent to weighted elpd
+elpd_model09a_predict = posterior_predict(elpd_model09a, newdata = popn_ps) 
+elpd_model09a_popnest = apply(elpd_model09a_predict, 1, function(x)sum(x*popn_ps$Nj)) ## ~~equivalent to weighted elpd
 
 elpd_model10a = brm(elpd_10a ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
                    backend = "cmdstanr", 
@@ -610,35 +992,10 @@ elpd_model15a_popnest = apply(elpd_model15a_predict, 1, function(x)sum(x*popn_ps
 
 
 
-
-popnest_all = list(model1_popnest, 
-                   model2_popnest, 
-                   model3_popnest,
-                   model4_popnest,
-                   model05_popnest, 
-                   model06_popnest, 
-                   model07_popnest,
-                   model08_popnest,
-                   model09_popnest,
-                   model10_popnest,
-                   model11_popnest, 
-                   model12_popnest, 
-                   model13_popnest,
-                   model14_popnest,
-                   model15_popnest,
-                   model04a_popnest,
-                   model07a_popnest,
-                   model08a_popnest,
-                   model10a_popnest,
-                   model12a_popnest,
-                   model13a_popnest,
-                   model14a_popnest,
-                   model15a_popnest)
-
-elpd_popnest_all = list(elpd_model1_popnest, 
-                        elpd_model2_popnest, 
-                        elpd_model3_popnest,
-                        elpd_model4_popnest,
+elpd_popnest_all = list(elpd_model01_popnest, 
+                        elpd_model02_popnest, 
+                        elpd_model03_popnest,
+                        elpd_model04_popnest,
                         elpd_model05_popnest, 
                         elpd_model06_popnest, 
                         elpd_model07_popnest,
@@ -652,17 +1009,12 @@ elpd_popnest_all = list(elpd_model1_popnest,
                         elpd_model15_popnest,
                         elpd_model04a_popnest,
                         elpd_model07a_popnest,
-                        elpd_model08a_popnest,
+                        elpd_model09a_popnest,
                         elpd_model10a_popnest,
                         elpd_model12a_popnest,
                         elpd_model13a_popnest,
                         elpd_model14a_popnest,
                         elpd_model15a_popnest)
-
-popnest_tab = lapply(popnest_all, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
-  do.call(rbind,.) %>% 
-  data.frame(.) %>% 
-  rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.)
 
 elpd_popnest_tab = lapply(elpd_popnest_all, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
   do.call(rbind,.) %>% 
@@ -681,7 +1033,7 @@ coef_list = c(coef(model01), coef(model02), coef(model03), coef(model04),
               coef(model05), coef(model06), coef(model07), coef(model08),
               coef(model09), coef(model10), coef(model11), coef(model12),
               coef(model13), coef(model14), coef(model15), coef(model04a),
-    	      coef(model07a), coef(model08a), coef(model10a), coef(model12a),
+    	      coef(model07a), coef(model09a), coef(model10a), coef(model12a),
 	      coef(model13a), coef(model14a), coef(model15a)) 
 names(coef_list) = c(paste0("01.",names(coef(model01))[grep("*", names(coef(model01)))]),
                      paste0("02.",names(coef(model02))[grep("*", names(coef(model02)))]),
@@ -699,6 +1051,7 @@ names(coef_list) = c(paste0("01.",names(coef(model01))[grep("*", names(coef(mode
                      paste0("14.",names(coef(model14))[grep("*", names(coef(model14)))]),
                      paste0("15.",names(coef(model15))[grep("*", names(coef(model15)))]))
 
-save(samp_data, samp_data2,
-     sim_list, prob_truth, coef_list,
+
+save(samp_data, samp_data2, pred_all,
+     sim_list, prob_truth, coef_list, summ_all,
      elpd_popnest_all, file = paste0("simulated_", ITE, ".RData"))

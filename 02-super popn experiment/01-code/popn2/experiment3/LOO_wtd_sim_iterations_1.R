@@ -156,12 +156,12 @@ model04 = brm(bin_value ~ (1|X4), data = samp_data,
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99) )
 
-model04a = brm(bin_value ~ (1|X4),
+model04a = brm(bin_value ~ 1,
                autocor = cor_arma(~1|X4,p=1, cov=T),
               data = samp_data,
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.9) )
+              control = list(adapt_delta = 0.99) )
 
 
 model05 = brm(bin_value ~ (1|X1) + (1|X2), data = samp_data,
@@ -179,11 +179,11 @@ model07 = brm(bin_value ~ (1|X1) + (1|X4), data = samp_data,
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99))
 
-model07a = brm(bin_value ~ (1|X1) + (1|X4), data = samp_data,
+model07a = brm(bin_value ~ (1|X1), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
                backend = "cmdstanr",
                family = bernoulli(link = "logit"), 
-               control = list(adapt_delta = 0.9))
+               control = list(adapt_delta = 0.99))
 
 model08 = brm(bin_value ~ (1|X2) + (1|X3), data = samp_data,
               backend = "cmdstanr",
@@ -195,22 +195,22 @@ model09 = brm(bin_value ~ (1|X2) + (1|X4), data = samp_data,
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99)) 
 
-model09a = brm(bin_value ~ (1|X2) + (1|X4), data = samp_data,
+model09a = brm(bin_value ~ (1|X2), data = samp_data,
               autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.9)) 
+              control = list(adapt_delta = 0.99)) 
 
 model10 = brm(bin_value ~ (1|X3) + (1|X4), data = samp_data,
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99)) 
 
-model10a = brm(bin_value ~ (1|X3) + (1|X4), data = samp_data,
+model10a = brm(bin_value ~ (1|X3), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.9)) 
+              control = list(adapt_delta = 0.99)) 
 
 model11 = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3), data = samp_data,
               backend = "cmdstanr",
@@ -223,11 +223,11 @@ model12 = brm(bin_value ~ (1|X1) + (1|X2) + (1|X4), data = samp_data,
               control = list(adapt_delta = 0.99)) 
 
 
-model12a = brm(bin_value ~ (1|X1) + (1|X2) + (1|X4), data = samp_data,
+model12a = brm(bin_value ~ (1|X1) + (1|X2), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.9)) 
+              control = list(adapt_delta = 0.99)) 
 
 
 model13 = brm(bin_value ~ (1|X1) + (1|X3) + (1|X4), data = samp_data,
@@ -235,33 +235,33 @@ model13 = brm(bin_value ~ (1|X1) + (1|X3) + (1|X4), data = samp_data,
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99))
 
-model13a = brm(bin_value ~ (1|X1) + (1|X3) + (1|X4), data = samp_data,
+model13a = brm(bin_value ~ (1|X1) + (1|X3), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.9))
+              control = list(adapt_delta = 0.99))
 
 model14 = brm(bin_value ~ (1|X2) + (1|X3) + (1|X4), data = samp_data,
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99)) 
 
-model14a = brm(bin_value ~ (1|X2) + (1|X3) + (1|X4), data = samp_data,
+model14a = brm(bin_value ~ (1|X2) + (1|X3), data = samp_data,
               autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.9)) 
+              control = list(adapt_delta = 0.99)) 
 
 model15 = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99)) 
 
-model15a = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
+model15a = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3), data = samp_data,
               autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.9)) 
+              control = list(adapt_delta = 0.99)) 
 
 
 ## make MRP estimates
@@ -275,7 +275,7 @@ prob_truth = mean(popn_data$bin_value)
 coef_list = c(coef(model01), coef(model02), coef(model03), coef(model04), 
               coef(model05), coef(model06), coef(model07), coef(model08),
               coef(model09), coef(model10), coef(model11), coef(model12),
-              coef(model13), coef(model14), coef(model15), coef(model04a),
+              coef(model13), coef(model14), coef(model15), fixef(model04a),
     	      coef(model07a), coef(model09a), coef(model10a), coef(model12a),
 	      coef(model13a), coef(model14a), coef(model15a)) 
 names(coef_list) = c(paste0("01.",names(coef(model01))[grep("*", names(coef(model01)))]),
@@ -513,119 +513,98 @@ names(summ_all) =  c(paste0('model0', 1:9), paste0('model', 10:15),
 
 ## save prediction 
 pred01 = model01 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred02 = model02 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred03 = model03 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred04 = model04 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred05 = model05 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred06 = model06 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T)%>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred07 = model07 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred08 = model08 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred09 = model09 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred10 = model10 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred11 = model11 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred12 = model12 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred13 = model13 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred14 = model14 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred15 = model15 %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
+
+
 
 pred04a = model04a %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred07a = model07a %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred09a = model09a %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred10a = model10a %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred12a = model12a %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred13a = model13a %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred14a = model14a %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred15a = model15a %>% 
-  predict(.) %>% 
-  as_tibble() %>%
-  select(Estimate, Est.Error)
+  posterior_linpred(., transform = T) %>% 
+  apply(., 2, quantile, c(0.025,0.975))
 
 pred_all = list(pred01, pred02, pred03, pred04, pred05,
                 pred06, pred07, pred08, pred09, pred10,
@@ -635,7 +614,6 @@ pred_all = list(pred01, pred02, pred03, pred04, pred05,
 
 names(pred_all) =  c(paste0('model0', 1:9), paste0('model', 10:15),  
                      paste0('model', c(4,7,9,10,12:15), 'a'))
-
 
 
 save(samp_data, samp_data2,
@@ -656,7 +634,7 @@ model03_popnest = apply(model03_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model04_predict = posterior_linpred(model04, newdata = popn_ps, transform = T) # getting estimate for each cell
 model04_popnest = apply(model04_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model04a_predict = posterior_epred(model04a, newdata = popn_ps) # getting estimate for each cell
+model04a_predict = posterior_linpred(model04a, newdata = popn_ps, transform = T) # getting estimate for each cell
 model04a_popnest = apply(model04a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -669,7 +647,7 @@ model06_popnest = apply(model06_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model07_predict = posterior_linpred(model07, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model07_popnest = apply(model07_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model07a_predict = posterior_epred(model07a, newdata = popn_ps) # getting model estimate for each cell
+model07a_predict = posterior_linpred(model07a, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model07a_popnest = apply(model07a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -679,7 +657,7 @@ model08_popnest = apply(model08_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model09_predict = posterior_linpred(model09, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model09_popnest = apply(model09_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model09a_predict = posterior_epred(model09a, newdata = popn_ps) # getting model estimate for each cell
+model09a_predict = posterior_linpred(model09a, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model09a_popnest = apply(model09a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -687,7 +665,7 @@ model09a_popnest = apply(model09a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(p
 model10_predict = posterior_linpred(model10, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model10_popnest = apply(model10_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model10a_predict = posterior_epred(model10a, newdata = popn_ps) # getting model estimate for each cell
+model10a_predict = posterior_linpred(model10a, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model10a_popnest = apply(model10a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -698,27 +676,27 @@ model11_popnest = apply(model11_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model12_predict = posterior_linpred(model12, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model12_popnest = apply(model12_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model12a_predict = posterior_epred(model12a, newdata = popn_ps) # getting model estimate for each cell
+model12a_predict = posterior_linpred(model12a, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model12a_popnest = apply(model12a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
 model13_predict = posterior_linpred(model13, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model13_popnest = apply(model13_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model13a_predict = posterior_epred(model13a, newdata = popn_ps) # getting model estimate for each cell
+model13a_predict = posterior_linpred(model13a, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model13a_popnest = apply(model13a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
 model14_predict = posterior_linpred(model14, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model14_popnest = apply(model14_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model14a_predict = posterior_epred(model14a, newdata = popn_ps) # getting model estimate for each cell
+model14a_predict = posterior_linpred(model14a, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model14a_popnest = apply(model14a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 model15_predict = posterior_linpred(model15, newdata = popn_ps, transform = T) # getting estimate for each cell
 model15_popnest = apply(model15_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model15a_predict = posterior_epred(model15a, newdata = popn_ps) # getting estimate for each cell
+model15a_predict = posterior_linpred(model15a, newdata = popn_ps, transform = T) # getting estimate for each cell
 model15a_popnest = apply(model15a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -1037,7 +1015,7 @@ prob_truth = mean(popn_data$bin_value)
 coef_list = c(coef(model01), coef(model02), coef(model03), coef(model04), 
               coef(model05), coef(model06), coef(model07), coef(model08),
               coef(model09), coef(model10), coef(model11), coef(model12),
-              coef(model13), coef(model14), coef(model15), coef(model04a),
+              coef(model13), coef(model14), coef(model15), fixef(model04a),
     	      coef(model07a), coef(model09a), coef(model10a), coef(model12a),
 	      coef(model13a), coef(model14a), coef(model15a)) 
 names(coef_list) = c(paste0("01.",names(coef(model01))[grep("*", names(coef(model01)))]),

@@ -31,7 +31,7 @@ summary(popn_data$X4_cont)
 popn_data$outcome <- inv_logit_scaled(wkly1*popn_data$X1_cont +
                                         strg1*popn_data$X2_cont +
                                         wkly1*popn_data$X3_cont +
-                                        fx1(popn_data$X4_tr))
+                                        fx3(popn_data$X4_tr))
 # par(mfrow=c(2,2))
 # plot((popn_data$X4_tr), fx1(popn_data$X4_tr))
 # plot((popn_data$X4_tr), fx2(popn_data$X4_tr))
@@ -52,7 +52,7 @@ popn_data$incl_prob <- inv_logit_scaled(wkly2*popn_data$X1_cont +
 
 ## categorising the continuous covariates 
 J = 5
-K=10
+K = 12
 popn_data <- popn_data %>% 
   mutate(X1_fct = cut_interval(X1_cont,J),
          X2_fct = cut_interval(X2_cont,J),
@@ -76,13 +76,16 @@ popn_data <- popn_data %>%
 ## generating samples
 samp_size = 500
 
-samp_loc = sample(1:nrow(popn_data), size = samp_size-(J*4), replace=F, prob = popn_data$incl_prob)
+samp_loc = sample(1:nrow(popn_data), size = samp_size-(J*3 + K), replace=F, prob = popn_data$incl_prob)
 
 ## making sure at least each level of the covariates are sampled
 for(j in 1:J){
   samp_loc[length(samp_loc)+1] = sample(which(popn_data$X1 == j), size=1)
   samp_loc[length(samp_loc)+1] = sample(which(popn_data$X2 == j), size=1)
   samp_loc[length(samp_loc)+1] = sample(which(popn_data$X3 == j), size=1)
+}
+
+for(j in 1:K){
   samp_loc[length(samp_loc)+1] = sample(which(popn_data$X4 == j), size=1)
 }
 
@@ -136,21 +139,18 @@ model03 = brm(bin_value ~ (1|X3), data = samp_data,
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99)) 
-ptm = proc.time()
-model04 = brm(bin_value ~ factor(X4), data = samp_data,
+
+model04 = brm(bin_value ~ (1|X4), data = samp_data,
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.9, max_treedepth=20))
-proc.time() - ptm
-
-
+              control = list(adapt_delta = 0.99) )
 ptm = proc.time()
 model04a = brm(bin_value ~ (1|X4),
                autocor = cor_arma(~1|X4,p=1, cov=T),
               data = samp_data,
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99) )
+              control = list(adapt_delta = 0.9) )
 proc.time() - ptm
 
 model05 = brm(bin_value ~ (1|X1) + (1|X2), data = samp_data,
@@ -172,7 +172,7 @@ model07a = brm(bin_value ~ (1|X1) + (1|X4), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
                backend = "cmdstanr",
                family = bernoulli(link = "logit"), 
-               control = list(adapt_delta = 0.99))
+               control = list(adapt_delta = 0.85))
 
 model08 = brm(bin_value ~ (1|X2) + (1|X3), data = samp_data,
               backend = "cmdstanr",
@@ -184,12 +184,13 @@ model09 = brm(bin_value ~ (1|X2) + (1|X4), data = samp_data,
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99)) 
 
+ptm = proc.time()
 model09a = brm(bin_value ~ (1|X2) + (1|X4), data = samp_data,
               autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99)) 
-
+              control = list(adapt_delta = 0.87)) 
+proc.time() - ptm
 model10 = brm(bin_value ~ (1|X3) + (1|X4), data = samp_data,
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
@@ -199,7 +200,7 @@ model10a = brm(bin_value ~ (1|X3) + (1|X4), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99)) 
+              control = list(adapt_delta = 0.85)) 
 
 model11 = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3), data = samp_data,
               backend = "cmdstanr",
@@ -252,11 +253,42 @@ model15a = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
               family = bernoulli(link = "logit"), 
               control = list(adapt_delta = 0.99)) 
 
+
 ## make MRP estimates
 popn_ps = popn_data %>% 
   group_by(X1, X2, X3, X4) %>% 
   summarise(Nj = n()) %>% 
   ungroup()
+
+prob_truth = mean(popn_data$bin_value)
+
+coef_list = c(coef(model01), coef(model02), coef(model03), coef(model04), 
+              coef(model05), coef(model06), coef(model07), coef(model08),
+              coef(model09), coef(model10), coef(model11), coef(model12),
+              coef(model13), coef(model14), coef(model15), coef(model04a),
+    	      coef(model07a), coef(model09a), coef(model10a), coef(model12a),
+	      coef(model13a), coef(model14a), coef(model15a)) 
+names(coef_list) = c(paste0("01.",names(coef(model01))[grep("*", names(coef(model01)))]),
+                     paste0("02.",names(coef(model02))[grep("*", names(coef(model02)))]),
+                     paste0("03.",names(coef(model03))[grep("*", names(coef(model03)))]),
+                     paste0("04.",names(coef(model04))[grep("*", names(coef(model04)))]),
+                     paste0("05.",names(coef(model05))[grep("*", names(coef(model05)))]),
+                     paste0("06.",names(coef(model06))[grep("*", names(coef(model06)))]),
+                     paste0("07.",names(coef(model07))[grep("*", names(coef(model07)))]),
+                     paste0("08.",names(coef(model08))[grep("*", names(coef(model08)))]),
+                     paste0("09.",names(coef(model09))[grep("*", names(coef(model09)))]),
+                     paste0("10.",names(coef(model10))[grep("*", names(coef(model10)))]),
+                     paste0("11.",names(coef(model11))[grep("*", names(coef(model11)))]),
+                     paste0("12.",names(coef(model12))[grep("*", names(coef(model12)))]),
+                     paste0("13.",names(coef(model13))[grep("*", names(coef(model13)))]),
+                     paste0("14.",names(coef(model14))[grep("*", names(coef(model14)))]),
+                     paste0("15.",names(coef(model15))[grep("*", names(coef(model15)))]))
+
+save(samp_data, samp_data2,
+     prob_truth, coef_list,
+     file = paste0("simulated_temp", ITE, ".RData"))
+
+
 
 model01_predict = posterior_linpred(model01, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model01_popnest = apply(model01_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
@@ -270,7 +302,9 @@ model03_popnest = apply(model03_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model04_predict = posterior_linpred(model04, newdata = popn_ps, transform = T) # getting estimate for each cell
 model04_popnest = apply(model04_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model04a_predict = posterior_linpred(model04a, newdata = popn_ps, transform = T) # getting estimate for each cell
+model04a2_predict = posterior_linpred(model04a, newdata = popn_ps, transform = T) # getting estimate for each cell
+
+model04a_predict = posterior_epred(model04a, newdata = popn_ps) # getting estimate for each cell
 model04a_popnest = apply(model04a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -283,7 +317,7 @@ model06_popnest = apply(model06_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model07_predict = posterior_linpred(model07, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model07_popnest = apply(model07_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model07a_predict = posterior_linpred(model07a, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model07a_predict = posterior_epred(model07a, newdata = popn_ps, transform=T) # getting model estimate for each cell
 model07a_popnest = apply(model07a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -293,14 +327,15 @@ model08_popnest = apply(model08_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model09_predict = posterior_linpred(model09, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model09_popnest = apply(model09_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model09a_predict = posterior_linpred(model09a, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model09a_predict = posterior_epred(model09a, newdata = popn_ps) # getting model estimate for each cell
 model09a_popnest = apply(model09a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
+
 
 
 model10_predict = posterior_linpred(model10, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model10_popnest = apply(model10_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model10a_predict = posterior_linpred(model10a, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model10a_predict = posterior_epred(model10a, newdata = popn_ps) # getting model estimate for each cell
 model10a_popnest = apply(model10a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -311,28 +346,27 @@ model11_popnest = apply(model11_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(pop
 model12_predict = posterior_linpred(model12, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model12_popnest = apply(model12_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model12a_predict = posterior_linpred(model12a, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model12a_predict = posterior_epred(model12a, newdata = popn_ps) # getting model estimate for each cell
 model12a_popnest = apply(model12a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
 model13_predict = posterior_linpred(model13, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model13_popnest = apply(model13_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model13a_predict = posterior_linpred(model13a, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model13a_predict = posterior_epred(model13a, newdata = popn_ps) # getting model estimate for each cell
 model13a_popnest = apply(model13a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
 model14_predict = posterior_linpred(model14, newdata = popn_ps, transform = T) # getting model estimate for each cell
 model14_popnest = apply(model14_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model14a_predict = posterior_linpred(model14a, newdata = popn_ps, transform = T) # getting model estimate for each cell
+model14a_predict = posterior_epred(model14a, newdata = popn_ps) # getting model estimate for each cell
 model14a_popnest = apply(model14a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
-
 
 model15_predict = posterior_linpred(model15, newdata = popn_ps, transform = T) # getting estimate for each cell
 model15_popnest = apply(model15_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
-model15a_predict = posterior_linpred(model15a, newdata = popn_ps, transform = T) # getting estimate for each cell
+model15a_predict = posterior_epred(model15a, newdata = popn_ps) # getting estimate for each cell
 model15a_popnest = apply(model15a_predict, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
 
 
@@ -354,14 +388,15 @@ loo13 <- loo(model13)
 loo14 <- loo(model14)
 loo15 <- loo(model15)
 
-loo4a <- loo(model04a)
-loo7a <- loo(model07a)
+loo4a <- loo(model04a, moment_match=T)
+loo7a <- loo(model07a, moment_match = T)
 loo9a <- loo(model09a)
 loo10a <- loo(model10a)
 loo12a <- loo(model12a)
 loo13a <- loo(model13a)
 loo14a <- loo(model14a)
 loo15a <- loo(model15a)
+
 
 loo_all = list(loo1, loo2, loo3, loo4, loo5, 
                loo6, loo7, loo8, loo9, loo10,
@@ -645,7 +680,9 @@ prob_truth = mean(popn_data$bin_value)
 coef_list = c(coef(model01), coef(model02), coef(model03), coef(model04), 
               coef(model05), coef(model06), coef(model07), coef(model08),
               coef(model09), coef(model10), coef(model11), coef(model12),
-              coef(model13), coef(model14), coef(model15))
+              coef(model13), coef(model14), coef(model15), coef(model04a),
+    	      coef(model07a), coef(model08a), coef(model10a), coef(model12a),
+	      coef(model13a), coef(model14a), coef(model15a)) 
 names(coef_list) = c(paste0("01.",names(coef(model01))[grep("*", names(coef(model01)))]),
                      paste0("02.",names(coef(model02))[grep("*", names(coef(model02)))]),
                      paste0("03.",names(coef(model03))[grep("*", names(coef(model03)))]),

@@ -11,6 +11,7 @@ ITE = as.numeric(slurm_arrayid)
 samp_size = 500
 
 
+
 # setting seed using array ID
 set.seed(seed[ITE])
 popn_data <- data.frame(X1_cont = rnorm(N, 0, 2), 

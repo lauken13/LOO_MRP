@@ -10,3 +10,10 @@ trialling binomial model (leave-one-GROUP/CELL-out rather than individual)
   - fx1 (smiley face reln. with the outcome)
   - fx2 (sad face reln. ")
   - fx3 (tick mark reln. ")
+  
+  # brms code
+  - fit on 23 models 
+
+  # stan code
+  - cutting down to 6 models (choosing the largest model from each group of models)
+

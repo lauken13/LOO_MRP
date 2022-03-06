@@ -9,7 +9,7 @@ trialling binomial model (leave-one-GROUP/CELL-out rather than individual)
 - X4 set to have different relationships with the outcome
   - fx1 (smiley face reln. with the outcome)
   - fx2 (sad face reln. ")
-  - fx3 (tick mark reln. ")
+  - fx3 (increasing-shaped reln. ")
   
   # brms code
   - fit on 23 models 

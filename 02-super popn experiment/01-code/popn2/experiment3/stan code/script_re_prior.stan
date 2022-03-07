@@ -24,7 +24,7 @@ parameters {
   real<lower=0> sigma_X3; // sd of U_X3 (hyperparam). halfnormal prior on this.
   real<lower=0> sigma_X4; // sd of U_X4 (hyperparam). halfnormal prior on this.
 
-  // real intercept; // the intercept (global fixed effect)
+  real intercept; // the intercept (global fixed effect)
 }
 
 transformed parameters { 
@@ -61,7 +61,7 @@ model {
   U_X3 ~ normal(0,1);
   U_X4 ~ normal(0,1);
   
-  // intercept ~ normal(0,1); // global intercept
+  intercept ~ normal(0,1); // global intercept
   
   // model
   for (i in 1:N) {

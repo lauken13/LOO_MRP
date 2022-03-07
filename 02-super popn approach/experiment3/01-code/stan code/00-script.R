@@ -19,8 +19,13 @@ samp_dat <- list(
   y = sim_data$bin_value # binary outcome
 )
 
+# compile stan model
+# using cmdstanr
+model15_mrp = cmdstan_model(file.path(here::here('Downloads/script_re_prior_mrp_lauren.stan')))
+
+
 # fitting stan model
-model15.fit = stan('script_re_prior.stan', data=samp_dat)
+model15_fit_mrp <- model15_mrp$sample(data=samp_dat_mrp, seed=4238) ## setting seed and set the same one in brms
 
 # examining fit
 list_of_draws = rstan::extract(model15.fit)

@@ -9,7 +9,7 @@ library(tidybayes)
 gen_dat <- function(N, fx, samp_size, ITE){
   set.seed(65438)
   
-  N = 10000 # size of population
+  # N = 10000 # size of population
   pn = 100 # number of different population
   seed = round(runif(pn, min=10, max=100000),0) # fixed seed number
   
@@ -22,7 +22,8 @@ gen_dat <- function(N, fx, samp_size, ITE){
                           X4_cont = rnorm(N, 0, 2))
   
   ## transforming X4_cont to have unit scale
-  popn_data$X4_tr = (popn_data$X4_cont - min(popn_data$X4_cont))/(max(popn_data$X4_cont) - min(popn_data$X4_cont))
+  popn_data$X4_tr = (popn_data$X4_cont - min(popn_data$X4_cont))/
+    (max(popn_data$X4_cont) - min(popn_data$X4_cont))
   
   wkly1 = 0.1
   strg1 = 1
@@ -37,7 +38,7 @@ gen_dat <- function(N, fx, samp_size, ITE){
   
   
   ## generating binary outcome
-  popn_data$bin_value <- as.numeric(rbinom(N,1,popn_data$outcome))
+  popn_data$y <- as.numeric(rbinom(N,1,popn_data$outcome))
   
   ## generate inclusion prob. for each individual
   # weakly predictive - 0.1 (sd), strongly predictive - 1 (sd)
@@ -104,7 +105,7 @@ gen_dat <- function(N, fx, samp_size, ITE){
   ## make poststratification table for sample
   samp_ps = samp_data %>% 
     group_by(X1, X2, X3, X4) %>% 
-    summarise(n_j = n(), sum_y = sum(bin_value), .groups = 'keep') %>% 
+    summarise(n_j = n(), sum_y = sum(y), .groups = 'keep') %>% 
     ungroup()
   
   all_list <- list(samp_data, samp_ps, popn_data, N)
@@ -121,4 +122,4 @@ fx1 = function(x) dbeta(x,2,2)
 fx2 = function(x) 1 - dbeta(x, 2,2)
 fx3 = function(x) 0.7 - (3 * exp(-x/0.2))
 
-sim1 = gen_dat(N = 10000, fx = fx1, samp_size = 1000, ITE=4)
+sim1 = gen_dat(N = 10000, fx = fx1, samp_size = 1000, ITE=52)

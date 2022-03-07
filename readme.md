@@ -1,4 +1,4 @@
-# LOO_MRP
+# LOO_MRP experiments
  
 ## 01-finite-popn approach
 

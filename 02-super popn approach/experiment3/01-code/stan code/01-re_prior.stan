@@ -73,11 +73,11 @@ model {
   target += std_normal_lpdf(U_X3);
   target += std_normal_lpdf(U_X4);
   
-  target += normal_lpdf(intercept,0,1);// global intercept
+  target += normal_lpdf(intercept|0,1);// global intercept
   
   // model
   for (i in 1:n) {
-    target += bernoulli_logit_lpmf(y[i],yhat[i]); 
+    target += bernoulli_logit_lpmf(y[i]|yhat[i]); 
   }
 }
 

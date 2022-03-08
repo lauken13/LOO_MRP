@@ -58,21 +58,26 @@ transformed parameters {
 
 model {
   // priors
-  sigma_X1 ~ normal(0,1);
-  sigma_X2 ~ normal(0,1);
-  sigma_X3 ~ normal(0,1);
-  sigma_X4 ~ normal(0,1);
+  target += normal_lpdf(sigma_X1|0,1)
+  -1 * normal_lccdf(0|0,1);
+  target += normal_lpdf(sigma_X2|0,1)
+  -1 * normal_lccdf(0|0,1);
+  target += normal_lpdf(sigma_X3|0,1)
+  -1 * normal_lccdf(0|0,1);
+  target += normal_lpdf(sigma_X4|0,1)
+  -1 * normal_lccdf(0|0,1);
   
-  U_X1 ~ normal(0,1); // random effect is normal
-  U_X2 ~ normal(0,1);
-  U_X3 ~ normal(0,1);
-  U_X4 ~ normal(0,1);
   
-  intercept ~ normal(0,1); // global intercept
+  target += std_normal_lpdf(U_X1);
+  target += std_normal_lpdf(U_X2);
+  target += std_normal_lpdf(U_X3);
+  target += std_normal_lpdf(U_X4);
+  
+  target += normal_lpdf(intercept,0,1);// global intercept
   
   // model
   for (i in 1:n) {
-    y[i] ~ bernoulli(inv_logit(yhat[i])); 
+    target += bernoulli_logit_lpmf(y[i],yhat[i]); 
   }
 }
 

@@ -28,6 +28,8 @@ samp_dat_mrp <- list(
 )
 
 # compile stan model
+
+
 # using cmdstanr
 model15_mrp = cmdstan_model(file.path(here::here('02-super popn approach/experiment3/01-code/stan code/01-re_prior.stan')))
 
@@ -64,6 +66,19 @@ summary(model15)$random
 # comparing fit between brms and cmdstanr
 ranef(model15)$X1
 model15_fit_mrp$summary("U_X1_transformed")
+# running the brms stancode with cmdstanr
+
+code <- stancode(model15)
+
+model15_brms = cmdstan_model(file.path(here::here('02-super popn approach/experiment3/01-code/stan code/brms_same_prior.stan')))
+
+# fitting stan model - run MCMC using the 'sample' method
+model15_fit_brms <- model15_brms$sample(data=standata(model15), 
+                                      seed = 2345, chains=4) # setting seed within sampling
+
+model15_fit_mrp$summary("U_X1_transformed")
+model15_fit_brms$summary("r_1_1")
+
 
 # same as brms default priors --------------------------------------------
 model15_brms = brm(y ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), 

@@ -76,9 +76,7 @@ model {
   target += normal_lpdf(intercept|0,1);// global intercept
   
   // model
-  for (i in 1:n) {
-    target += bernoulli_logit_lpmf(y[i]|yhat[i]); 
-  }
+    target += bernoulli_logit_lpmf(y|yhat); 
 }
 
 // generated quantities {

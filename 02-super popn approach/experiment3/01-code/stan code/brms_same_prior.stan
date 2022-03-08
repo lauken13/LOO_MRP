@@ -9,7 +9,7 @@ data {
   int<lower=1> M_1;  // number of coefficients per level
   int<lower=1> J_1[N];  // grouping indicator per observation
   // group-level predictor values
-  vector[N] Z_1_1;
+  vector[N] Z_1_1; 
   // data for group-level effects of ID 2
   int<lower=1> N_2;  // number of grouping levels
   int<lower=1> M_2;  // number of coefficients per level

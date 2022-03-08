@@ -63,7 +63,7 @@ summary(model15)$random
 
 # comparing fit between brms and cmdstanr
 ranef(model15)$X1
-model15_fit_mrp$summary("U_X1")
+model15_fit_mrp$summary("U_X1_transformed")
 
 # same as brms default priors --------------------------------------------
 model15_brms = brm(y ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), 

@@ -6,6 +6,7 @@ options(cores=parallel::detectCores())
 # generating data ---------------------------------------------------------
 source(here::here("02-super popn approach/experiment3/01-code/stan code/00-LOO_gen_data.R")) # generate a list of things
 samp_dat = sim1$samp_data
+popn_ps = sim1$popn_ps
 
 # diagnostics (comparing fit to brms) ---------------------------------------------------
 # same priors as cmdstanr 
@@ -23,9 +24,6 @@ prior_summary(model15)
 summary(model15)$random
 
 # list of data for stan
-# !! placeholder for poststrat matrix - need to add it in data generation later
-poststrat <- data.frame(expand.grid(X1=1:5, X2 = 1:5, X3 = 1:5, X4 = 1:5))
- 
 samp_dat_mrp <- list(
   n = nrow(samp_dat), # number in samples
   n_groups_X_cat = max(samp_dat$X1), # number of levels in X1, X2, X3 (categorical)
@@ -35,11 +33,11 @@ samp_dat_mrp <- list(
   X3 = samp_dat$X3,
   X4 = samp_dat$X4, 
   y = samp_dat$y, # binary outcome
-  X1_pop = poststrat$X1,
-  X2_pop = poststrat$X2,
-  X3_pop = poststrat$X3,
-  X4_pop = poststrat$X4, 
-  Nj = nrow(poststrat),
+  X1_pop = popn_ps$X1,
+  X2_pop = popn_ps$X2,
+  X3_pop = popn_ps$X3,
+  X4_pop = popn_ps$X4, 
+  N = nrow(popn_ps),
   
   ## adding these from brms
   M_1 = standata(model15)$M_1,
@@ -62,7 +60,7 @@ model15_fit_mrp$draws(variables = "log_lik")
 
 # comparing fit between brms and cmdstanr
 ranef(model15)$X1
-model15_fit_mrp$summary("U_X1_transformed")
+model15_fit_mrp$summary("U_X1")
 
 
 # running the brms stancode with cmdstanr

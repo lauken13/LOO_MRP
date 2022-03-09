@@ -11,7 +11,7 @@ library(survey) # creating raked weights
 options(mc.cores = 1)
 
 ## loading external functions
-source("../functions.R")
+source("../../functions.R")
 
 ## generating 5 continuous predictors/covariates
 N = 10000

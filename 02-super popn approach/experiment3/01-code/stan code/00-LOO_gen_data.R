@@ -103,13 +103,13 @@ gen_dat <- function(N, fx, samp_size, ITE){
   samp_data2 = popn_data[samp_loc2,]
   
   ## make poststratification table for sample
-  samp_ps = samp_data %>% 
+  popn_ps = popn_data %>% 
     group_by(X1, X2, X3, X4) %>% 
     summarise(n_j = n(), sum_y = sum(y), .groups = 'keep') %>% 
     ungroup()
   
-  all_list <- list(samp_data, samp_ps, popn_data, N)
-  names(all_list) = c('samp_data', 'samp_ps', 'popn_data', 'N')
+  all_list <- list(samp_data, popn_ps, popn_data, N)
+  names(all_list) = c('samp_data', 'popn_ps', 'popn_data', 'N')
   all_list
 }
 

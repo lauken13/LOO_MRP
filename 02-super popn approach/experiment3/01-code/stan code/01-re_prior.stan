@@ -11,11 +11,11 @@ data {
   int<lower=1,upper=n_groups_X_cat> X3[n]; // levels of X3
   
   // Assume no prediction of unobserved groups
-  int<lower=0> Nj; // number of poststrat cells
-  int<lower=1,upper=n_groups_X4> X4_pop[Nj]; // levels of X4
-  int<lower=1,upper=n_groups_X_cat> X1_pop[Nj]; // levels of X1
-  int<lower=1,upper=n_groups_X_cat> X2_pop[Nj]; // levels of X2
-  int<lower=1,upper=n_groups_X_cat> X3_pop[Nj]; // levels of X3
+  int<lower=0> N; // number of poststrat cells
+  int<lower=1,upper=n_groups_X4> X4_pop[N]; // levels of X4
+  int<lower=1,upper=n_groups_X_cat> X1_pop[N]; // levels of X1
+  int<lower=1,upper=n_groups_X_cat> X2_pop[N]; // levels of X2
+  int<lower=1,upper=n_groups_X_cat> X3_pop[N]; // levels of X3
 
   int y[n]; // the response vector
   
@@ -82,10 +82,10 @@ model {
 }
 
 generated quantities {
-  vector[Nj] theta_pop; // poststrat
+  vector[N] theta_pop; // poststrat
   vector[n] log_lik;
 
-  for (j in 1:Nj){
+  for (j in 1:N){
     theta_pop[j] = bernoulli_rng(inv_logit(intercept +
     U_X1[X1_pop[j]] +
     U_X2[X2_pop[j]] +

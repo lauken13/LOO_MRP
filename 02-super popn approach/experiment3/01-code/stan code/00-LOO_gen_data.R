@@ -105,7 +105,7 @@ gen_dat <- function(N, fx, samp_size, ITE){
   ## make poststratification table for sample
   popn_ps = popn_data %>% 
     group_by(X1, X2, X3, X4) %>% 
-    summarise(n_j = n(), sum_y = sum(y), .groups = 'keep') %>% 
+    summarise(Nj = n(), sum_y = sum(y), .groups = 'keep') %>% 
     ungroup()
   
   all_list <- list(samp_data, popn_ps, popn_data, N)

@@ -42,15 +42,14 @@ samp_dat_mrp <- list(
   ## adding these from brms
   M_1 = standata(model15)$M_1,
   M_2 = standata(model15)$M_2,
-  M_3 = standata(model15)$M_3,
-  M_4 = standata(model15)$M_4
+  M_3 = standata(model15)$M_3
+  # M_4 = standata(model15)$M_4
   
 )
 
-
 # using cmdstanr ----------------------------------------------------------
 # compile stan model
-model15_mrp = cmdstan_model(file.path(here::here('02-super popn approach/experiment3/01-code/stan code/01-re_prior.stan')))
+model15_mrp = cmdstan_model(file.path(here::here('GitHub/LOO_MRP/02-super popn approach/experiment3/01-code/stan code/01-re_prior.stan')))
 
 # fitting stan model - run MCMC using the 'sample' method
 model15_fit_mrp <- model15_mrp$sample(data = samp_dat_mrp, 
@@ -59,8 +58,33 @@ model15_fit_mrp <- model15_mrp$sample(data = samp_dat_mrp,
 model15_fit_mrp$draws(variables = "log_lik")
 
 # comparing fit between brms and cmdstanr
+ranef(model15)$X2
+model15_fit_mrp$summary("U_X2")
+
+
+
+
+
+# using cmdstanr ----------------------------------------------------------
+# compile stan model
+model15_mrp_test = cmdstan_model(file.path(
+  here::here('GitHub/LOO_MRP/02-super popn approach/experiment3/01-code/stan code/01-re_prior_edit.stan')))
+
+tic()
+# fitting stan model - run MCMC using the 'sample' method
+model15_fit_mrp_test <- model15_mrp_test$sample(data = samp_dat_mrp, 
+                                      seed = 2345) # setting seed within sampling
+toc()
+
+
 ranef(model15)$X1
-model15_fit_mrp$summary("U_X1")
+model15_fit_mrp_test$summary("U_X1")
+
+
+
+
+
+
 
 
 # running the brms stancode with cmdstanr

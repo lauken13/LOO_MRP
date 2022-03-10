@@ -37,24 +37,17 @@ samp_dat_mrp <- list(
   X2_pop = popn_ps$X2,
   X3_pop = popn_ps$X3,
   X4_pop = popn_ps$X4, 
-  N = nrow(popn_ps),
-  
-  ## adding these from brms
-  M_1 = standata(model15)$M_1,
-  M_2 = standata(model15)$M_2,
-  M_3 = standata(model15)$M_3,
-  M_4 = standata(model15)$M_4
-  
+  N = nrow(popn_ps)
 )
 
 
 # using cmdstanr ----------------------------------------------------------
 # compile stan model
-model15_mrp = cmdstan_model(file.path(here::here('02-super popn approach/experiment3/01-code/stan code/01-re_prior.stan')))
+model15_mrp = cmdstan_model(file.path(here::here('02-super popn approach/experiment3/01-code/stan code/01-re_prior_edit.stan')))
 
 # fitting stan model - run MCMC using the 'sample' method
 model15_fit_mrp <- model15_mrp$sample(data = samp_dat_mrp, 
-                                      seed = 2345) # setting seed within sampling
+                                      seed = 2345, chains =2, num_samples = 100) # setting seed within sampling
 
 model15_fit_mrp$draws(variables = "log_lik")
 

@@ -99,5 +99,3 @@ generated quantities {
   }
   
 }
-
-

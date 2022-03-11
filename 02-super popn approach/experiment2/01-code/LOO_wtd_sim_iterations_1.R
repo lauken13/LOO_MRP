@@ -385,26 +385,6 @@ sim_list = cbind(loo_tab, loo_rank, elpd_popnest_rank,
 
 prob_truth = mean(popn_data$bin_value)
 
-coef_list = c(coef(model01), coef(model02), coef(model03), coef(model04), 
-              coef(model05), coef(model06), coef(model07), coef(model08),
-              coef(model09), coef(model10), coef(model11), coef(model12),
-              coef(model13), coef(model14), coef(model15))
-names(coef_list) = c(paste0("01.",names(coef(model01))[grep("*", names(coef(model01)))]),
-                     paste0("02.",names(coef(model02))[grep("*", names(coef(model02)))]),
-                     paste0("03.",names(coef(model03))[grep("*", names(coef(model03)))]),
-                     paste0("04.",names(coef(model04))[grep("*", names(coef(model04)))]),
-                     paste0("05.",names(coef(model05))[grep("*", names(coef(model05)))]),
-                     paste0("06.",names(coef(model06))[grep("*", names(coef(model06)))]),
-                     paste0("07.",names(coef(model07))[grep("*", names(coef(model07)))]),
-                     paste0("08.",names(coef(model08))[grep("*", names(coef(model08)))]),
-                     paste0("09.",names(coef(model09))[grep("*", names(coef(model09)))]),
-                     paste0("10.",names(coef(model10))[grep("*", names(coef(model10)))]),
-                     paste0("11.",names(coef(model11))[grep("*", names(coef(model11)))]),
-                     paste0("12.",names(coef(model12))[grep("*", names(coef(model12)))]),
-                     paste0("13.",names(coef(model13))[grep("*", names(coef(model13)))]),
-                     paste0("14.",names(coef(model14))[grep("*", names(coef(model14)))]),
-                     paste0("15.",names(coef(model15))[grep("*", names(coef(model15)))]))
-
 save(samp_data, samp_data2, samp_ps,
-     sim_list, prob_truth, coef_list,
+     sim_list, prob_truth,
      elpd_popnest_all, file = paste0("simulated_", ITE, ".RData"))

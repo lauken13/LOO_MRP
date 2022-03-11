@@ -55,7 +55,7 @@ transformed parameters {
   // faster vectorisation (code from brms) 
   for (ind in 1:n) {
   // add more terms to the linear predictor
-    yhat[ind] += U_X1[X1[ind]] + U_X2[X2[ind]] + U_X3[X3[ind]] + U_X4[X4[ind]]; // intercept added before
+    yhat[ind] += U_X1[X1[ind]] + U_X2[X2[ind]] + U_X3[X3[ind]] + U_X4[X4[ind]]; // intercept added in yhat vector before
   }
 }
 
@@ -72,7 +72,7 @@ model {
   
   rho ~ beta(0.5, 0.5); // prior on autoregressive coefficient
 
-  z_X4[1] ~ normal(0, 1/sqrt(1-rho_transformed^2)); // before it was normal(0, 1) but this is wrong
+  z_X4[1] ~ normal(0, 1/sqrt(1-rho_transformed^2)); // AR prior from Alex's code
   for (j in 2:n_groups_X4) {
     z_X4[j] ~normal(rho_transformed * z_X4[j-1],1);
   }

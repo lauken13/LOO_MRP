@@ -51,6 +51,6 @@ model15_fit_mrp <- model15_mrp$sample(data = samp_dat_mrp,
 model15_fit_mrp$draws(variables = "log_lik")
 
 # comparing fit between brms and cmdstanr
-ranef(model15)$X2
-model15_fit_mrp$summary("U_X2")
+ranef(model15a)$X2
+model15_fit_arprior$summary("U_X2")
 

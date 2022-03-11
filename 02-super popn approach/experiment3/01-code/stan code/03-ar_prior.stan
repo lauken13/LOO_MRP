@@ -33,6 +33,7 @@ parameters {
   real<lower=0> sigma_X4; // sd of z_X4 (hyperparam). halfnormal prior on this.
 
   real intercept; // the intercept (global fixed effect)
+  real<lower=0,upper=1> rho; // the autoregressive coefficient untransformed
 }
 
 transformed parameters { 
@@ -41,6 +42,10 @@ transformed parameters {
   vector[n_groups_X_cat] U_X2;
   vector[n_groups_X_cat] U_X3;
   vector[n] yhat = intercept + rep_vector(0.0, n);   // initialize linear predictor term, intercept added here
+
+  real<lower=-1,upper=1> rho_transformed;
+  
+  rho_transformed = (rho * 2) - 1; // the autoregressive coefficient
 
   U_X1 = sigma_X1 * z_X1; // the random effect for X1
   U_X2 = sigma_X2 * z_X2; // the random effect for X2
@@ -65,7 +70,14 @@ model {
   target += normal_lpdf(sigma_X4|0,1)
   -1 * normal_lccdf(0|0,1);
   
-  target += std_normal_lpdf(z_X1);
+  rho ~ beta(0.5, 0.5); // prior on autoregressive coefficient
+
+  z_X4[1] ~ normal(0, 1/sqrt(1-rho_transformed^2)); // before it was normal(0, 1) but this is wrong
+  for (j in 2:n_groups_X4) {
+    z_X4[j] ~normal(rho_transformed * z_X4[j-1],1);
+  }
+
+  target += std_normal_lpdf(z_X1); // random effect is Normal
   target += std_normal_lpdf(z_X2);
   target += std_normal_lpdf(z_X3);
   target += std_normal_lpdf(z_X4);

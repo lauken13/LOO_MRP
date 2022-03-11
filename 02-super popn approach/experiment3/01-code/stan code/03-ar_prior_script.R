@@ -8,21 +8,6 @@ source(here::here("02-super popn approach/experiment3/01-code/stan code/00-LOO_g
 samp_dat = sim1$samp_data
 popn_ps = sim1$popn_ps
 
-# diagnostics (comparing fit to brms) ---------------------------------------------------
-# same priors as cmdstanr 
-bprior <- c(prior(normal(0,1), class = "sd"),
-            prior(normal(0,1), class = "Intercept"))
-model15 = brm(y ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), 
-              data = samp_dat, 
-              seed = 2345,
-              backend = "cmdstanr",
-              prior = bprior,
-              family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.9)) 
-stancode(model15)
-prior_summary(model15)
-summary(model15)$random
-
 # using cmdstanr ----------------------------------------------------------
 # list of data for stan
 samp_dat_mrp <- list(
@@ -42,15 +27,36 @@ samp_dat_mrp <- list(
 )
 
 # compile stan model
-model15_mrp = cmdstan_model(file.path(here::here('02-super popn approach/experiment3/01-code/stan code/01-re_prior.stan')))
-
+model15_arprior = cmdstan_model(file.path(here::here('02-super popn approach/experiment3/01-code/stan code/03-ar_prior.stan')))
+tic()
 # fitting stan model - run MCMC using the 'sample' method
-model15_fit_mrp <- model15_mrp$sample(data = samp_dat_mrp, 
+model15_fit_arprior <- model15_arprior$sample(data = samp_dat_mrp, 
                                       seed = 2345) # setting seed within sampling
+toc()
+model15_fit_arprior$draws(variables = "log_lik")
 
-model15_fit_mrp$draws(variables = "log_lik")
+
+
+
+
+# diagnostics (comparing fit to brms) ---------------------------------------------------
+# same priors as cmdstanr 
+bprior <- c(prior(normal(0,1), class = "sd"),
+            prior(normal(0,1), class = "Intercept"))
+
+tic()
+model15a = brm(y ~ (1|X1) + (1|X2) + (1|X3) + arma(gr=X4, p=1, cov=T), 
+              data = samp_dat, 
+              seed = 2345,
+              backend = "cmdstanr",
+              prior = bprior,
+              family = bernoulli(link = "logit"), 
+              control = list(adapt_delta = 0.9))
+toc()
+stancode(model15)
+prior_summary(model15)
+summary(model15)$random
 
 # comparing fit between brms and cmdstanr
 ranef(model15a)$X2
 model15_fit_arprior$summary("U_X2")
-

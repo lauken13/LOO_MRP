@@ -16,17 +16,17 @@ gen_dat <- function(N, fx, samp_size, ITE){
   ## first generate 100 different population and sample it each time
   # setting fixed seed using array ID (in cluster)
   set.seed(seed[ITE])
-  popn_data <- data.frame(X1_cont = rnorm(N, 0, 2), 
-                          X2_cont = rnorm(N, 0, 2),
-                          X3_cont = rnorm(N, 0, 2), 
-                          X4_cont = rnorm(N, 0, 2))
+  popn_data <- data.frame(X1_cont = rnorm(N, 0, 1), 
+                          X2_cont = rnorm(N, 0, 1),
+                          X3_cont = rnorm(N, 0, 1), 
+                          X4_cont = rnorm(N, 0, 1))
   
-  ## transforming X4_cont to have unit scale
+  ## transforming X4_cont to have normalised scale -- for the beta function in fx
   popn_data$X4_tr = (popn_data$X4_cont - min(popn_data$X4_cont))/
     (max(popn_data$X4_cont) - min(popn_data$X4_cont))
   
-  wkly1 = 0.1
-  strg1 = 1
+  wkly1 = 0.1/3
+  strg1 = 1/3
   
   summary(popn_data$X4_cont)
   
@@ -47,7 +47,7 @@ gen_dat <- function(N, fx, samp_size, ITE){
   popn_data$incl_prob <- inv_logit_scaled(wkly2*popn_data$X1_cont + 
                                             wkly2*popn_data$X2_cont + 
                                             strg2*popn_data$X3_cont +
-                                            strg2*popn_data$X4_tr)
+                                            strg2*popn_data$X4_cont)
   
   ## categorising the continuous covariates 
   J = 5
@@ -113,13 +113,8 @@ gen_dat <- function(N, fx, samp_size, ITE){
   all_list
 }
 
-# ## iteration number (ITE) from cluster 
-# slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
-# iter = as.numeric(slurm_arrayid)
-
 ## relationship of covariate with outcome
-fx1 = function(x) dbeta(x,2,2)
-fx2 = function(x) 1 - dbeta(x, 2,2)
-fx3 = function(x) 0.7 - (3 * exp(-x/0.2))
+fx1 = function(x) {dbeta(x,2,2)}
+fx2 = function(x) {1 - dbeta(x, 2,2)}
+fx3 = function(x) {0.7 - (3 * exp(-x/0.2))}
 
-sim1 = gen_dat(N = 10000, fx = fx1, samp_size = 1000, ITE=52)

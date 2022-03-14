@@ -19,3 +19,9 @@ trialling binomial model (leave-one-GROUP/CELL-out rather than individual)
   - fx2 (sad face reln. ")
   - fx3 (increasing-shaped reln. ")
 
+## manuals 
+- `doc_1.html` - describes the design of the variables set up for all the simulations we run 
+
+- `doc_2.html` - describes all the simulation settings we ran
+  1) Finite population approach
+  2) Super population approach

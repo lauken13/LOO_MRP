@@ -69,7 +69,7 @@ model {
 
 generated quantities {
   vector[J] theta_pop; // prediction on popn. level
-  vector[J] theta_samp; // prediction on samp. level
+  vector[n] theta_samp; // prediction on samp. level
   vector[n] log_lik;
 
   for (j in 1:J){

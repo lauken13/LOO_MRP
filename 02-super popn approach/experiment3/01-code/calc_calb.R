@@ -5,7 +5,10 @@ cov_list = list()
 num_ite = length(popnest_list)
 
 for(iter in 1:num_ite){
+  # truth
   prob_truth = pt_list[[iter]]
+  
+  # calculating coverage for each iteration
   cov_calc[[iter]] = popnest_list[[iter]] %>% 
     rename(low_int = popnestX5,
            upp_int = popnestX95) %>% 

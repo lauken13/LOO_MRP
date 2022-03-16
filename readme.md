@@ -15,8 +15,8 @@ trialling binomial model (leave-one-GROUP/CELL-out rather than individual)
 ### experiment3
 - trying AR prior on X4 
 - X4 set to have different relationships with the outcome
-  - fx1 (smiley face reln. with the outcome)
-  - fx2 (sad face reln. ")
+  - fx1 (sad face reln. with the outcome)
+  - fx2 (smiley face reln. ")
   - fx3 (increasing-shaped reln. ")
 
 ## manuals 

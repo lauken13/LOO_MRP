@@ -50,7 +50,7 @@ transformed parameters {
   // faster vectorisation (code from brms) 
   for (ind in 1:n) {
   // add more terms to the linear predictor
-    yhat[ind] += U_X1[X1[ind]] + U_X2[X2[ind]] + U_X3[X3[ind]] + U_X4[X4[ind]]; // intercept added before
+    yhat[ind] += U_X1[X1[ind]] + U_X2[X2[ind]] + U_X3[X3[ind]] + U_X4[X4[ind]]; // intercept added in yhat vector before
   }
 }
 

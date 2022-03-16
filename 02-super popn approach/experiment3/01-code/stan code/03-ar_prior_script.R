@@ -23,18 +23,18 @@ samp_dat_mrp <- list(
   X2_pop = popn_ps$X2,
   X3_pop = popn_ps$X3,
   X4_pop = popn_ps$X4, 
-  N = nrow(popn_ps)
+  J = nrow(popn_ps)
 )
 
 # compile stan model
 model15_arprior = cmdstan_model(file.path(here::here('02-super popn approach/experiment3/01-code/stan code/03-ar_prior.stan')))
-tic()
+
 # fitting stan model - run MCMC using the 'sample' method
 model15_fit_arprior <- model15_arprior$sample(data = samp_dat_mrp, 
                                       seed = 2345) # setting seed within sampling
-toc()
-model15_fit_arprior$draws(variables = "log_lik")
 
+model15_fit_arprior$draws(variables = "log_lik")
+model15_fit_arprior$draws(variables = "theta_pop")
 
 
 

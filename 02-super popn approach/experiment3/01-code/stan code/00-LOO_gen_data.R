@@ -9,7 +9,6 @@ library(tidybayes)
 gen_dat <- function(N, fx, samp_size, ITE){
   set.seed(65438)
   
-  # N = 10000 # size of population
   pn = 100 # number of different population
   seed = round(runif(pn, min=10, max=100000),0) # fixed seed number
   
@@ -31,14 +30,15 @@ gen_dat <- function(N, fx, samp_size, ITE){
   summary(popn_data$X4_cont)
   
   ## generating continuous outcome
-  popn_data$outcome <- inv_logit_scaled(wkly1*popn_data$X1_cont +
+  # using -1 as the intercept for we have a better spread of y_prob (probability of outcome)
+  popn_data$y_prob <- inv_logit_scaled(-1 + wkly1*popn_data$X1_cont + 
                                           strg1*popn_data$X2_cont +
                                           wkly1*popn_data$X3_cont +
                                           fx(popn_data$X4_tr))
   
   
   ## generating binary outcome
-  popn_data$y <- as.numeric(rbinom(N,1,popn_data$outcome))
+  popn_data$y_obs <- as.numeric(rbinom(N,1,popn_data$y_prob))
   
   ## generate inclusion prob. for each individual
   # weakly predictive - 0.1 (sd), strongly predictive - 1 (sd)
@@ -59,13 +59,6 @@ gen_dat <- function(N, fx, samp_size, ITE){
            X4_fct = cut_interval(X4_tr,K)) %>% 
     mutate(across(X1_fct:X4_fct, ~ as.numeric(.x))) 
   
-  df <- popn_data %>%
-    pivot_longer(c(X1_fct:X4_fct, X1_cont:X4_cont),
-                 names_to = c("variable","type"),
-                 values_to = "value",
-                 names_sep = "_") %>% 
-    filter(type=="fct")
-  
   popn_data <- popn_data %>%
     rename(X1 = X1_fct,
            X2 = X2_fct,
@@ -77,35 +70,21 @@ gen_dat <- function(N, fx, samp_size, ITE){
   
   ## making sure at least each level of the covariates are sampled
   for(j in 1:J){
-    if(length(which(popn_data$X1 == j)) == 1){
-      samp_loc[length(samp_loc)+1] = which(popn_data$X1 == j)
-      samp_loc[length(samp_loc)+1] = which(popn_data$X2 == j)
-      samp_loc[length(samp_loc)+1] = which(popn_data$X3 == j)
-    } else{
       samp_loc[length(samp_loc)+1] = sample(which(popn_data$X1 == j), size=1)
       samp_loc[length(samp_loc)+1] = sample(which(popn_data$X2 == j), size=1)
       samp_loc[length(samp_loc)+1] = sample(which(popn_data$X3 == j), size=1)
-    }
   }
   
   for(k in 1:K){
-    if( length(which(popn_data$X4 == k)) == 1 ){
-      samp_loc[length(samp_loc)+1] = which(popn_data$X4 == k)
-    } else
       samp_loc[length(samp_loc)+1] = sample(which(popn_data$X4 == k), size=1)
   }
   
-  
   samp_data = popn_data[samp_loc,]
-  
-  # random sample
-  samp_loc2 = sample(1:nrow(popn_data), size = samp_size)
-  samp_data2 = popn_data[samp_loc2,]
-  
-  ## make poststratification table for sample
+
+  ## make poststrat table for popn
   popn_ps = popn_data %>% 
     group_by(X1, X2, X3, X4) %>% 
-    summarise(Nj = n(), sum_y = sum(y), .groups = 'keep') %>% 
+    summarise(Nj = n(), prob_out = mean(y_prob), .groups = 'keep') %>% 
     ungroup()
   
   all_list <- list(samp_data, popn_ps, popn_data, N)

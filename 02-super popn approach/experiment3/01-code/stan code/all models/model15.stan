@@ -82,19 +82,19 @@ generated quantities {
   vector[n] log_lik;
 
   for (j in 1:J){
-    theta_pop[j] = bernoulli_rng(inv_logit(intercept +
+    theta_pop[j] = inv_logit(intercept +
     U_X1[X1_pop[j]] +
     U_X2[X2_pop[j]] +
     U_X3[X3_pop[j]] +
-    U_X4[X4_pop[j]]));
+    U_X4[X4_pop[j]]);
   }
   
  for (i in 1:n){
-    theta_samp[i] = bernoulli_rng(inv_logit(intercept +
+    theta_samp[i] = inv_logit(intercept +
     U_X1[X1[i]] +
     U_X2[X2[i]] +
     U_X3[X3[i]] +
-    U_X4[X4[i]]));
+    U_X4[X4[i]]);
   }
 
    // calculating log likelihood for loo

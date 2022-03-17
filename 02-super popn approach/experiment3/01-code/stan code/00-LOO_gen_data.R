@@ -16,17 +16,17 @@ gen_dat <- function(N, fx, samp_size, ITE){
   ## first generate 100 different population and sample it each time
   # setting fixed seed using array ID (in cluster)
   set.seed(seed[ITE])
-  popn_data <- data.frame(X1_cont = rnorm(N, 0, 1), 
-                          X2_cont = rnorm(N, 0, 1),
-                          X3_cont = rnorm(N, 0, 1), 
-                          X4_cont = rnorm(N, 0, 1))
+  popn_data <- data.frame(X1_cont = runif(N, -3, 3), 
+                          X2_cont = runif(N, -3,3),
+                          X3_cont = runif(N, -3,3), 
+                          X4_cont = runif(N, -3,3))
   
   ## transforming X4_cont to have normalised scale -- for the beta function in fx
   popn_data$X4_tr = (popn_data$X4_cont - min(popn_data$X4_cont))/
     (max(popn_data$X4_cont) - min(popn_data$X4_cont))
   
-  wkly1 = 0.1/3
-  strg1 = 1/3
+  wkly1 = 0.1/2
+  strg1 = 1/2
   
   summary(popn_data$X4_cont)
   

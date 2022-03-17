@@ -1,11 +1,9 @@
 ## script for stan files
 ## running for all six models
-library(cmdstanr)
-options(cores=parallel::detectCores())
 
 # data generation ---------------------------------------------------------
 # function to generate data
-source("00-LOO_gen_data.R") 
+source("00-LOO_gen_dat_func.R") 
 
 # iteration number (ITE) from cluster
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
@@ -13,18 +11,21 @@ iter = as.numeric(slurm_arrayid)
 
 # generating data using gen_dat()
 set.seed(34567)
-sim2 = gen_dat(N = 10000, fx = fx1, samp_size = 1000, ITE=iter) # generate a list of things
+sim1 = gen_dat(N = 10000, fx = fx3, samp_size = 1000, ITE=iter) # generate a list of things
 
 samp_dat = sim1$samp_data
 popn_ps = sim1$popn_ps
 popn_data = sim1$popn_data
 
 # using cmdstanr ----------------------------------------------------------
+library(cmdstanr)
+options(cores=parallel::detectCores())
+
 # list of data for stan
 samp_dat_mrp <- list(
   n = nrow(samp_dat), # number in samples
-  n_groups_X_cat = max(samp_dat$X1), # number of levels in X1, X2, X3 (categorical)
-  n_groups_X4 =  max(samp_dat$X4), # number of levels in X4 (depends on choice of discretisation)
+  n_groups_X_cat = max(popn_data$X1), # number of levels in X1, X2, X3 (categorical)
+  n_groups_X4 =  max(popn_data$X4), # number of levels in X4 (depends on choice of discretisation)
   X1 = samp_dat$X1,
   X2 = samp_dat$X2,
   X3 = samp_dat$X3,
@@ -69,29 +70,47 @@ model06_fit_rePrior <- model06_rePrior$sample(data = samp_dat_mrp,
 
 
 # saving quantities
-loglik_15a = model15a_fit_arPrior$draws(variables = "log_lik")
-popnest_15a = model15a_fit_arPrior$draws(variables = "theta_pop")
-sampest_15a = model15a_fit_arPrior$draws(variables = "theta_samp")
+loglik_15a = model15a_fit_arPrior$draws(variables = "log_lik") %>% 
+  as_draws_matrix()
+popnest_15a = model15a_fit_arPrior$draws(variables = "theta_pop") %>% 
+  as_draws_matrix()
+sampest_15a = model15a_fit_arPrior$draws(variables = "theta_samp") %>% 
+  as_draws_matrix()
 
-loglik_15 = model15_fit_rePrior$draws(variables = "log_lik")
-popnest_15 = model15_fit_rePrior$draws(variables = "theta_pop")
-sampest_15 = model15_fit_rePrior$draws(variables = "theta_samp")
+loglik_15 = model15_fit_rePrior$draws(variables = "log_lik") %>% 
+  as_draws_matrix()
+popnest_15 = model15_fit_rePrior$draws(variables = "theta_pop") %>% 
+  as_draws_matrix()
+sampest_15 = model15_fit_rePrior$draws(variables = "theta_samp") %>% 
+  as_draws_matrix()
 
-loglik_13a = model13a_fit_arPrior$draws(variables = "log_lik")
-popnest_13a = model13a_fit_arPrior$draws(variables = "theta_pop")
-sampest_13a = model13a_fit_arPrior$draws(variables = "theta_samp")
+loglik_13a = model13a_fit_arPrior$draws(variables = "log_lik") %>% 
+  as_draws_matrix()
+popnest_13a = model13a_fit_arPrior$draws(variables = "theta_pop") %>% 
+  as_draws_matrix()
+sampest_13a = model13a_fit_arPrior$draws(variables = "theta_samp") %>% 
+  as_draws_matrix()
 
-loglik_13 = model13_fit_rePrior$draws(variables = "log_lik")
-popnest_13 = model13_fit_rePrior$draws(variables = "theta_pop")
-sampest_13 = model13_fit_rePrior$draws(variables = "theta_samp")
+loglik_13 = model13_fit_rePrior$draws(variables = "log_lik") %>% 
+  as_draws_matrix()
+popnest_13 = model13_fit_rePrior$draws(variables = "theta_pop") %>% 
+  as_draws_matrix()
+sampest_13 = model13_fit_rePrior$draws(variables = "theta_samp") %>% 
+  as_draws_matrix()
 
-loglik_11 = model11_fit_rePrior$draws(variables = "log_lik")
-popnest_11 = model11_fit_rePrior$draws(variables = "theta_pop")
-sampest_11 = model11_fit_rePrior$draws(variables = "theta_samp")
+loglik_11 = model11_fit_rePrior$draws(variables = "log_lik") %>% 
+  as_draws_matrix()
+popnest_11 = model11_fit_rePrior$draws(variables = "theta_pop") %>% 
+  as_draws_matrix()
+sampest_11 = model11_fit_rePrior$draws(variables = "theta_samp") %>% 
+  as_draws_matrix()
 
-loglik_06 = model06_fit_rePrior$draws(variables = "log_lik")
-popnest_06 = model06_fit_rePrior$draws(variables = "theta_pop")
-sampest_06 = model06_fit_rePrior$draws(variables = "theta_samp")
+loglik_06 = model06_fit_rePrior$draws(variables = "log_lik")%>% 
+  as_draws_matrix()
+popnest_06 = model06_fit_rePrior$draws(variables = "theta_pop")%>% 
+  as_draws_matrix()
+sampest_06 = model06_fit_rePrior$draws(variables = "theta_samp") %>% 
+  as_draws_matrix()
 
 save(loglik_15a, loglik_15, loglik_13a,
      loglik_13, loglik_11, loglik_06,

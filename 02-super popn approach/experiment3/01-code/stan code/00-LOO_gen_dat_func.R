@@ -76,6 +76,9 @@ gen_dat <- function(N, fx, samp_size, ITE){
   }
   
   for(k in 1:K){
+    if(length(which(popn_data$X4 == k)) == 1 ){ # if condition for when only 1 indv. exist in that popn. level
+      samp_loc[length(samp_loc)+1] = which(popn_data$X4 == k)
+    } else
       samp_loc[length(samp_loc)+1] = sample(which(popn_data$X4 == k), size=1)
   }
   

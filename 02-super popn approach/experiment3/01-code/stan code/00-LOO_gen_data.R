@@ -34,7 +34,7 @@ gen_dat <- function(N, fx, samp_size, ITE){
   popn_data$outcome <- inv_logit_scaled(wkly1*popn_data$X1_cont +
                                           strg1*popn_data$X2_cont +
                                           wkly1*popn_data$X3_cont +
-                                          fx(popn_data$X4_tr))
+                                          1.5*fx(popn_data$X4_tr))
   
   
   ## generating binary outcome

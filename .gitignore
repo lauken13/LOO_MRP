@@ -2,7 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-02-super popn approach/experiment1/01-data
+.DS_Store
+02-super popn approach/experiment1/03-data
 02-super popn approach/experiment3/03-data
 /*/*/.Rhistory
 /02-super popn approach/experiment3/01-code/stan code/all models_new stan syntax
+tests/

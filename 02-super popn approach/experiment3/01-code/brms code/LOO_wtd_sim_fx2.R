@@ -162,7 +162,8 @@ model04a = brm(bin_value ~ 1,
               data = samp_data,
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99))
+              control = list(adapt_delta = 0.99),
+              prior = set_prior("normal(0, 10)", class = "ar"))
 
 
 model05 = brm(bin_value ~ (1|X1) + (1|X2), data = samp_data,
@@ -184,7 +185,8 @@ model07a = brm(bin_value ~ (1|X1), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
                backend = "cmdstanr",
                family = bernoulli(link = "logit"), 
-               control = list(adapt_delta = 0.99))
+               control = list(adapt_delta = 0.99),
+               prior = set_prior("normal(0, 10)", class = "ar"))
 
 model08 = brm(bin_value ~ (1|X2) + (1|X3), data = samp_data,
               backend = "cmdstanr",
@@ -200,7 +202,8 @@ model09a = brm(bin_value ~ (1|X2), data = samp_data,
               autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99)) 
+              control = list(adapt_delta = 0.99),
+              prior = set_prior("normal(0, 10)", class = "ar")) 
 
 model10 = brm(bin_value ~ (1|X3) + (1|X4), data = samp_data,
               backend = "cmdstanr",
@@ -211,7 +214,8 @@ model10a = brm(bin_value ~ (1|X3), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99)) 
+              control = list(adapt_delta = 0.99),
+              prior = set_prior("normal(0, 10)", class = "ar")) 
 
 model11 = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3), data = samp_data,
               backend = "cmdstanr",
@@ -228,7 +232,8 @@ model12a = brm(bin_value ~ (1|X1) + (1|X2), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99)) 
+              control = list(adapt_delta = 0.99),
+              prior = set_prior("normal(0, 10)", class = "ar")) 
 
 
 model13 = brm(bin_value ~ (1|X1) + (1|X3) + (1|X4), data = samp_data,
@@ -240,7 +245,8 @@ model13a = brm(bin_value ~ (1|X1) + (1|X3), data = samp_data,
                autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99))
+              control = list(adapt_delta = 0.99),
+              prior = set_prior("normal(0, 10)", class = "ar"))
 
 model14 = brm(bin_value ~ (1|X2) + (1|X3) + (1|X4), data = samp_data,
               backend = "cmdstanr",
@@ -251,7 +257,8 @@ model14a = brm(bin_value ~ (1|X2) + (1|X3), data = samp_data,
               autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99)) 
+              control = list(adapt_delta = 0.99),
+              prior = set_prior("normal(0, 10)", class = "ar")) 
 
 model15 = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3) + (1|X4), data = samp_data,
               backend = "cmdstanr",
@@ -262,7 +269,8 @@ model15a = brm(bin_value ~ (1|X1) + (1|X2) + (1|X3), data = samp_data,
               autocor = cor_arma(~1|X4,p=1, cov=T),
               backend = "cmdstanr",
               family = bernoulli(link = "logit"), 
-              control = list(adapt_delta = 0.99)) 
+              control = list(adapt_delta = 0.99),
+              prior = set_prior("normal(0, 10)", class = "ar")) 
 
 
 ## make MRP estimates

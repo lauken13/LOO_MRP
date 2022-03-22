@@ -3,7 +3,7 @@
 
 # data generation ---------------------------------------------------------
 # function to generate data
-source("00-LOO_gen_dat_func.R") 
+source("00-gen_dat_func.R") 
 
 # iteration number (ITE) from cluster
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')

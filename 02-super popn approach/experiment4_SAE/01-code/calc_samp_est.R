@@ -132,7 +132,7 @@ pc2$model = forcats::fct_relevel(pc2$model, c('X1 + X2 + X3 + X4', '*X1 + X2 + X
 
 ## plot diff in mean
 xloc4 = 0.6
-(p1 = ggplot(pc2, aes(x = mean_coverage, y = model, group = ite, colour = model))+
+(p1 = ggplot(pc2, aes(x = mean_coverage_ite, y = model, group = ite, colour = model))+
     geom_point(position = position_dodge(width = .5), alpha=0.5) +
     theme(legend.position = "none",
           axis.title = element_blank()) +

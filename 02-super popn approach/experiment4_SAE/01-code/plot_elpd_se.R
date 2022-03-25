@@ -90,7 +90,7 @@ xloc2 = 38
     annotate("label", x = xloc2, y = 3.5, label = "X4 only") +
     annotate("label", x = xloc2, y = 2,  label = "X2 only") +
     annotate("label", x = xloc2, y = 1, label = "None") +
-    labs(title="Range of interval for elpd values (unweighted)") + xlim(c(5,42)))
+    labs(title="Range of interval for elpd values (unweighted)") + xlim(c(2,42)))
 
 ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_loo_unwtd_range_fx3.png"), p1a, width=6, height=7.5, units="in", device="png")
 

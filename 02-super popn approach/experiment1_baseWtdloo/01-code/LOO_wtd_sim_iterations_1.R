@@ -72,11 +72,6 @@ popn_data <- data.frame(X1_cont = rnorm(N, 0, 2),
   
   samp_data = popn_data[samp_loc,]
   
-  # random sample
-  samp_loc2 = sample(1:nrow(popn_data), size = samp_size)
-  samp_data2 = popn_data[samp_loc2,]
-  
-  
   ## creating survey design
   svy1 = svydesign(ids=~1, # cluster id, ~1 for no clusters
                    weights=~rep(1,nrow(samp_data)), # equal weights for each unit

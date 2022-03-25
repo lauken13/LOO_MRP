@@ -3,10 +3,10 @@ library(loo)
 library(posterior) # to convert draws_array() objects 
 
 # sourcing gen_dat()
-source(here::here("02-super popn approach/experiment3/01-code/stan code/00-LOO_gen_dat_func.R"))
+source(here::here("00-LOO_gen_dat_func.R"))
 
 # sourcing loo_wtd()
-source(here::here("02-super popn approach/functions.R"))
+source(here::here("../functions.R"))
 
 ## empty matrices
 # for mrp est
@@ -41,8 +41,8 @@ samp_data_list =
   popn_data_list =
   popn_ps_list = list()
 
-## fx2 
-iter = c(1:88,92:100)
+# ## fx2 
+# iter = c(1:88,92:100)
 
 
 for(ite in 1:100){
@@ -51,7 +51,7 @@ for(ite in 1:100){
   # mrp est -----------------------------------------------------------------
   # generating data using gen_dat()
   set.seed(34567)
-  sim1 = gen_dat(N = 10000, fx = fx1, samp_size = 1000, ITE=ite)
+  sim1 = gen_dat(N = 10000, fx = fx3, samp_size = 1000, ITE=ite)
   
   samp_data = samp_data_list[[ite]] = sim1$samp_data
   popn_data = popn_data_list[[ite]] = sim1$popn_data
@@ -144,4 +144,5 @@ for(ite in 1:100){
   loo_wtd_15a_list[[ite]] = loo_wtd(lpd_15a_list[[ite]], svy_rake)
 }  
 
+save.image('loo_fx3_attempt2.RData')
 

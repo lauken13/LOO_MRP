@@ -163,7 +163,7 @@ ph$model = fct_relevel(ph$model, c('X1 + X2 + X3 + X4', '*X1 + X2 + X3 + X4',
 
 ## plot
 xloc3 = -5000
-p2 = ggplot(ph, aes(x = wtd_elpd_loo, y = model, group = iter, colour = model))+
+(p2 = ggplot(ph, aes(x = wtd_elpd_loo, y = model, group = iter, colour = model))+
   geom_point(position = position_dodge(width = .5), alpha=0.7) +
   theme(legend.position = "none",
         axis.title = element_blank()) +
@@ -177,18 +177,14 @@ p2 = ggplot(ph, aes(x = wtd_elpd_loo, y = model, group = iter, colour = model))+
   annotate("label", x = -6500, y = 5.5, label = "X2 and X4") +
   annotate("label", x = xloc3, y = 3.5, label = "X4 only") +
   annotate("label", x = xloc3, y = 2, label = "X2 only") +
-  annotate("label", x = xloc3, y = 1, label = "None")   + xlim(-7000,-4650) 
-   geom_errorbarh(mapping = aes(xmin = low_elpd,
-                                xmax = upp_elpd),
-                  position = position_dodge(width = .5),
-                  height = 0, alpha = .5)
+  annotate("label", x = xloc3, y = 1, label = "None")   + xlim(-7000,-4650))
 
 
 ggsave(here::here("02-super popn approach/experiment3/02-results/stan code/plot_loo_wtd_fx3.png"), p2, width=6, height=7.5, units="in", device="png")
 
 ## range of elpd values (weighted)
 xloc2 = 1350
-p3 = ggplot(ph, aes(x = range_pe, y = model, group = iter, colour = model)) +
+(p3 = ggplot(ph, aes(x = range_pe, y = model, group = iter, colour = model)) +
   geom_point(position = position_dodge(width = .5), alpha=0.7) +
   scale_colour_manual(values = c("#1C73B1FF", "#26456EFF",
                                  "#FB964EFF", "#DF5948FF",
@@ -201,6 +197,6 @@ p3 = ggplot(ph, aes(x = range_pe, y = model, group = iter, colour = model)) +
   annotate("label", x = xloc2, y = 3.5, label = "X4 only") +
   annotate("label", x = xloc2, y = 2,  label = "X2 only") +
   annotate("label", x = xloc2, y = 1, label = "None") +
-  labs(title="Range of interval for elpd values (weighted)") + xlim(c(500,1500))
+  labs(title="Range of interval for elpd values (weighted)") + xlim(c(500,1500)))
 
 ggsave(here::here("02-super popn approach/experiment3/02-results/stan code/plot_loo_wtd_range_fx3.png"), p3, width=6, height=7.5, units="in", device="png")

@@ -2,7 +2,6 @@
 library(dplyr)
 library(ggplot2)
 
-
 # mrp estimate at popn level ----------------------------------------------
 ## poststratification step using theta_pop (predicted values)
 # calculating popnest and prob. of outcome for each iteration

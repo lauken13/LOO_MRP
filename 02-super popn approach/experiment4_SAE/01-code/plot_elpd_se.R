@@ -70,7 +70,7 @@ xloc = -280
     annotate("label", x = xloc, y = 3.5, label = "X4 only") +
     annotate("label", x = xloc, y = 2,  label = "X2 only") +
     annotate("label", x = xloc, y = 1, label = "None")  +
-     xlim(c(-350,-275)) )
+     xlim(c(range(pu$elpd_loo)[1] - 2, range(pu$elpd_loo)[2] + 2)) )
 
 ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_loo_unwtd_fx3.png"), p1, width=6, height=7.5, units="in", device="png")
 
@@ -180,3 +180,58 @@ xloc2 = 2000
   labs(title="Range of interval for elpd values (weighted)") + xlim(c(550,2200)))
 
 ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_loo_wtd_range_fx3.png"), p3, width=6, height=7.5, units="in", device="png")
+
+
+# small area loo ----------------------------------------------------------
+
+sum_elpd_all = list()
+
+iter=1:100
+for(ite in iter){
+  samp_data_list[[ite]]$elpd_loo_06 = loo_06_list[[ite]]$pointwise[,1]
+  samp_data_list[[ite]]$elpd_loo_11 = loo_11_list[[ite]]$pointwise[,1]
+  samp_data_list[[ite]]$elpd_loo_13 = loo_13_list[[ite]]$pointwise[,1]
+  samp_data_list[[ite]]$elpd_loo_13a = loo_13a_list[[ite]]$pointwise[,1]
+  samp_data_list[[ite]]$elpd_loo_15 = loo_15_list[[ite]]$pointwise[,1]
+  samp_data_list[[ite]]$elpd_loo_15a = loo_15a_list[[ite]]$pointwise[,1]
+  
+  
+  sum_elpd_all[[ite]] =  samp_data_list[[ite]] %>% 
+    group_by(X4) %>% 
+    summarise(sum_elpd_06 = sum(elpd_loo_06),
+              sum_elpd_11 = sum(elpd_loo_11),
+              sum_elpd_13 = sum(elpd_loo_13),
+              sum_elpd_13a = sum(elpd_loo_13a),
+              sum_elpd_15 = sum(elpd_loo_15),
+              sum_elpd_15a = sum(elpd_loo_15a)) %>% 
+    mutate(iteration = ite)
+  
+}
+
+# combining all loo estimate by group
+sum_elpd_all_tab = do.call(rbind, sum_elpd_all)
+
+sum_elpd_all_tab %>%
+  select(X4, sum_elpd_15) %>% 
+  group_by(X4) %>% 
+  summarise(sum_loo_group = sum(sum_elpd_15))
+
+sum_elpd_all_tab %>%
+  select(X4, sum_elpd_15a) %>% 
+  group_by(X4) %>% 
+  summarise(sum_loo_group = sum(sum_elpd_15a))
+
+
+
+## potential plotting
+test = sum_elpd_all_tab %>%
+  select(sum_elpd_15, sum_elpd_15a) %>% 
+  gather(.) %>% 
+  mutate(X4 = rep(1:12, 200),
+         iter = c(rep(1:100, each=12), rep(1:100, each=12))) %>% 
+  rename(model = key, elpd_loo = value) %>% 
+  mutate(model = as.factor(model))
+
+
+
+

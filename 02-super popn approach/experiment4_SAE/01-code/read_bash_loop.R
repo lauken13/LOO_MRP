@@ -10,7 +10,8 @@ source("../functions.R")
 
 ## empty matrices
 # for mrp est
-popnest_list = list()
+popnest_list = 
+  sampest_list = list()
 pt_list = list() 
 
 # elpd values and wtd loo
@@ -57,6 +58,10 @@ model06_popnest_sae =
 iter = 1:100
 for(ite in iter){
   load(paste0('LOO_arPrior_',ite,".RData")) 
+  
+  # saving individual estimates
+  sampest_list[[ite]] = list(sampest_06, sampest_11, sampest_13,
+                             sampest_13a, sampest_15, sampest_15a)
   
   # mrp est -----------------------------------------------------------------
   # generating data using gen_dat()

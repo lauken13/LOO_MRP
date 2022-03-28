@@ -3,7 +3,7 @@ library(loo)
 library(posterior) # to convert draws_array() objects 
 
 # sourcing gen_dat()
-source(here::here("00-LOO_gen_dat_func.R"))
+source(here::here("00-gen_dat_func.R"))
 
 # sourcing loo_wtd()
 source(here::here("../functions.R"))

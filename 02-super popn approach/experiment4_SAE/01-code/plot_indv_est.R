@@ -1,17 +1,36 @@
 ## looking at individual prediction 
 library(dplyr)
 library(ggplot2)
+library(brms)
 
-load("~/GitHub/LOO_MRP/02-super popn approach/experiment4_SAE/01-code/loo_sae_fx3.RData")
+load("~/GitHub/LOO_MRP/02-super popn approach/experiment4_SAE/03-data/loo_sae_fx3.RData")
 
+# empty lists
+pt_samp_list = cov_prop_samp_list = list()
 
+iter = 1:100
 # getting coverage for individual estimates
-pt_samp_list = cov_prop_samp_list = 
-  list()
-
 for(ite in iter){
+  # # generating data using gen_dat()
+  # set.seed(65438)
+  # sim1 = gen_dat(N = 10000, fx = fx1, samp_size = 500, ITE=ite) # generate a list of things
+  # 
+  # pt_samp_list[[ite]] = sim1$samp_data$y_prob
+ 
   pt_samp_list[[ite]] = samp_data_list[[ite]]$y_prob
   
+  # getting the sampest for each iteration
+  names(sampest_list[[ite]]) = c('model06', 'model11','model13', 
+                                 'model13a', 'model15', 'model15a')
+  
+  sampest_06 = sampest_list[[ite]]$model06
+  sampest_11 = sampest_list[[ite]]$model11
+  sampest_13 = sampest_list[[ite]]$model13
+  sampest_13a = sampest_list[[ite]]$model13a
+  sampest_15 = sampest_list[[ite]]$model15
+  sampest_15a = sampest_list[[ite]]$model15a
+  
+
   # subtracting the truth for each of the models
   ## getting posterior of individuals estimate for each of the models
   
@@ -131,9 +150,9 @@ pc2$model = forcats::fct_relevel(pc2$model, c('X1 + X2 + X3 + X4', '*X1 + X2 + X
                                               'X1 + X3'))
 
 ## plot diff in mean
-xloc4 = 0.6
+xloc4 = 0.9
 (p1 = ggplot(pc2, aes(x = mean_coverage_ite, y = model, group = ite, colour = model))+
-    geom_point(position = position_dodge(width = .5), alpha=0.5) +
+    geom_point(position = position_dodge(width = .5), alpha=0.7) +
     theme(legend.position = "none",
           axis.title = element_blank()) +
     scale_y_discrete(limits = rev) +
@@ -142,13 +161,13 @@ xloc4 = 0.6
                                    "#09622AFF",
                                    "#879195FF")) + 
     labs(title="Mean proportion of coverage in individual-level prediction") +
-    xlim(c(0.1, 1)) +
-    annotate("label", x = xloc4, y = 5.5, label = "X2 and X4") +
+    xlim(c(range(pc2$mean_coverage_ite)[1]-0.15, range(pc2$mean_coverage_ite)[2]+0.15)) +
+    annotate("label", x = xloc4-0.5, y = 5.5, label = "X2 and X4") +
     annotate("label", x = xloc4, y = 3.5, label = "X4 only") +
     annotate("label", x = xloc4, y = 2,  label = "X2 only") +
     annotate("label", x = xloc4, y = 1, label = "None") )
 
-ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_ind_est_fx3.png"), p1, width=6, height=7.5, units="in", device="png")
+ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_ind_est_fx2.png"), p1, width=6, height=7.5, units="in", device="png")
 
 
 

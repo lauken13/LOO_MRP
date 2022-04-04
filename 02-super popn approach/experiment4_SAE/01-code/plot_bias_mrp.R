@@ -33,7 +33,7 @@ pc$model = forcats::fct_relevel(pc$model, c('X1 + X2 + X3 + X4', '*X1 + X2 + X3 
                                    'X1 + X3'))
 
 ## plot diff in mean
-xloc4 = 0.16
+xloc4 = 0.1
 (p3 = ggplot(pc, aes(x = mean_pe, y = model, group = iter, colour = model))+
     geom_vline(aes(xintercept = 0)) +
     geom_point(position = position_dodge(width = .5), alpha=0.7) +
@@ -46,16 +46,16 @@ xloc4 = 0.16
                                    "#09622AFF",
                                    "#879195FF")) + 
     labs(title="Difference in MRP estimate and truth") +
-    xlim(c(-0.04, 0.18)) +
+    xlim(c(-0.1, 0.15)) +
     annotate("label", x = xloc4, y = 5.5, label = "X2 and X4") +
     annotate("label", x = xloc4, y = 3.5, label = "X4 only") +
     annotate("label", x = xloc4, y = 2,  label = "X2 only") +
     annotate("label", x = xloc4, y = 1, label = "None") )
 
-ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_mrp_truth_fx3.png"), p3, width=6, height=7.5, units="in", device="png")
+ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_mrp_truth_fx2.png"), p3, width=6, height=7.5, units="in", device="png")
 
 ## plotting variance range
-xloc5 = 0.095
+xloc5 = 0.09
 range(pc$range_pe)
 (p4 = ggplot(pc, aes(x = range_pe, y = model, group = iter, colour = model)) +
     geom_point(position = position_dodge(width = .5), alpha=0.7) +
@@ -74,4 +74,4 @@ range(pc$range_pe)
     annotate("label", x = xloc5, y = 2,  label = "X2 only") +
     annotate("label", x = xloc5, y = 1, label = "None"))
 
-ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_mrp_qt_range_fx3.png"), p4, width=6, height=7.5, units="in", device="png")
+ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_mrp_qt_range_fx2.png"), p4, width=6, height=7.5, units="in", device="png")

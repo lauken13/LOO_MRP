@@ -1,9 +1,7 @@
 ## plotting small area estimations 
-
-
-# group/small area prediction --------------------------------------------------------
 # checking the coverage for small area/group
 
+# group/small area prediction --------------------------------------------------------
 X4_group_mean_list = list()
 
 ## getting the group prob for each iteration/population
@@ -88,7 +86,6 @@ model_all_pn_tab$model = forcats::fct_relevel(model_all_pn_tab$model, c('X1 + X2
                                                                         'X1 + X2 + X3',
                                                                         'X1 + X3'))
 
-## to be edited
 ## comparing to 'truth'
 model_all_pn_tab$mean_pe = as.numeric(model_all_pn_tab$`50%`) - as.numeric(model_all_pn_tab$mean_prob) # recursive diff for pt_list
 model_all_pn_tab$low_pe = as.numeric(model_all_pn_tab$`5%`) - as.numeric(model_all_pn_tab$mean_prob)
@@ -103,16 +100,16 @@ model_13_pn_tab = model_all_pn_tab %>%
 
 ## plot diff in mean
 xloc4 = 0.45
-(p3 = ggplot(model_15_pn_tab, aes(x = mean_pe, y = X4_group, group = model, colour = model))+
+(p3 = ggplot(model_13_pn_tab, aes(x = mean_pe, y = X4_group, group = model, colour = model))+
     geom_vline(aes(xintercept = 0)) +
     geom_point(position = position_dodge(width = 1), alpha=0.7) +
     theme(legend.position = c(0.8,0.8)) +
     scale_colour_manual(values = c("#1C73B1FF", "#FB964EFF")) + 
-    stat_summary(aes(group=model), width=0.5, size=0.7, fun=mean, geom="crossbar", colour=rep(c("#1C73B1FF", "#FB964EFF"), each = 12)) + #drawing the mean line 
+    stat_summary(aes(group=model), width=0.5, size=0.3, fun=mean, geom="crossbar", colour=rep(c("#1C73B1FF", "#FB964EFF"), each = 12)) + #drawing the mean line 
     labs(title="Difference in X4-levels estimate and truth",
          y = 'Levels of X4', x = 'Bias' ))
 
-ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_sae_X4.png"), p3, width=6, height=7.5, units="in", device="png")
+ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_bias_sae_M13_fx3.png"), p3, width=6, height=7.5, units="in", device="png")
 
 ## y_prob for each level of X4
 popn_data_list[[10]] %>% 

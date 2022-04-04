@@ -14,12 +14,12 @@ popnest_list = list()
 pt_list = list() 
 
 # elpd values and wtd loo
-lpd_06_list = 
-  lpd_11_list = 
-  lpd_13_list = 
-  lpd_13a_list = 
-  lpd_15_list = 
-  lpd_15a_list = list()
+loo_06_list = 
+  loo_11_list = 
+  loo_13_list = 
+  loo_13a_list = 
+  loo_15_list = 
+  loo_15a_list = list()
 
 loo_wtd_06_list =
   loo_wtd_11_list = 
@@ -47,6 +47,10 @@ samp_data_list =
 
 for(ite in 1:100){
   load(paste0('LOO_arPrior_',ite,".RData")) 
+  
+  # saving individual estimates
+  sampest_list[[ite]] = list(sampest_06, sampest_11, sampest_13,
+                             sampest_13a, sampest_15, sampest_15a)
   
   # mrp est -----------------------------------------------------------------
   # generating data using gen_dat()
@@ -108,40 +112,40 @@ for(ite in 1:100){
                        data=samp_data) 
   
   ## saving loo object ####
-  lpd_06_list[[ite]] = loo(loglik_06)
-  lpd_11_list[[ite]] = loo(loglik_11)
-  lpd_13_list[[ite]] = loo(loglik_13)
-  lpd_13a_list[[ite]] = loo(loglik_13a)
-  lpd_15_list[[ite]] = loo(loglik_15)
-  lpd_15a_list[[ite]] = loo(loglik_15a)
+  loo_06_list[[ite]] = loo_06
+  loo_11_list[[ite]] = loo_11
+  loo_13_list[[ite]] = loo_13
+  loo_13a_list[[ite]] = loo_13a
+  loo_15_list[[ite]] = loo_15
+  loo_15a_list[[ite]] = loo_15a
   
   ## elpd_loo ####
   ## elpd values 
-  elpd_06_mat[ite,1] = lpd_06_list[[ite]]$estimates[1,1]
-  elpd_06_mat[ite,2] = lpd_06_list[[ite]]$estimates[1,2]
+  elpd_06_mat[ite,1] = loo_06_list[[ite]]$estimates[1,1]
+  elpd_06_mat[ite,2] = loo_06_list[[ite]]$estimates[1,2]
   
-  elpd_11_mat[ite,1] = lpd_11_list[[ite]]$estimates[1,1]
-  elpd_11_mat[ite,2] = lpd_11_list[[ite]]$estimates[1,2]
+  elpd_11_mat[ite,1] = loo_11_list[[ite]]$estimates[1,1]
+  elpd_11_mat[ite,2] = loo_11_list[[ite]]$estimates[1,2]
   
-  elpd_13_mat[ite,1] = lpd_13_list[[ite]]$estimates[1,1]
-  elpd_13_mat[ite,2] = lpd_13_list[[ite]]$estimates[1,2]
+  elpd_13_mat[ite,1] = loo_13_list[[ite]]$estimates[1,1]
+  elpd_13_mat[ite,2] = loo_13_list[[ite]]$estimates[1,2]
   
-  elpd_13a_mat[ite,1] = lpd_13a_list[[ite]]$estimates[1,1]
-  elpd_13a_mat[ite,2] = lpd_13a_list[[ite]]$estimates[1,2]
+  elpd_13a_mat[ite,1] = loo_13a_list[[ite]]$estimates[1,1]
+  elpd_13a_mat[ite,2] = loo_13a_list[[ite]]$estimates[1,2]
   
-  elpd_15_mat[ite,1] = lpd_15_list[[ite]]$estimates[1,1]
-  elpd_15_mat[ite,2] = lpd_15_list[[ite]]$estimates[1,2]
+  elpd_15_mat[ite,1] = loo_15_list[[ite]]$estimates[1,1]
+  elpd_15_mat[ite,2] = loo_15_list[[ite]]$estimates[1,2]
   
-  elpd_15a_mat[ite,1] = lpd_15a_list[[ite]]$estimates[1,1]
-  elpd_15a_mat[ite,2] = lpd_15a_list[[ite]]$estimates[1,2]
+  elpd_15a_mat[ite,1] = loo_15a_list[[ite]]$estimates[1,1]
+  elpd_15a_mat[ite,2] = loo_15a_list[[ite]]$estimates[1,2]
   
   ## wtd_loo ####
-  loo_wtd_06_list[[ite]] = loo_wtd(lpd_06_list[[ite]], svy_rake)
-  loo_wtd_11_list[[ite]] = loo_wtd(lpd_11_list[[ite]], svy_rake)
-  loo_wtd_13_list[[ite]] = loo_wtd(lpd_13_list[[ite]], svy_rake)
-  loo_wtd_13a_list[[ite]] = loo_wtd(lpd_13a_list[[ite]], svy_rake)
-  loo_wtd_15_list[[ite]] = loo_wtd(lpd_15_list[[ite]], svy_rake)
-  loo_wtd_15a_list[[ite]] = loo_wtd(lpd_15a_list[[ite]], svy_rake)
+  loo_wtd_06_list[[ite]] = loo_wtd(loo_06_list[[ite]], svy_rake)
+  loo_wtd_11_list[[ite]] = loo_wtd(loo_11_list[[ite]], svy_rake)
+  loo_wtd_13_list[[ite]] = loo_wtd(loo_13_list[[ite]], svy_rake)
+  loo_wtd_13a_list[[ite]] = loo_wtd(loo_13a_list[[ite]], svy_rake)
+  loo_wtd_15_list[[ite]] = loo_wtd(loo_15_list[[ite]], svy_rake)
+  loo_wtd_15a_list[[ite]] = loo_wtd(loo_15a_list[[ite]], svy_rake)
 }  
 
 save.image('loo_fx3_attempt2.RData')

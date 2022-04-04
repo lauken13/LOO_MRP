@@ -9,7 +9,21 @@ pt_samp_list = cov_prop_samp_list =
   list()
 
 for(ite in c(1:100)){
-  pt_samp_list[[ite]] = samp_data_list[[ite]]$y_prob
+  # generating data using gen_dat()
+  set.seed(65438)
+  sim1 = gen_dat(N = 10000, fx = fx3, samp_size = 1000, ITE=iter) # generate a list of things
+  
+  pt_samp_list[[ite]] = sim1$samp_data$y_prob
+  
+  # getting the sampest for each iteration
+  names(sampest_list[[ite]]) = c('model06', 'model11','model13', 
+                                 'model13a', 'model15', 'model15a')
+  sampest_06 = sampest_list[[ite]]$model06
+  sampest_11 = sampest_list[[ite]]$model11
+  sampest_13 = sampest_list[[ite]]$model13
+  sampest_13a = sampest_list[[ite]]$model13a
+  sampest_15 = sampest_list[[ite]]$model15
+  sampest_15a = sampest_list[[ite]]$model15a
 
   # subtracting the truth for each of the models
   ## getting posterior of individuals estimate for each of the models

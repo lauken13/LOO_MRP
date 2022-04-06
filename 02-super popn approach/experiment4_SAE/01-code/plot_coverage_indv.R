@@ -136,7 +136,7 @@ cov_prop_samp_tab = do.call(rbind,cov_prop_samp_list) %>%
                                         'model15a' = '*X1 + X2 + X3 + X4'))))
 
 # renaming and relevelling models
-pc2 = cov_prop_samp_tab %>% 
+pn2 = cov_prop_samp_tab %>% 
   mutate(model = factor(model)) %>% 
   mutate(model = plyr::revalue(model, c('model06' = 'X1 + X3',
                                         'model11' = 'X1 + X2 + X3',  
@@ -144,14 +144,14 @@ pc2 = cov_prop_samp_tab %>%
                                         'model13a' = '*X1 + X3 + X4', 
                                         'model15' = 'X1 + X2 + X3 + X4',
                                         'model15a' = '*X1 + X2 + X3 + X4')))
-pc2$model = forcats::fct_relevel(pc2$model, c('X1 + X2 + X3 + X4', '*X1 + X2 + X3 + X4', 
+pn2$model = forcats::fct_relevel(pn2$model, c('X1 + X2 + X3 + X4', '*X1 + X2 + X3 + X4', 
                                               'X1 + X3 + X4', '*X1 + X3 + X4',
                                               'X1 + X2 + X3',
                                               'X1 + X3'))
 
 ## plot diff in mean
 xloc4 = 0.9
-(p1 = ggplot(pc2, aes(x = mean_coverage_ite, y = model, group = ite, colour = model))+
+(p1 = ggplot(pn2, aes(x = mean_coverage_ite, y = model, group = ite, colour = model))+
     geom_point(position = position_dodge(width = .5), alpha=0.7) +
     theme(legend.position = "none",
           axis.title = element_blank()) +
@@ -161,7 +161,7 @@ xloc4 = 0.9
                                    "#09622AFF",
                                    "#879195FF")) + 
     labs(title="Mean proportion of coverage in individual-level prediction") +
-    xlim(c(range(pc2$mean_coverage_ite)[1]-0.15, range(pc2$mean_coverage_ite)[2]+0.15)) +
+    xlim(c(range(pc2$mean_coverage_ite)[1]-0.1, range(pc2$mean_coverage_ite)[2]+0.1)) +
     annotate("label", x = xloc4-0.5, y = 5.5, label = "X2 and X4") +
     annotate("label", x = xloc4, y = 3.5, label = "X4 only") +
     annotate("label", x = xloc4, y = 2,  label = "X2 only") +

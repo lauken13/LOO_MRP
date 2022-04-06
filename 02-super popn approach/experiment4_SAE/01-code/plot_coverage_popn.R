@@ -4,7 +4,7 @@ library(ggplot2)
 library(brms)
 
 ## choose which set of data to load
-load("~/GitHub/LOO_MRP/02-super popn approach/experiment4_SAE/03-data/loo_sae_fx3.RData")
+load("~/GitHub/LOO_MRP/02-super popn approach/experiment4_SAE/03-data/loo_sae_fx3.Rbin")
 
 # empty lists
 pt_popn_list = cov_prop_popn_list = list()
@@ -107,10 +107,10 @@ xloc4 = 0.97
                                    "#09622AFF",
                                    "#879195FF")) + 
     labs(title="Mean proportion of coverage in population-level prediction") +
-    xlim(c(0.65, 1)) +
+    xlim(c(range(pc2$mean_coverage_ite)[1] - 0.1, range(pc2$mean_coverage_ite)[2] + 0.1)) +
     annotate("label", x = xloc4, y = 5.5, label = "X2 and X4") +
     annotate("label", x = xloc4, y = 3.5, label = "X4 only") +
     annotate("label", x = xloc4, y = 2,  label = "X2 only") +
     annotate("label", x = xloc4, y = 1, label = "None") )
 
-ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_popn_est_fx2.png"), p1, width=6, height=7.5, units="in", device="png")
+ ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_popn_est_fx2.png"), p1, width=6, height=7.5, units="in", device="png")

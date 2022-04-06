@@ -1,12 +1,13 @@
 source('LOO_wtd_sim_popn_2.R')
 
 ITE = 100
-sim_doub_list = lapply(1:ITE, function(x)matrix(NA, nrow=4, ncol=6))
-sim_trip_list = lapply(1:ITE, function(x)matrix(NA, nrow=4, ncol=6))
+sim_list = lapply(1:ITE, function(x)matrix(NA, nrow=4, ncol=6))
 samp_data_list = lapply(1:ITE, function(x)matrix(NA))
 
+slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
+i = as.numeric(slurm_arrayid)
 
-for (i in 1:ITE){
+
   samp_size = 500
   samp_loc = sample(1:nrow(popn_data), size = samp_size, replace=F, prob = popn_data$inclusion)
   samp_data = popn_data[samp_loc,]
@@ -34,7 +35,7 @@ for (i in 1:ITE){
   ind = c(1:4,6)
   samp_data[,ind] = apply(samp_data[,ind], 2, function(x)as.factor(x))
   
-  ## four models ####
+  ## the rest of the models ####
   model1 = brm(bin_value ~ (1|X1), data = samp_data,
                backend = "cmdstanr",
                family = bernoulli(link = "logit"), 
@@ -109,7 +110,7 @@ for (i in 1:ITE){
                 backend = "cmdstanr",
                 family = bernoulli(link = "logit"), 
                 control = list(adapt_delta = 0.99)) 
- 
+  
   ## comparing loo for the models, with weights and without weights
   # calculating loo
   loo1 <- loo(model1)
@@ -128,49 +129,38 @@ for (i in 1:ITE){
   loo14 <- loo(model14)
   loo15 <- loo(model15)
   
-  loo_doub = list(loo5, loo6, loo7, loo8, loo9, loo10, loo15)
-  loo_trip = list(loo11, loo12, loo13, loo14, loo15)
- 
-  ## extracting loo estimates to rank them
-  loo_doub_tab = lapply(loo_doub,function(x)x$estimates[1,]) %>% 
-    do.call(rbind,.) %>% 
-    data.frame(.) %>% 
-    mutate(loo_doub_rank = rank(-.[,1])) %>% 
-    rename(elpd_loo = Estimate)
-  rownames(loo_doub_tab) = c(paste0('model', c(5:10,15)))
+  loo_all = list(loo1, loo2, loo3, loo4,loo5,
+                 loo6, loo7, loo8, loo9, loo10,
+                 loo11, loo12, loo13, loo14, loo15)
   
-  loo_trip_tab = lapply(loo_trip,function(x)x$estimates[1,]) %>% 
+  ## extracting loo estimates to rank them
+  loo_tab = lapply(loo_all,function(x)x$estimates[1,]) %>% 
     do.call(rbind,.) %>% 
     data.frame(.) %>% 
-    mutate(loo_trip_rank = rank(-.[,1])) %>% 
     rename(elpd_loo = Estimate)
-  rownames(loo_trip_tab) = c(paste0('model', 11:15))
+  rownames(loo_tab) = c(paste0('model0', c(1:9)), paste0('model', c(10:15)))
+  colnames(loo_tab) = c('elpd_loo', 'SE')
+  
   
   # creating survey raked weights
   svy_rake = svydesign(ids=~1, # cluster id, ~1 for no clusters
                        weights=~wts, # including raked weights in the survey design
                        data=samp_data)
- 
-  loo_wtd_doub_tab = lapply(loo_doub, function(x)loo_wtd(x,svy_rake)) %>% 
-    do.call(rbind,.) %>% 
-    data.frame(.) %>% 
-    mutate(loo_wtd_doub_rank =  rank(-.[,1]))
-  rownames(loo_wtd_doub_tab) =  c(paste0('model', c(5:10,15)))
   
-  loo_wtd_trip_tab = lapply(loo_trip, function(x)loo_wtd(x,svy_rake)) %>% 
-    do.call(rbind,.) %>% 
-    data.frame(.) %>% 
-    mutate(loo_wtd_trip_rank =  rank(-.[,1]))
-  rownames(loo_wtd_trip_tab) =  c(paste0('model', c(11:15)))
+  loo_wtd_tab = lapply(loo_all, function(x)loo_wtd(x,svy_rake)) %>% do.call(rbind,.) %>% data.frame(.)
+  rownames(loo_wtd_tab) = c(paste0('model0', c(1:9)), paste0('model', c(10:15)))
   
-  sim_doub_list[[i]] = cbind(loo_doub_tab, loo_wtd_doub_tab) %>% 
-    arrange(., loo_wtd_doub_rank)
+  loo_rank = rank(-loo_tab[,1])
+  loo_wtd_rank = rank(-loo_wtd_tab[,1])
   
-  sim_trip_list[[i]] = cbind(loo_trip_tab, loo_wtd_trip_tab) %>% 
-    arrange(., loo_wtd_trip_rank)
+  sim_list[[i]] = cbind(loo_tab, loo_wtd_tab, loo_rank, loo_wtd_rank)
   
   samp_data <- samp_data %>% 
-    mutate(elpd_5 = loo5$pointwise[,1],
+    mutate(elpd_1 = loo1$pointwise[,1],
+           elpd_2 = loo2$pointwise[,1],
+           elpd_3 = loo3$pointwise[,1],
+           elpd_4 = loo4$pointwise[,1],
+           elpd_5 = loo5$pointwise[,1],
            elpd_6 = loo6$pointwise[,1],
            elpd_7 = loo7$pointwise[,1],
            elpd_8 = loo8$pointwise[,1],
@@ -181,13 +171,8 @@ for (i in 1:ITE){
            elpd_13 = loo13$pointwise[,1],
            elpd_14 = loo14$pointwise[,1],
            elpd_15 = loo15$pointwise[,1]) 
- 
+  
   samp_data_list[[i]] = samp_data
   
-    save(samp_data_list, sim_doub_list, sim_trip_list, file="simulated100temp_2.RData")
-  
-}
+save(samp_data_list, sim_list, file=paste0("simulated100_", i, ".RData"))
 
-save(samp_data_list, sim_doub_list, sim_trip_list, file="simulated100_2.RData")
- 
-               

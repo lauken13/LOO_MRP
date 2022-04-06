@@ -7,7 +7,7 @@ library(tidybayes)
 
 ## generating data - 5 continuous predictors/covariates and a binary outcome 
 gen_dat <- function(N, fx, samp_size, ITE){
-  set.seed(54321)
+  set.seed(65438)
   
   pn = 100 # number of different population
   seed = round(runif(pn, min=10, max=100000),0) # fixed seed number

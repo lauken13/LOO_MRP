@@ -10,7 +10,7 @@ slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 iter = as.numeric(slurm_arrayid)
 
 # generating data using gen_dat()
-set.seed(34567)
+set.seed(65438)
 sim1 = gen_dat(N = 10000, fx = fx3, samp_size = 500, ITE=iter) # generate a list of things
 
 samp_dat = sim1$samp_data
@@ -39,18 +39,18 @@ samp_dat_mrp <- list(
 )
 
 ## compile stan model
-model15a_arPrior = cmdstan_model(file.path('model15a.stan'))
-model15_rePrior = cmdstan_model(file.path('model15.stan'))
+model15a_arPrior = cmdstan_model(file.path('../stancode/model15a.stan'))
+model15_rePrior = cmdstan_model(file.path('../stancode/model15.stan'))
 
 # without X2
-model13a_arPrior = cmdstan_model(file.path('model13a.stan'))
-model13_rePrior = cmdstan_model(file.path('model13.stan'))
+model13a_arPrior = cmdstan_model(file.path('../stancode/model13a.stan'))
+model13_rePrior = cmdstan_model(file.path('../stancode/model13.stan'))
 
 # without X4
-model11_rePrior = cmdstan_model(file.path('model11.stan'))
+model11_rePrior = cmdstan_model(file.path('../stancode/model11.stan'))
 
 # without X2 and X4
-model06_rePrior = cmdstan_model(file.path('model06.stan'))
+model06_rePrior = cmdstan_model(file.path('../stancode/model06.stan'))
 
 ## fitting stan model 
 model15a_fit_arPrior <- model15a_arPrior$sample(data = samp_dat_mrp, 

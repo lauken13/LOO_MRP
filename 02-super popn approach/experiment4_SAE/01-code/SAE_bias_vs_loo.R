@@ -202,9 +202,6 @@ loo_bias_tab =
   arrange(X4)
 # View(loo_bias_tab)
 
-shp = c('1' = '7', '2' = '8', '3' = '9', '4' = '10',
-        '5' = '11', '6' = '12', '7' = '13', '8' = '14',
-        '9' = '15', '10' = '16', '11' = '17', '12' = '18')
 ## range of elpd values (weighted)
 (p3 = ggplot(loo_bias_tab, aes(x = elpd_sae, y = mean_bias_abs, shape = X4, colour = model)) +
     geom_point(position = position_dodge(width = .5), alpha=0.7, size=2) +
@@ -213,8 +210,8 @@ shp = c('1' = '7', '2' = '8', '3' = '9', '4' = '10',
                                    "#09622AFF",
                                    "#879195FF")) +
     scale_shape_manual(values = c(0:5,7,8,10,11,15:16)) +
-    labs(title="SAE bias vs loo for each X4-level", 
+    labs(title="SAE bias vs. loo for each X4-level", 
          x = "SAE elpd values",
          y = "SAE absolute mean bias") )
 
-# ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/plot_loo_wtd_range_fx1.png"), p3, width=6, height=7.5, units="in", device="png")
+ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/SAE_bias_loo.png"), p3, width=6, height=7.5, units="in", device="png")

@@ -1,6 +1,8 @@
 ## script for stan files
 ## running for all six models
 
+setwd('/mnt/lustre/projects/Mona0085/skuh/02-super/experiment4d')
+
 # data generation ---------------------------------------------------------
 # function to generate data
 source("00-gen_dat_func.R") 
@@ -52,6 +54,14 @@ model11_rePrior = cmdstan_model(file.path('../stancode/model11.stan'))
 # without X2 and X4
 model06_rePrior = cmdstan_model(file.path('../stancode/model06.stan'))
 
+# without X3
+model12_rePrior = cmdstan_model(file.path('../stancode/model12.stan'))
+
+# without X1
+model14_rePrior = cmdstan_model(file.path('../stancode/model14.stan'))
+
+
+
 ## fitting stan model 
 model15a_fit_arPrior <- model15a_arPrior$sample(data = samp_dat_mrp, 
                                               seed = 5678) # setting seed within sampling
@@ -66,6 +76,11 @@ model13_fit_rePrior <- model13_rePrior$sample(data = samp_dat_mrp,
 model11_fit_rePrior <- model11_rePrior$sample(data = samp_dat_mrp, 
                                                 seed = 5678)
 model06_fit_rePrior <- model06_rePrior$sample(data = samp_dat_mrp, 
+                                              seed = 5678)
+
+model12_fit_rePrior <- model12_rePrior$sample(data = samp_dat_mrp, 
+                                              seed = 5678)
+model14_fit_rePrior <- model14_rePrior$sample(data = samp_dat_mrp, 
                                               seed = 5678)
 
 
@@ -106,10 +121,27 @@ popnest_06 = model06_fit_rePrior$draws(variables = "theta_pop")%>%
 sampest_06 = model06_fit_rePrior$draws(variables = "theta_samp") %>% 
   as_draws_matrix()
 
+loo_12 = model12_fit_rePrior$loo()
+popnest_12 = model12_fit_rePrior$draws(variables = "theta_pop")%>% 
+  as_draws_matrix()
+sampest_12 = model12_fit_rePrior$draws(variables = "theta_samp") %>% 
+  as_draws_matrix()
+
+loo_14 = model14_fit_rePrior$loo()
+popnest_14 = model14_fit_rePrior$draws(variables = "theta_pop")%>% 
+  as_draws_matrix()
+sampest_14 = model14_fit_rePrior$draws(variables = "theta_samp") %>% 
+  as_draws_matrix()
+
+
+
 save(loo_15a, loo_15, loo_13a,
      loo_13, loo_11, loo_06,
+     loo_12, loo_14,
      popnest_15a, popnest_15, popnest_13a,
-     popnest_13, popnest_11, popnest_06, 
+     popnest_13, popnest_11, popnest_06,
+      popnest_12, popnest_14,  
      sampest_15a, sampest_15, sampest_13a,
-     sampest_13, sampest_11, sampest_06, 
+     sampest_13, sampest_11, sampest_06,
+     sampest_12, sampest_14, 
      file = paste0('LOO_arPrior_', iter, '.RData'))

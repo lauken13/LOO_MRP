@@ -4,6 +4,8 @@ library(posterior) # to convert draws_array() objects
 library(dplyr)
 library(ggplot2)
 
+load(here::here("02-super popn approach/experiment4_SAE/03-data/loo_sae_fx3.Rbin"))
+
 # group/small area prediction --------------------------------------------------------
 X2_group_mean_list = list()
 
@@ -33,8 +35,10 @@ for(ite in 1:100){
 } 
   
 # extracting every 1st/2nd ... 6th list of the main list
+# model06
 popnest_sae_X2_m6 = sapply(popnest_sae_X2, '[', 1) %>% 
     lapply(., function(x)t(x))
+# model11
 popnest_sae_X2_m11 = sapply(popnest_sae_X2, '[', 2) %>% 
   lapply(., function(x)t(x))
 popnest_sae_X2_m13 = sapply(popnest_sae_X2, '[', 3) %>% 
@@ -129,7 +133,10 @@ sae_X2_tab_m15a = do.call(rbind, calc_list_m15a) %>%
   mutate(model = "*X1 + X2 + X3 + X4")
 
 model_all_pn_tab = rbind(sae_X2_tab_m6, sae_X2_tab_m11, sae_X2_tab_m13,
-                         sae_X2_tab_m13a, sae_X2_tab_m15, sae_X2_tab_m15a)
+                         sae_X2_tab_m13a, sae_X2_tab_m15, sae_X2_tab_m15a) %>% 
+  rename(popnest_sae_X5 = `5%`,
+         popnest_sae_X50 = `50%`,
+         popnest_sae_X95 = `95%`)
 
 ## looking at two models only
 model_15_pn_tab = model_all_pn_tab %>% 
@@ -138,36 +145,54 @@ model_15_pn_tab = model_all_pn_tab %>%
 model_13_pn_tab = model_all_pn_tab %>% 
   filter(model == 'X1 + X3 + X4' | model == '*X1 + X3 + X4')
 
-## plot diff in mean
+model_13_pn_tab = model_all_pn_tab %>% 
+  filter(model == 'X1 + X3 + X4' | model == '*X1 + X3 + X4')
+
+model_11_pn_tab = model_all_pn_tab %>% 
+  filter(model == 'X1 + X2 + X3')
+
+model_sel_pn_tab = model_all_pn_tab %>% 
+  filter(model == 'X1 + X2 + X3 + X4' | model == 'X1 + X2 + X3' |
+           model == 'X1 + X3 + X4' | model == 'X1 + X3') %>% 
+  mutate(model = factor(model)) 
+model_sel_pn_tab$model = forcats::fct_relevel(model_sel_pn_tab$model, c('X1 + X2 + X3 + X4',
+                                                               'X1 + X3 + X4',
+                                                               'X1 + X2 + X3',
+                                                               'X1 + X3'))
+
+
+# plotting bias -----------------------------------------------------------
 xloc4 = 0.45
-(p3 = ggplot(model_13_pn_tab, aes(x = mean_pe, y = X2, group = model, colour = model)) +
+(p3 = ggplot(model_sel_pn_tab, aes(x = abs(mean_pe), y = X2, group = model, colour = model)) +
     geom_vline(aes(xintercept = 0)) +
     geom_point(position = position_dodge(width = 0.3), alpha=0.7) +
     theme(legend.position = c(0.8,0.7)) +
-    scale_colour_manual(values = c("#1C73B1FF", "#FB964EFF")) + 
-    stat_summary(aes(group=model), width=0.1, size=0.3, fun=mean, geom="crossbar", colour=rep(c("#1C73B1FF", "#FB964EFF"), each = 5)) + #drawing the mean line 
+    scale_colour_manual(values = c("#1C73B1FF", 
+                                   "#FB964EFF",
+                                   "#09622AFF",
+                                   "#879195FF")) + 
+    stat_summary(aes(group=model), width=0.7, size=0.4, 
+                 position = position_dodge(width = .3),
+                 fun=mean, geom="crossbar", colour=rep(c("#1C73B1FF", 
+                                                         "#FB964EFF",
+                                                         "#09622AFF",
+                                                         "#879195FF"), each=5)) + #drawing the mean line 
     labs(title="Difference in X2-levels estimate and truth",
-         y = 'Levels of X2', x = 'Bias' ))
+         y = 'Levels of X2', x = 'Absolute bias' ))
 
-ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/bias_sae_X2_M13_fx3.png"), p3, width=6, height=7.5, units="in", device="png")
+ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/bias_sae_X2_fx3.png"), p3, width=6, height=7.5, units="in", device="png")
 
 
-xloc4 = 0.45
-(p4 = ggplot(model_15_pn_tab, aes(x = mean_pe, y = X2, group = model, colour = model)) +
-    geom_vline(aes(xintercept = 0)) +
-    geom_point(position = position_dodge(width = 0.3), alpha=0.7) +
-    theme(legend.position = c(0.85,0.4)) +
-    xlim(-0.1,0.23) +
-    scale_colour_manual(values = c("#1C73B1FF", "#FB964EFF")) + 
-    stat_summary(aes(group=model), width=0.1, size=0.3, fun=mean, geom="crossbar", colour=rep(c("#1C73B1FF", "#FB964EFF"), each = 5)) + #drawing the mean line 
-    labs(title="Difference in X2-levels estimate and truth",
-         y = 'Levels of X2', x = 'Bias' ))
 
 ggsave(here::here("02-super popn approach/experiment4_SAE/02-results/bias_sae_X2_M15_fx3.png"), p4, width=6, height=7.5, units="in", device="png")
 
 
+# plotting coverage -------------------------------------------------------
 
+model_all_pn_tab
 
+## need elpd by small area
+# merge onto larger data frame
 
   
 

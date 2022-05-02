@@ -1,0 +1,82 @@
+// The input data is a vector 'y' of length 'n'.
+// model without X2 and X4 (model06)
+data {
+  int<lower=1> n; // number of samples
+  int<lower=1> n_groups_X_cat; // the number of groups for X1, X3
+
+  int<lower=1,upper=n_groups_X_cat> X1[n]; // levels of X1
+  int<lower=1,upper=n_groups_X_cat> X3[n]; // levels of X3
+  
+  // Assume no prediction of unobserved groups
+  int<lower=0> J; // number of poststrat cells
+  int<lower=1,upper=n_groups_X_cat> X1_pop[J]; // levels of X1
+  int<lower=1,upper=n_groups_X_cat> X3_pop[J]; // levels of X3
+
+  int y[n]; // the response vector
+
+}
+
+parameters {
+  vector[n_groups_X_cat] z_X1; // standardised random effect for X1
+  vector[n_groups_X_cat] z_X3; // standardised random effect for X3
+
+  real<lower=0> sigma_X1; // sd of z_X1 (hyperparam). halfnormal prior on this.
+  real<lower=0> sigma_X3; // sd of z_X3 (hyperparam). halfnormal prior on this.
+
+  real intercept; // the intercept (global fixed effect)
+}
+
+transformed parameters { 
+  vector[n_groups_X_cat] U_X1;
+  vector[n_groups_X_cat] U_X3;
+  vector[n] yhat = intercept + rep_vector(0.0, n);   // initialize linear predictor term, intercept added here
+
+  U_X1 = sigma_X1 * z_X1; // the random effect for X1
+  U_X3 = sigma_X3 * z_X3; // the random effect for X3
+
+  // faster vectorisation (code from brms) 
+  for (ind in 1:n) {
+  // add more terms to the linear predictor
+    yhat[ind] += U_X1[X1[ind]] + U_X3[X3[ind]]; // intercept added in yhat vector before
+  }
+}
+
+model {
+  // priors
+  target += normal_lpdf(sigma_X1|0,1)
+  -1 * normal_lccdf(0|0,1);
+  target += normal_lpdf(sigma_X3|0,1)
+  -1 * normal_lccdf(0|0,1);
+  
+  target += std_normal_lpdf(z_X1);
+  target += std_normal_lpdf(z_X3);
+
+  target += normal_lpdf(intercept|0,1);// global intercept
+  
+  // model
+  target += bernoulli_logit_lpmf(y|yhat); 
+}
+
+generated quantities {
+  vector[J] theta_pop; // prediction on popn. level
+  vector[n] theta_samp; // prediction on samp. level
+  vector[n] log_lik;
+
+  for (j in 1:J){
+    theta_pop[j] = inv_logit(intercept +
+    U_X1[X1_pop[j]] +
+    U_X3[X3_pop[j]]);
+  }
+  
+   for (i in 1:n){
+    theta_samp[i] = inv_logit(intercept +
+    U_X1[X1[i]] +
+    U_X3[X3[i]]);
+  }
+
+   // calculating log likelihood for loo
+  for (ind in 1:n){
+    log_lik[ind] = bernoulli_logit_lpmf(y[ind] | yhat[ind]);
+  }
+
+}

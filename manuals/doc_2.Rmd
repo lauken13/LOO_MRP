@@ -5,8 +5,6 @@ date: "22/11/2021"
 output: pdf_document
 ---
 
-<!-- ## Simulation 3b - Different priors -->
-
 # Simulation 2 
 ## Super-population approach
 Now, we have the above code in the for-loop, generating different population and samples from that population each time. 
@@ -84,15 +82,15 @@ If we weigh the elpd values, the distinctions between using $X_4$ and $X_2$ only
 
 We see similar conclusion by looking at the LOOP values (adjust using MRP).
 
-![](images/3b/plot_loo_raw_unwtd.png){width=450px} ![](images/3b/plot_loo_raw_wtd.png){width=450px}
+![](here::here(02-super popn approach/experiment1_baseWtdloo/02-results/plot_loo_raw_unwtd.png)){width=450px} ![](here::here(02-super popn approach/experiment1_baseWtdloo/02-results/plot_loo_raw_wtd.png)){width=450px}
 
-![](images/3b/plot_loop.png){width=450px}
+![](here::here(02-super popn approach/experiment1_baseWtdloo/02-results/plot_loop.png)){width=450px}
 
 If we look at the MRP estimates (bias), the models with both $X_2$ and $X_4$ in it are distinctively less biased, as would be expected as $X_4$ can be seen as a bias reduction variable. 
 
 However we have higher precision (?) when we have $X_2$ in the model. 
 
-![](images/3b/plot_mrp_truth.png){width=450px} ![](images/3b/plot_mrp_qt_range.png){width=450px}
+![](here::here(02-super popn approach/experiment1_baseWtdloo/02-results/plot_mrp_truth.png)){width=450px} ![](here::here(02-super popn approach/experiment1_baseWtdloo/02-results/plot_mrp_qt_range.png)){width=450px}
 
 # Simulation 1 
 ## Finite-population approach
@@ -123,6 +121,45 @@ popn_data$inclusion <- inv_logit_scaled(round(rnorm(J[1], sd=0.1),2)[popn_data$X
                                         round(rnorm(J[4], sd=1),2)[popn_data$X4])
 ```
 
-We were expecting to see models with $X_2$ and $X_4$ getting picked up when using `loo` and `wtd_loo`, but we were getting mixed results. So we moved on to a super population approach by sampling a different population each time. 
+We were expecting to see models with $X_2$ and $X_4$ getting picked up when using `loo` and `wtd_loo`, but we were getting mixed results. We then tried to fix the multiplier when generating our random effects. 
+
+```{r eval=F}
+## loading external functions
+source("../functions.R")
+
+## generating 5 levels of predictors/covariates
+N = 10000
+J = c(5,5,5,5) # levels for each variable
+popn_data <- data.frame(X1 = sample(1:J[1], N, replace= TRUE), 
+                        X2 = sample(1:J[2], N, replace= TRUE),
+                        X3 = sample(1:J[3], N, replace= TRUE), 
+                        X4 = sample(1:J[4], N, replace= TRUE))
+
+## generating a binary outcome 
+# weakly predictive - 0.1 (sd), strongly predictive - 1 (sd)
+set.seed(65438)
+wkly1 = round(rnorm(J[1], sd=0.1),2)
+strg1 = round(rnorm(J[2], sd=1),2)
+popn_data$bin_outcome <- inv_logit_scaled(wkly1[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
+                                          strg1[popn_data$X2] +
+                                          wkly1[popn_data$X3] +
+                                          strg1[popn_data$X4])
+popn_data$bin_value <- rbinom(N,1,popn_data$bin_outcome)
+hist(popn_data$bin_outcome)
+hist(popn_data$bin_value)
+
+## generate inclusion prob. for each individual
+# weakly predictive - 0.1 (sd), strongly predictive - 1 (sd)
+wkly2 = round(rnorm(J[1], sd=0.1),2)
+strg2 = round(rnorm(J[2], sd=1),2)
+popn_data$inclusion <- inv_logit_scaled(wkly2[popn_data$X1] + # apply inv-logit for 'simulated' coefficients
+                                        wkly2[popn_data$X2] +
+                                        strg2[popn_data$X3] +
+                                        strg2[popn_data$X4])
+hist(popn_data$inclusion)
+```
+
+
+Even after fixing the multiplier, we were still getting inconclusive results across the models. So we moved on to a super population approach by sampling a different population each time. 
 
 

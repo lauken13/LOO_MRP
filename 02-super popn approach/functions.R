@@ -57,7 +57,6 @@ loo_wtd <- function(loo_a, svydesign_obj){
   loo_svydsn
 }
 
-
 pairdiff <- function(a, b, colname1, colname2){
   dif = sum(a-b)
   stderror = sqrt(N) * sd(a - b)

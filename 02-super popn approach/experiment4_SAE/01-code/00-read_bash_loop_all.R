@@ -75,7 +75,6 @@ model06_popnest_sae_X2 =
 
 iter = 62:100
 
-setwd("~/GitHub/LOO_MRP/02-super popn approach/experiment4_SAE/03-data")
 for(ite in iter){
   print(ite)
   load(paste0('LOO_arPrior_',ite,".RData"))
@@ -89,20 +88,19 @@ for(ite in iter){
   popn_data = popn_data_list[[ite]] = sim1$popn_data
   popn_ps = popn_ps_list[[ite]] = sim1$popn_ps
   
-  pt_samp_list[[ite]] = mean(samp_data$y_prob)
-  pt_popn_list[[ite]] = mean(popn_data$y_prob)
+  pt_samp_list[[ite]] = mean(samp_data$y_obs)
+  pt_popn_list[[ite]] = mean(popn_data$y_obs)
 
 ## individual estimates
 sampest_tab_06 = apply(sampest_06,2,quantile,c(0.05,0.5,0.95)) %>%
-  t() %>%
+  t(.) %>%
   as_tibble() %>%
   rename(sampestX5 = `5%`,
          sampestX50 = `50%`,
          sampestX95 = `95%`) %>%
   mutate(model = 'model06',
-         prob_truth = samp_data$y_prob,
-         range_int = sampestX95 - sampestX5,
-         coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+         ci_ind_width = sampestX95 - sampestX5,
+         coverage = ifelse(y_obs >= sampestX5 & y_obs <= sampestX95, 1, 0))
 
 sampest_tab_11 = apply(sampest_11,2,quantile,c(0.05,0.5,0.95)) %>%
   t() %>%
@@ -111,9 +109,8 @@ sampest_tab_11 = apply(sampest_11,2,quantile,c(0.05,0.5,0.95)) %>%
          sampestX50 = `50%`,
          sampestX95 = `95%`) %>%
   mutate(model = 'model11',
-         prob_truth = samp_data$y_prob,
-         range_int = sampestX95 - sampestX5,
-         coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+        ci_ind_width = sampestX95 - sampestX5,
+         coverage = ifelse(y_obs >= sampestX5 & y_obs <= sampestX95, 1, 0))
 
 sampest_tab_13 = apply(sampest_13,2,quantile,c(0.05,0.5,0.95)) %>%
   t() %>%
@@ -122,9 +119,8 @@ sampest_tab_13 = apply(sampest_13,2,quantile,c(0.05,0.5,0.95)) %>%
          sampestX50 = `50%`,
          sampestX95 = `95%`) %>%
   mutate(model = 'model13',
-         prob_truth = samp_data$y_prob,
-         range_int = sampestX95 - sampestX5,
-         coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+         ci_ind_width = sampestX95 - sampestX5,
+         coverage = ifelse(y_obs >= sampestX5 & y_obs <= sampestX95, 1, 0))
 
 
 sampest_tab_13a = apply(sampest_13a,2,quantile,c(0.05,0.5,0.95)) %>%
@@ -134,9 +130,8 @@ sampest_tab_13a = apply(sampest_13a,2,quantile,c(0.05,0.5,0.95)) %>%
          sampestX50 = `50%`,
          sampestX95 = `95%`) %>%
   mutate(model = 'model13a',
-         prob_truth = samp_data$y_prob,
-         range_int = sampestX95 - sampestX5,
-         coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+         ci_ind_width = sampestX95 - sampestX5,
+         coverage = ifelse(y_obs >= sampestX5 & y_obs <= sampestX95, 1, 0))
 
 sampest_tab_15 = apply(sampest_15,2,quantile,c(0.05,0.5,0.95)) %>%
   t() %>%
@@ -145,9 +140,8 @@ sampest_tab_15 = apply(sampest_15,2,quantile,c(0.05,0.5,0.95)) %>%
          sampestX50 = `50%`,
          sampestX95 = `95%`) %>%
   mutate(model = 'model15',
-         prob_truth = samp_data$y_prob,
-         range_int = sampestX95 - sampestX5,
-         coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+         ci_ind_width = sampestX95 - sampestX5,
+         coverage = ifelse(y_obs >= sampestX5 & y_obs <= sampestX95, 1, 0))
 
 sampest_tab_15a = apply(sampest_15a,2,quantile,c(0.05,0.5,0.95)) %>%
   t() %>%
@@ -156,9 +150,8 @@ sampest_tab_15a = apply(sampest_15a,2,quantile,c(0.05,0.5,0.95)) %>%
          sampestX50 = `50%`,
          sampestX95 = `95%`) %>%
   mutate(model = 'model15a',
-         prob_truth = samp_data$y_prob,
-         range_int = sampestX95 - sampestX5,
-         coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+         ci_ind_width = sampestX95 - sampestX5,
+         coverage = ifelse(y_obs >= sampestX5 & y_obs <= sampestX95, 1, 0))
 
 sampest_tab_12 = apply(sampest_15a,2,quantile,c(0.05,0.5,0.95)) %>%
   t() %>%
@@ -167,9 +160,8 @@ sampest_tab_12 = apply(sampest_15a,2,quantile,c(0.05,0.5,0.95)) %>%
          sampestX50 = `50%`,
          sampestX95 = `95%`) %>%
   mutate(model = 'model12',
-         prob_truth = samp_data$y_prob,
-         range_int = sampestX95 - sampestX5,
-         coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+         ci_ind_width = sampestX95 - sampestX5,
+         coverage = ifelse(y_obs >= sampestX5 & y_obs <= sampestX95, 1, 0))
 
 sampest_tab_14 = apply(sampest_15a,2,quantile,c(0.05,0.5,0.95)) %>%
   t() %>%
@@ -178,9 +170,8 @@ sampest_tab_14 = apply(sampest_15a,2,quantile,c(0.05,0.5,0.95)) %>%
          sampestX50 = `50%`,
          sampestX95 = `95%`) %>%
   mutate(model = 'model14',
-         prob_truth = samp_data$y_prob,
-         range_int = sampestX95 - sampestX5,
-         coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+         ci_ind_width = sampestX95 - sampestX5,
+         coverage = ifelse(y_obs >= sampestX5 & y_obs <= sampestX95, 1, 0))
 
 
 
@@ -281,9 +272,6 @@ popnest_sae_X2_list[[ite]] = lapply(popnest_sae_X2_all[[ite]], function(x)quanti
   rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.) %>%
   mutate(model = paste0('model', c('06','11','13','13a','15','15a','12','14')),
          iter = ite)
-
-# prob of outcome for each iteration
-pt_list[ite] = mean(popn_data$y_obs) # or mean(popn_data$y_prob) 
 
 # weighted loo ------------------------------------------------------------
 # calculating population totals for each level

@@ -10,8 +10,9 @@ source("../functions.R")
 
 ## empty matrices
 # for mrp est
-popnest_list = 
-  sampest_list = 
+popnest_all_list =
+  popnest_summary_list =  
+  sampest_tab_all = 
   popnest_sae_X2_all =
   popnest_sae_X4_all =
   popnest_sae_X2_list = 
@@ -62,20 +63,11 @@ model06_popnest_sae_X2 =
   model15_popnest_sae_X2 =
   model15a_popnest_sae_X2 = lapply(1:100,matrix, data=NA,nrow=4000, ncol=5)
 
-iter = 1:100
+#iter = c(1:16,19:100)
+iter = 19:100
 for(ite in iter){
+  print(ite)
   load(paste0('LOO_arPrior_',ite,".RData")) 
-  
-  # saving individual estimates
-  sampest_all = list(sampest_06, sampest_11, sampest_13,
-                             sampest_13a, sampest_15, sampest_15a)
-
-  sampest_list[[ite]] = lapply(sampest_all, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
-    do.call(rbind,.) %>% 
-    data.frame(.) %>% 
-    rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.) %>% 
-    mutate(model = paste0('model', c('06','11','13','13a','15','15a')),
-           iter = ite)
   
   # mrp est -----------------------------------------------------------------
   # generating data using gen_dat()
@@ -89,6 +81,79 @@ for(ite in iter){
  pt_samp_list[[ite]] = mean(samp_data$y_prob)
  pt_popn_list[[ite]] = mean(popn_data$y_prob)
  
+ ## individual estimates
+ sampest_tab_06 = apply(sampest_06,2,quantile,c(0.05,0.5,0.95)) %>% 
+   t() %>% 
+   as_tibble() %>% 
+   rename(sampestX5 = `5%`,
+          sampestX50 = `50%`,
+          sampestX95 = `95%`) %>% 
+   mutate(model = 'model06',
+          prob_truth = samp_data$y_prob,
+          range_int = sampestX95 - sampestX5,
+          coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+ 
+ sampest_tab_11 = apply(sampest_11,2,quantile,c(0.05,0.5,0.95)) %>% 
+   t() %>% 
+   as_tibble() %>% 
+   rename(sampestX5 = `5%`,
+          sampestX50 = `50%`,
+          sampestX95 = `95%`) %>% 
+   mutate(model = 'model11',
+          prob_truth = samp_data$y_prob,
+          range_int = sampestX95 - sampestX5,
+          coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+ 
+ sampest_tab_13 = apply(sampest_13,2,quantile,c(0.05,0.5,0.95)) %>% 
+   t() %>% 
+   as_tibble() %>% 
+   rename(sampestX5 = `5%`,
+          sampestX50 = `50%`,
+          sampestX95 = `95%`) %>% 
+   mutate(model = 'model13',
+          prob_truth = samp_data$y_prob,
+          range_int = sampestX95 - sampestX5,
+          coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+ 
+ sampest_tab_13a = apply(sampest_13a,2,quantile,c(0.05,0.5,0.95)) %>% 
+   t() %>% 
+   as_tibble() %>% 
+   rename(sampestX5 = `5%`,
+          sampestX50 = `50%`,
+          sampestX95 = `95%`) %>% 
+   mutate(model = 'model13a',
+          prob_truth = samp_data$y_prob,
+          range_int = sampestX95 - sampestX5,
+          coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+ 
+ sampest_tab_15 = apply(sampest_15,2,quantile,c(0.05,0.5,0.95)) %>% 
+   t() %>% 
+   as_tibble() %>% 
+   rename(sampestX5 = `5%`,
+          sampestX50 = `50%`,
+          sampestX95 = `95%`) %>% 
+   mutate(model = 'model15',
+          prob_truth = samp_data$y_prob,
+          range_int = sampestX95 - sampestX5,
+          coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+ 
+ sampest_tab_15a = apply(sampest_15a,2,quantile,c(0.05,0.5,0.95)) %>% 
+   t() %>% 
+   as_tibble() %>% 
+   rename(sampestX5 = `5%`,
+          sampestX50 = `50%`,
+          sampestX95 = `95%`) %>% 
+   mutate(model = 'model15a',
+          prob_truth = samp_data$y_prob,
+          range_int = sampestX95 - sampestX5,
+          coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+ 
+ 
+ ## getting posterior of individuals estimate for each of the models
+ sampest_tab_all[[ite]] = list(sampest_tab_06, sampest_tab_11, sampest_tab_13,
+                               sampest_tab_13a, sampest_tab_15, sampest_tab_15a) %>% 
+   do.call(rbind,.)
+ 
   # calculating popnest
   model06_popnest = apply(as_draws_matrix(popnest_06), 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # applying to each iteration
   model11_popnest = apply(as_draws_matrix(popnest_11), 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
@@ -97,19 +162,18 @@ for(ite in iter){
   model15_popnest = apply(as_draws_matrix(popnest_15), 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
   model15a_popnest = apply(as_draws_matrix(popnest_15a), 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
   
-  popnest_all = list(model06_popnest, 
+  popnest_all_list[[ite]] = list(model06_popnest, 
                      model11_popnest, 
                      model13_popnest, 
                      model13a_popnest,
                      model15_popnest,
                      model15a_popnest)
   
-  popnest_list[[ite]] = lapply(popnest_all, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
+  popnest_summary_list[[ite]] = lapply(popnest_all_list[[ite]], function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
     do.call(rbind,.) %>% 
     data.frame(.) %>% 
     rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.) %>% 
-    mutate(model = paste0('model', c('06','11','13','13a','15','15a')),
-           iter = ite)
+    mutate(model = paste0('model', c('06','11','13','13a','15','15a')), iter = ite)
   
   ## small area estimation for X4
   for (s in 1:12){
@@ -232,12 +296,20 @@ for(ite in iter){
   loo_wtd_15a_list[[ite]] = loo_wtd(loo_15a_list[[ite]], svy_rake)
 }  
 
-save.image(file="loo_sae_fx3.Rbin", compress=T)
+#save.image(file="loo_sae_fx3.Rbin", compress=T)
 #save(elpd_06_mat, elpd_11_mat, elpd_13_mat, 
  #    elpd_13a_mat, elpd_15_mat, elpd_15a_mat,
  #   loo_wtd_06_list, loo_wtd_11_list, loo_wtd_13_list, 
  #    loo_wtd_13a_list, loo_wtd_15_list, loo_wtd_15a_list,
  #    sampest_list, popnest_list, pt_popn_list, pt_samp_list,
  #    popnest_sae_X2_list, popnest_sae_X4_list, file="loo_sae_fx3.Rbin", compress=T)
+
+save(elpd_06_mat, elpd_11_mat, elpd_13_mat, 
+     elpd_13a_mat, elpd_15_mat, elpd_15a_mat,
+    loo_wtd_06_list, loo_wtd_11_list, loo_wtd_13_list, 
+     loo_wtd_13a_list, loo_wtd_15_list, loo_wtd_15a_list,
+     sampest_all_list, sampest_summary_list, popnest_all_list,popnest_summary_list,
+ pt_popn_list, pt_samp_list, pt_list,
+     popnest_sae_X2_list, popnest_sae_X4_list, file="loo_sae_fx3_edit.Rbin", compress=T)
 
 

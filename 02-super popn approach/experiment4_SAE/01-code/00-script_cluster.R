@@ -7,9 +7,13 @@ setwd('/mnt/lustre/projects/Mona0085/skuh/02-super/experiment4d')
 # function to generate data
 source("00-gen_dat_func.R") 
 
-# iteration number (ITE) from cluster
-slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
-iter = as.numeric(slurm_arrayid)
+# # iteration number (ITE) from cluster
+# slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
+# iter = as.numeric(slurm_arrayid)
+
+setwd("~/GitHub/LOO_MRP/02-super popn approach/experiment4_SAE/03-data")
+
+for(iter in 62:100){
 
 # generating data using gen_dat()
 set.seed(65438)
@@ -145,3 +149,4 @@ save(loo_15a, loo_15, loo_13a,
      sampest_13, sampest_11, sampest_06,
      sampest_12, sampest_14, 
      file = paste0('LOO_arPrior_', iter, '.RData'))
+}

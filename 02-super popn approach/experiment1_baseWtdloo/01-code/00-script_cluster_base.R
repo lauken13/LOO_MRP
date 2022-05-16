@@ -43,21 +43,21 @@ for(iter in 1:100){
   )
   
   ## compile stan model
-  model01_rePrior = cmdstan_model(file.path('../stancode/model01.stan'))
-  model02_rePrior = cmdstan_model(file.path('../stancode/model02.stan'))
-  model03_rePrior = cmdstan_model(file.path('../stancode/model03.stan'))
-  model04_rePrior = cmdstan_model(file.path('../stancode/model04.stan'))
-  model05_rePrior = cmdstan_model(file.path('../stancode/model05.stan'))
-  model06_rePrior = cmdstan_model(file.path('../stancode/model06.stan'))
-  model07_rePrior = cmdstan_model(file.path('../stancode/model07.stan'))
-  model08_rePrior = cmdstan_model(file.path('../stancode/model08.stan'))
-  model09_rePrior = cmdstan_model(file.path('../stancode/model09.stan'))
-  model10_rePrior = cmdstan_model(file.path('../stancode/model10.stan'))
-  model11_rePrior = cmdstan_model(file.path('../stancode/model11.stan'))
-  model12_rePrior = cmdstan_model(file.path('../stancode/model12.stan'))
-  model13_rePrior = cmdstan_model(file.path('../stancode/model13.stan'))
-  model14_rePrior = cmdstan_model(file.path('../stancode/model14.stan'))
-  model15_rePrior = cmdstan_model(file.path('../stancode/model15.stan'))
+  model01_rePrior = cmdstan_model(file.path('stancode/model01.stan'))
+  model02_rePrior = cmdstan_model(file.path('stancode/model02.stan'))
+  model03_rePrior = cmdstan_model(file.path('stancode/model03.stan'))
+  model04_rePrior = cmdstan_model(file.path('stancode/model04.stan'))
+  model05_rePrior = cmdstan_model(file.path('stancode/model05.stan'))
+  model06_rePrior = cmdstan_model(file.path('stancode/model06.stan'))
+  model07_rePrior = cmdstan_model(file.path('stancode/model07.stan'))
+  model08_rePrior = cmdstan_model(file.path('stancode/model08.stan'))
+  model09_rePrior = cmdstan_model(file.path('stancode/model09.stan'))
+  model10_rePrior = cmdstan_model(file.path('stancode/model10.stan'))
+  model11_rePrior = cmdstan_model(file.path('stancode/model11.stan'))
+  model12_rePrior = cmdstan_model(file.path('stancode/model12.stan'))
+  model13_rePrior = cmdstan_model(file.path('stancode/model13.stan'))
+  model14_rePrior = cmdstan_model(file.path('stancode/model14.stan'))
+  model15_rePrior = cmdstan_model(file.path('stancode/model15.stan'))
   
   
   ## fitting stan model 
@@ -149,5 +149,5 @@ for(iter in 1:100){
        sampest_01, sampest_02, sampest_03, sampest_04, sampest_05,
        sampest_06, sampest_07, sampest_08, sampest_09, sampest_10,
        sampest_11, sampest_12, sampest_13, sampest_14, sampest_15,
-       file = paste0('LOO_arPrior_', iter, '.RData'))
+       file = paste0('LOO_arPrior_', iter, '.RData'), compress=T)
 }

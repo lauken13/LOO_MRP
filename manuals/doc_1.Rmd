@@ -2,7 +2,7 @@
 title: "LOO_MRP Simulation Design document"
 author: "Swen Kuh"
 date: "13/09/2021"
-output: html_document
+output: pdf_document
 ---
 
 This document will describe the simulations we plan to conduct and the expected results from using `loo` and `weighted_loo` (`wtd_loo`) to do model comparisons. 

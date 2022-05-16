@@ -158,7 +158,7 @@ ph$model = fct_relevel(ph$model, c('X2 + X4', 'X1 + X2 + X4', 'X2 + X3 + X4', 'X
 
 
 # plot ------------------------------------------------------------
-g = ggplot(ph, aes(x = mean, y = model, group = iter, colour = model))+
+(g = ggplot(ph, aes(x = mean, y = model, group = iter, colour = model))+
   geom_point(position = position_dodge(width = .5)) +
   geom_errorbarh(mapping = aes(xmin = low_elpd, 
                                xmax = upp_elpd), 
@@ -172,7 +172,7 @@ g = ggplot(ph, aes(x = mean, y = model, group = iter, colour = model))+
   annotate("label", x = -0.7, y = 13.5, label = "X2 and X4") +
   annotate("label", x = -0.4, y = 9.5, label = "X2 only") +
   annotate("label", x = -0.4, y = 5.5, label = "X4 only") +
-  annotate("label", x = -0.4, y = 2, label = "None") 
+  annotate("label", x = -0.4, y = 2, label = "None") )
 
 ggsave("plot_loo_mean_raw_wtd.png", g, width=6, height=7.5, units="in", device="png")
 

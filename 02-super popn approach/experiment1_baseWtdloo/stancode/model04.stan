@@ -2,20 +2,20 @@
 // full model with all covariates (model15)
 data {
   int<lower=1> n; // number of samples
-  int<lower=1> n_groups_X4; // the number of groups for X4
+  int<lower=1> n_groups_X_cat; // the number of groups for X4
 
-  int<lower=1,upper=n_groups_X4> X4[n]; // levels of X4
+  int<lower=1,upper=n_groups_X_cat> X4[n]; // levels of X4
 
   // Assume no prediction of unobserved groups
   int<lower=0> J; // number of poststrat cells
-  int<lower=1,upper=n_groups_X4> X4_pop[J]; // levels of X4
+  int<lower=1,upper=n_groups_X_cat> X4_pop[J]; // levels of X4
 
   int y[n]; // the response vector
 
 }
 
 parameters {
-  vector[n_groups_X4] z_X4; // standardised random effect for X4
+  vector[n_groups_X_cat] z_X4; // standardised random effect for X4
   
   real<lower=0> sigma_X4; // sd of z_X4 (hyperparam). halfnormal prior on this.
 
@@ -23,7 +23,7 @@ parameters {
 }
 
 transformed parameters { 
-  vector[n_groups_X4] U_X4;
+  vector[n_groups_X_cat] U_X4;
   vector[n] yhat = intercept + rep_vector(0.0, n);   // initialize linear predictor term, intercept added here
 
   U_X4 = sigma_X4 * z_X4; // the random effect for X4

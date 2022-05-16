@@ -3,15 +3,14 @@
 data {
   int<lower=1> n; // number of samples
   int<lower=1> n_groups_X_cat; // the number of groups for X1, X3
-  int<lower=1> n_groups_X4; // the number of groups for X4
 
-  int<lower=1,upper=n_groups_X4> X4[n]; // levels of X4
+  int<lower=1,upper=n_groups_X_cat> X4[n]; // levels of X4
   int<lower=1,upper=n_groups_X_cat> X1[n]; // levels of X1
   int<lower=1,upper=n_groups_X_cat> X3[n]; // levels of X3
   
   // Assume no prediction of unobserved groups
   int<lower=0> J; // number of poststrat cells
-  int<lower=1,upper=n_groups_X4> X4_pop[J]; // levels of X4
+  int<lower=1,upper=n_groups_X_cat> X4_pop[J]; // levels of X4
   int<lower=1,upper=n_groups_X_cat> X1_pop[J]; // levels of X1
   int<lower=1,upper=n_groups_X_cat> X3_pop[J]; // levels of X3
 
@@ -22,7 +21,7 @@ data {
 parameters {
   vector[n_groups_X_cat] z_X1; // standardised random effect for X1
   vector[n_groups_X_cat] z_X3; // standardised random effect for X3
-  vector[n_groups_X4] z_X4; // standardised random effect for X4
+  vector[n_groups_X_cat] z_X4; // standardised random effect for X4
   
   real<lower=0> sigma_X1; // sd of z_X1 (hyperparam). halfnormal prior on this.
   real<lower=0> sigma_X3; // sd of z_X3 (hyperparam). halfnormal prior on this.
@@ -32,7 +31,7 @@ parameters {
 }
 
 transformed parameters { 
-  vector[n_groups_X4] U_X4;
+  vector[n_groups_X_cat] U_X4;
   vector[n_groups_X_cat] U_X1;
   vector[n_groups_X_cat] U_X3;
   vector[n] yhat = intercept + rep_vector(0.0, n);   // initialize linear predictor term, intercept added here

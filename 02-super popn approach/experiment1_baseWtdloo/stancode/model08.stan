@@ -3,8 +3,7 @@
 data {
   int<lower=1> n; // number of samples
   int<lower=1> n_groups_X_cat; // the number of groups for X1, X2, X3
-  int<lower=1> n_groups_X4; // the number of groups for X4
-
+ 
   int<lower=1,upper=n_groups_X_cat> X2[n]; // levels of X2
   int<lower=1,upper=n_groups_X_cat> X3[n]; // levels of X3
   

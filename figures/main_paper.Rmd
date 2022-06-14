@@ -1,6 +1,6 @@
 ---
 title: "Figures"
-author: "Lauren Kennedy"
+author: "Lauren Kennedy & Swen Kuh"
 date: "09/05/2022"
 output: html_document
 ---
@@ -8,57 +8,105 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-
 library(ggplot2)
 library(tidyverse)
 library(forcats)
 library(here)
 
-res_list <- readRDS(here('02-super popn approach/experiment4_SAE/03-data/res_list.rds'))
+res_list_sae_1000 <- readRDS(here('02-super popn approach/experiment4_SAE/03-data/res_list_sae_1000.rds'))
 
-indv_all_tab = res_list$indv_all_tab
-popn_indv_tab = res_list$popn_indv_tab
-model_sae_X1_tab = res_list$model_sae_X1_tab
-model_sae_X2_tab = res_list$model_sae_X2_tab
-model_sae_X3_tab = res_list$model_sae_X3_tab
-model_sae_X4_tab = res_list$model_sae_X4_tab
+res_list_sae_500 <- readRDS(here('02-super popn approach/experiment4_SAE/03-data/res_list_sae_500.rds'))
+
+res_list_base <- readRDS(here('02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_1000.rds'))
+
+indv_all_tab = res_list_base$indv_all_tab
+popn_indv_tab = res_list_base$popn_indv_tab
+popn_counts = res_list_base$popn_counts
+
+model_sae_X1_tab_base = res_list_base$model_sae_X1_tab
+model_sae_X2_tab_base = res_list_base$model_sae_X2_tab
+model_sae_X3_tab_base = res_list_base$model_sae_X3_tab
+model_sae_X4_tab_base = res_list_base$model_sae_X4_tab
+
+model_sae_X1_tab = res_list_sae_500$model_sae_X1_tab
+model_sae_X2_tab = res_list_sae_500$model_sae_X2_tab
+model_sae_X3_tab = res_list_sae_500$model_sae_X3_tab
+model_sae_X4_tab = res_list_sae_500$model_sae_X4_tab
+
+model_sae_X1_tab = res_list_sae_1000$model_sae_X1_tab
+model_sae_X2_tab = res_list_sae_1000$model_sae_X2_tab
+model_sae_X3_tab = res_list_sae_1000$model_sae_X3_tab
+model_sae_X4_tab = res_list_sae_1000$model_sae_X4_tab
 ```
 
 ## ELPD and individual interval score
-
-Will likely get replaced by earlier simulation
-
 ```{r}
+colour_palette_var_base  =  c(`X2 + X4` =  "#4477AA",
+                         `X1 + X2 + X4` = "#88CCEE", 
+                         `X2 + X3 + X4` = "#66CCEE",
+                         `X1 + X2 + X3 + X4` = "#332288",
+                         `X4` = "#CC6677", `X1 + X4` = "#AA4499", 
+                         `X3 + X4` = "#EE6677", `X1 + X3 + X4` = "#882255",
+                         `X2` = "#228833", `X1 + X2` = "#117733",
+                         `X2 + X3` = "#999933", `X1 + X2 + X3` = "#DDCC77",
+                         `X1` = "#DDDDDD", `X3` = "#BBBBBB", `X1 + X3` = "#879195FF")
+
+popn_indv_tab$model = fct_relevel(popn_indv_tab$model, 'X2 + X4',
+                         'X1 + X2 + X4', 
+                         'X2 + X3 + X4',
+                         'X1 + X2 + X3 + X4',
+                         'X4', 'X1 + X4', 
+                         'X3 + X4', 'X1 + X3 + X4',
+                         'X2', 'X1 + X2',
+                         'X2 + X3', 'X1 + X2 + X3',
+                         'X1', 'X3', 'X1 + X3')
+
+shape_base  = c(rep(16,4), rep(15,4), rep(17,4), rep(18,3))
+
+
 corr_indiv_intervalscore <- popn_indv_tab %>%
   pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score")%>%
   mutate(type = factor(type),
          type = fct_recode(type, `LOO` = "elpd_loo", `WTD LOO` = "wtdElpd_loo"))%>%
   group_by(type)%>%
-  summarise(cor_val = paste0("cor: ",round(cor(model_score, ind_intervalScr_mean),2)))%>%
-  mutate(xloc = c(-275,-5000),yloc = c(8.5,8.5))
+  summarise(cor_val = paste0("cor: ",round(cor(model_score, ind_intervalScr_mean, use='complete.obs'),2)))%>%
+  mutate(xloc = c(-450,-4500),yloc = c(4.5,4.5))
 
-popn_indv_tab %>%
-  pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score")%>%
-  mutate(type = factor(type),
-        type = fct_recode(type, `LOO` = "elpd_loo", `WTD LOO` = "wtdElpd_loo"))%>%
-  ggplot(., aes(x = model_score, y = ind_intervalScr_mean))+
-    geom_point(alpha = .5, aes( colour = model))+
-#    geom_line(aes(group = iteration), method = "lm", se = FALSE, colour = "black", stat = "smooth", alpha = .3)+
-    ggthemes::scale_color_colorblind()+
+
+( g1 = popn_indv_tab %>%
+    pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score") %>%
+    mutate(type = factor(type),
+           type = fct_recode(type, `LOO` = "elpd_loo", `WTD LOO` = "wtdElpd_loo")) %>% 
+    ggplot(., aes(x = model_score, y = ind_intervalScr_mean))+
+    guides(fill = guide_legend(override.aes = list(size=8))) +
+    geom_point(size = 3, alpha = .5, aes( colour = model))+
+    scale_colour_manual(values = colour_palette_var_base) + 
+   # scale_shape_manual(values = shape_base) +
     geom_text(
-    data    = corr_indiv_intervalscore,
-    mapping = aes(x = xloc, y = yloc, label = cor_val))+
+      data    = corr_indiv_intervalscore,
+      mapping = aes(x = xloc, y = yloc, label = cor_val),
+      size = 7)+
     facet_grid(.~type, scales = "free")+
-  xlab("Model Score")+ ylab("Mean Individual Interval Score")+
-  theme(legend.position = "bottom",
-        legend.title = element_blank())
+    xlab("LOO-based Model Score")+ ylab("Mean of Sampled Individual Interval Score")+
+    theme_bw(base_size = 22) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+            plot.margin = margin(10, 70, 10, 10)) + 
+    guides(colour = guide_legend(override.aes = list(size=3), nrow=4)) + 
+    labs(tag = paste0(str_pad("X2 and X4", 28, "right"), str_pad("X4-only", 24, "right"), str_pad("X2-only", 22, "right"), "Irrelevant")) +
+    theme(plot.tag.position = c(0.525, 0.16),
+          plot.tag = element_text(size=18, face="bold"))
+
+  )
+
+    #    geom_line(aes(group = iteration), method = "lm", se = FALSE, colour = "black", stat = "smooth", alpha = .3)+
+
+
+ggsave(g1, width=15, height=8, filename = here("figures/elpd_indv_test2.png"))
 ```
 
 
 ## ELPD and population MRP interval score
-
-Will likely get replaced by earlier simulation
-
 ```{r}
 corr_popn_intervalscore <- popn_indv_tab %>%
   pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score")%>%
@@ -66,49 +114,142 @@ corr_popn_intervalscore <- popn_indv_tab %>%
          type = fct_recode(type, `LOO` = "elpd_loo", `WTD LOO` = "wtdElpd_loo"))%>%
   group_by(type)%>%
   summarise(cor_val = paste0("cor: ",round(cor(model_score, popn_intervalScr),2)))%>%
-  mutate(xloc = c(-275,-5000),yloc = c(2,2))
+  mutate(xloc = c(-450,-4500),yloc = rep(2.8,2))
 
 
-popn_indv_tab %>%
-  pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score")%>%
-  mutate(type = factor(type),
-         type = fct_recode(type, `LOO` = "elpd_loo", `WTD LOO` = "wtdElpd_loo"))%>%
-  ggplot(., aes(x = model_score, y =    popn_intervalScr))+
-  geom_point(alpha = .5, aes( colour = model))+
-#  geom_line(aes(group = iteration), method = "lm", se = FALSE, colour = "black", stat = "smooth", alpha = .3)+
-  geom_text(data  = corr_popn_intervalscore,
-    mapping = aes(x = xloc, y = yloc, label = cor_val))+
-  ggthemes::scale_color_colorblind()+
-  facet_grid(.~type, scales = "free")+
-  xlab("Model Score")+ ylab("Population MRP Interval Score")+
-  theme(legend.position = "bottom",
-        legend.title = element_blank())
+( g2 = popn_indv_tab %>%
+    pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score") %>%
+    mutate(type = factor(type),
+           type = fct_recode(type, `LOO` = "elpd_loo", `WTD LOO` = "wtdElpd_loo"),
+           colour_code = case_when(model == 'X2 + X4' ~ "#4477AA",
+                              model == 'X1 + X2 + X4' ~ "#88CCEE",
+                               model == 'X1 + X2 + X3 + X4' ~ "#332288", 
+                              model == 'X2 + X3 + X4' ~ "#66CCEE",
+                               model == 'X4' ~ "#CC6677", 
+                               model == 'X1 + X4' ~ "#AA4499", 
+                               model == 'X3 + X4' ~ "#EE6677", 
+                               model == 'X1 + X3 + X4' ~ "#882255", 
+                               model == 'X2' ~ "#228833", 
+                               model == 'X1 + X2' ~ "#117733", 
+                               model == 'X2 + X3' ~ "#999933", 
+                               model == 'X1 + X2 + X3' ~ "#DDCC77", 
+                               model == 'X1' ~ "#DDDDDD", 
+                               model == 'X3' ~ "#BBBBBB", 
+                               model == 'X1 + X3' ~ "#879195FF")) %>% 
+    ggplot(., aes(x = model_score, y = popn_intervalScr))+
+    geom_point(size=3, alpha = .5, aes( colour = model), shape = 16)+
+    geom_text(data  = corr_popn_intervalscore,
+              mapping = aes(x = xloc, y = yloc, label = cor_val), size=9)+
+    scale_colour_manual(values = colour_palette_var_base) + 
+    facet_grid(.~type, scales = "free")+
+    xlab("LOO-based Model Score")+ ylab("Population MRP Interval Score")+
+    theme_bw(base_size = 25) +
+    theme(legend.title = element_blank(), legend.position = "bottom",
+            plot.margin = margin(10, 25, 10, 10)) + 
+    guides(colour = guide_legend(override.aes = list(size=3), nrow=4)) 
+     # geom_line(aes(group = model), method = "lm", se = FALSE, colour = 'black', stat = "smooth", alpha = .7, size=1.2) 
+  )
+
+ggsave(g2, width=15, height=8, filename = here("figures/elpd_popn.png"))
+
 ```
 
+## Difference between variables - SAE
+### Base model setup 
+```{r, echo=F}
+saeX1_clean_base <- model_sae_X1_tab_base %>%
+  rename(group = X1, elpdmean_sae = elpd_mean_X1sae, intervalScr_sae = intervalScr_X1sae,
+         n_sae = n_X1sae)%>%
+  select(group, iteration, intervalScr_sae, elpdmean_sae, model, n_sae)%>%
+  mutate(sae = "X1")
 
-## Difference between priors - full model
+saeX2_clean_base <- model_sae_X2_tab_base %>%
+  rename(group = X2, elpdmean_sae = elpd_mean_X2sae, intervalScr_sae = intervalScr_X2sae,
+         n_sae = n_X2sae)%>%
+  select(group, iteration, intervalScr_sae, elpdmean_sae, model, n_sae)%>%
+  mutate(sae = "X2")
 
-This one compares the AR prior against the non-AR prior for the full model. Axes are arranged so points in the top right quadrant are where ELPD and Interval Score agree. I thought the 3, 4 facets were kind of interesting because there's barely an improvement from the AR prior but the elpd seems relatively positive.
+saeX3_clean_base <- model_sae_X3_tab_base %>%
+  rename(group = X3, elpdmean_sae = elpd_mean_X3sae, intervalScr_sae = intervalScr_X3sae,
+         n_sae = n_X3sae)%>%
+  select(group, iteration, intervalScr_sae, elpdmean_sae, model, n_sae)%>%
+  mutate(sae = "X3")
 
-```{r}
+saeX4_clean_base <- model_sae_X4_tab_base %>%
+  rename(group = X4, elpdmean_sae = elpd_mean_X4sae, intervalScr_sae = intervalScr_X4sae,
+         n_sae = n_X4sae)%>%
+  select(group, iteration, intervalScr_sae, elpdmean_sae, model, n_sae)%>%
+  mutate(sae = "X4")
+
+sae_clean_base <- rbind(saeX1_clean_base,saeX2_clean_base, saeX3_clean_base, saeX4_clean_base)%>%
+  mutate(full_model = grepl("X1 + X2 + X3 + X4",model, fixed = TRUE),
+         ar_prior = grepl("*",model, fixed = TRUE))
+```
+
+```{r, fig.width=10, fig.height=8}
+( g3 = sae_clean_base %>%
+    select(-full_model) %>%
+    filter(!ar_prior) %>%
+    mutate(full_model = grepl("X1 + X2 + X3 + X4", model, fixed = TRUE)) %>%
+    ggplot(., aes(x = elpdmean_sae, y = intervalScr_sae, colour = model))+
+    geom_point(alpha=.4, size=1, shape=16)+
+    facet_grid(sae~group)+
+    scale_color_manual(values = colour_palette_var_base)+
+    geom_rug(alpha=.3)+
+    theme_bw(base_size = 15) +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          axis.title=element_text(size=16))+
+    xlab("Mean SAE ELDP") + ylab("Interval Score at SAE") + 
+    guides(colour = guide_legend(override.aes = list(size=5), nrow=4)) )
+
+ggsave(g3, width=11, height=10, filename = here("figures/elpd_sae_1000.png"))
+```
+
+### Mean sample size in each group 
+```{r, echo=FALSE, warning=F, message=F}
+freq_sae_base = sae_clean_base %>%
+  group_by(sae, group) %>%
+  summarise(mean_n = round(mean(n_sae)))
+( t1 = freq_sae_base %>% 
+  spread(., group, mean_n) %>% .[, c(2:6,1)] )
+  # %>% 
+  #   kableExtra::kbl(.)  %>% 
+  # kableExtra::kable_styling(full_width = F,position = "float_left") )
+
+( t2 = popn_counts %>%
+    rename(popn_mean_n = value, popn. = sae) %>% 
+    spread(., group, popn_mean_n) %>% .[, c(2:6,1)]  )
+  # %>% 
+  #   kableExtra::kbl(.)  %>% 
+  #   kableExtra::kable_styling(full_width = F, position = "right") )
+
+
+```
+### AR prior setup
+```{r, echo=F}
 saeX1_clean <- model_sae_X1_tab %>%
-  rename(group = X1, elpdmean_sae = elpd_mean_X1sae, intervalScr_sae = intervalScr_X1sae)%>%
-  select(group, iteration, intervalScr_sae, elpdmean_sae,model)%>%
+  rename(group = X1, elpdmean_sae = elpd_mean_X1sae, intervalScr_sae = intervalScr_X1sae,
+           n_sae = n_X1sae)%>%
+  select(group, iteration, intervalScr_sae, elpdmean_sae, model, n_sae)%>%
   mutate(sae = "X1")
 
 saeX2_clean <- model_sae_X2_tab %>%
-  rename(group = X2, elpdmean_sae = elpd_mean_X2sae, intervalScr_sae = intervalScr_X2sae)%>%
-  select(group, iteration, intervalScr_sae, elpdmean_sae,model)%>%
+  rename(group = X2, elpdmean_sae = elpd_mean_X2sae, intervalScr_sae = intervalScr_X2sae,
+         n_sae = n_X2sae)%>%
+  select(group, iteration, intervalScr_sae, elpdmean_sae, model, n_sae)%>%
   mutate(sae = "X2")
 
 saeX3_clean <- model_sae_X3_tab %>%
-  rename(group = X3, elpdmean_sae = elpd_mean_X3sae, intervalScr_sae = intervalScr_X3sae)%>%
-  select(group, iteration, intervalScr_sae, elpdmean_sae,model)%>%
+  rename(group = X3, elpdmean_sae = elpd_mean_X3sae, intervalScr_sae = intervalScr_X3sae,
+           n_sae = n_X3sae)%>%
+  select(group, iteration, intervalScr_sae, elpdmean_sae, model, n_sae)%>%
   mutate(sae = "X3")
 
 saeX4_clean <- model_sae_X4_tab %>%
-  rename(group = X4, elpdmean_sae = elpd_mean_X4sae, intervalScr_sae = intervalScr_X4sae)%>%
-  select(group, iteration, intervalScr_sae, elpdmean_sae,model)%>%
+  rename(group = X4, elpdmean_sae = elpd_mean_X4sae, intervalScr_sae = intervalScr_X4sae,
+           n_sae = n_X4sae)%>%
+  select(group, iteration, intervalScr_sae, elpdmean_sae, model, n_sae)%>%
   mutate(sae = "X4")
 
 sae_clean <- rbind(saeX1_clean,saeX2_clean, saeX3_clean, saeX4_clean)%>%
@@ -116,76 +257,53 @@ sae_clean <- rbind(saeX1_clean,saeX2_clean, saeX3_clean, saeX4_clean)%>%
          ar_prior = grepl("*",model, fixed = TRUE))
 
 colour_palette_var  =  c( `X1 + X2 + X3` = "#ef6548",
-               `X1 + X2 + X3 + X4` = "#014636", `X1 + X2 + X4 ` ="#02818a", `X2 + X3 + X4` = "#67a9cf", 
+               `X1 + X2 + X3 + X4` = "#014636", `X1 + X2 + X4 ` ="#02818a", `X2 + X3 + X4` = "#67a9cf",
                `X1 + X3` = "#fed976",
                `X1 + X3 + X4` = "#f768a1")
+```
 
+## Difference between priors - full model (AR prior setup)
+This one compares the AR prior against the non-AR prior for the full model. Axes are arranged so points in the top right quadrant are where ELPD and Interval Score agree. I thought the 3, 4 facets were kind of interesting because there's barely an improvement from the AR prior but the elpd seems relatively positive.
 
-sae_clean %>%
+```{r}
+ar_tab = sae_clean %>%
   select(-ar_prior)%>%
   filter(full_model, sae == "X4")%>%
-  pivot_wider(names_from = model, values_from = c(intervalScr_sae, elpdmean_sae), names_sep = "-")%>%
-  mutate(elpd_diff = (`elpdmean_sae-*X1 + X2 + X3 + X4`-`elpdmean_sae-X1 + X2 + X3 + X4`), # positive is favours * model
-         intscr_diff = -(`intervalScr_sae-*X1 + X2 + X3 + X4`-`intervalScr_sae-X1 + X2 + X3 + X4`))%>% #postiive favours * model 
-  ggplot(., aes(x = elpd_diff, y = intscr_diff))+
-  geom_hline(yintercept = 0)+
-  geom_vline(xintercept = 0)+
-  geom_point(alpha = .3)+
-  facet_wrap(.~group)+
-  ggtitle("AR Prior vs non-AR prior")+
-  xlab("ELPD (AR prior)- ELPD (non-AR prior)")+
-  ylab("1- (Interval Score (AR prior)- Interval Score (non-AR prior))")+
-  theme(plot.title = element_text(hjust = 0.5))
+  pivot_wider(names_from = model, values_from = c(intervalScr_sae, elpdmean_sae), names_sep = "_")%>%
+  mutate(elpd_diff = (`elpdmean_sae_*X1 + X2 + X3 + X4`-`elpdmean_sae_X1 + X2 + X3 + X4`), # positive is favours * model
+         intscr_diff = (`intervalScr_sae_*X1 + X2 + X3 + X4`-`intervalScr_sae_X1 + X2 + X3 + X4`)) #positive favours * model
 
+xloc1 = -0.08; xloc2 = 0.17;
+yloc1 = -1.5; yloc2 = 1.8
+( g4 = ggplot(data=ar_tab, aes(x = elpd_diff, y = intscr_diff))+
+    geom_rect(aes(xmin = xloc1, xmax = 0, ymin = yloc1, ymax = 0), fill="#98FB98",alpha = 0.02) + # green grid
+    geom_rect(aes(xmin = 0, xmax = xloc2, ymin = 0, ymax = yloc2), fill="#98FB98",alpha = 0.02) +
+    geom_rect(aes(xmin = xloc1, xmax = 0, ymin = 0, ymax = yloc2), fill="#FA8072",alpha = 0.003) + # red grid
+    geom_rect(aes(xmin = 0, xmax = xloc2, ymin = yloc1, ymax = 0), fill="#FA8072",alpha = 0.003) +
+    geom_hline(yintercept = 0)+
+    geom_vline(xintercept = 0)+
+    geom_point(alpha = .5, shape=16, size=2)+
+    facet_wrap(.~group)+
+    ggtitle("AR Prior vs non-AR prior")+
+    xlab("ELPD (AR prior) - ELPD (non-AR prior)")+
+    ylab("-(Interval Score (AR prior) - Interval Score (non-AR prior))")+
+    theme(plot.title = element_text(hjust = 0.5)) +
+    theme_bw(base_size = 17) +
+    scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) )
+
+
+ggsave(g4, width=12, height=10, filename = here("figures/elpd_AR_1000.png"))
 ```
 
-## Difference between variables - SAE
+#### Mean sample size in each group 
+```{r, echo=FALSE, warning=F, message=F}
+freq_sae = sae_clean %>% group_by(sae, group) %>% 
+  summarise(mean_n = round(mean(n_sae))) %>%
+  spread(., group, mean_n) %>% 
+  .[, c(2:13,1)] %>% 
+  data.frame(.)
 
-### Focus on X1-X3
-
-
-Then I took a look into our different models (excluding the AR prior). I looked at the X1-X3 variables first. I added a rug plot on either side to highlight the distributional differences (I kept losing track). I think this broadly shows what we had discussed previously, but I think the second row, fifth tab, orange colour (X2 only model) needs to be investigated - what's with that linear trend? But essentially, it highlight a) that different variables aren't properly reflected with ELPD and b) the x2 only model isn't so bad when looking specifically at X2 level predictions. 
-
-```{r}
-
- sae_clean %>%
-  select(-full_model)%>%
-  filter(!ar_prior, sae != "X4")%>%
-  mutate(full_model = grepl("X1 + X2 + X3 + X4",model, fixed = TRUE))%>%
-  ggplot(., aes(x = elpdmean_sae, y = intervalScr_sae, colour = model))+
-  geom_point(alpha=.6)+
-  facet_grid(sae~group)+
-  scale_color_manual(values = colour_palette_var)+
-  geom_rug(alpha=.3)+
-  theme(legend.position = "bottom",
-        legend.title = element_blank())+
-   xlab("Mean SAE ELDP") + ylab("Interval Score at SAE")
-
-
+stargazer::stargazer(freq_sae)
+  
+knitr::kable(freq_sae, format="html") %>% kableExtra::kable_styling(full_width = F)
 ```
-
-
-### Focus on X4
-
-When we look at the X4 small area estimation, we see a similar two clouds, but the models change, indicating that the goodness differs based on the small area being estimated. Importantly, the cloud is only on the y direction, and not the x-direction, suggesting that ELPD is again not sensitive to this, even when we calculate it at the small area level. 
-
-
-
-```{r}
-
-sae_clean %>%
-  select(-full_model)%>%
-  filter(!ar_prior, sae == "X4")%>%
-  mutate(full_model = grepl("X1 + X2 + X3 + X4",model, fixed = TRUE) 
-         )%>%
-  ggplot(., aes(x = elpdmean_sae, y = intervalScr_sae, colour = model))+
-  geom_point(alpha=.6)+
-  facet_wrap(.~group)+
-  scale_color_manual(values = colour_palette_var)+
-  geom_rug(alpha=.3)+
-  theme(legend.position = "bottom",
-        legend.title = element_blank())+
-  xlab("Mean SAE ELDP") + ylab("Interval Score at SAE")
-
-```
-

@@ -147,3 +147,18 @@ sae_clean %>%
   theme(legend.position = "bottom",
         legend.title = element_blank())+
   xlab("Mean SAE ELDP") + ylab("Interval Score at SAE")
+
+sae_clean %>% 
+  select(-full_model)%>%
+  filter(!ar_prior)%>%
+  mutate(full_model = grepl("X1 + X2 + X3 + X4",model, fixed = TRUE))%>%
+  ggplot(., aes(x = elpdmean_sae, y = intervalScr_sae, colour = model))+
+  geom_point(alpha=.4, size=1, shape=16)+
+  facet_grid(sae~group)+
+  scale_color_manual(values = colour_palette_var_base)+
+  geom_rug(alpha=.3)+
+  theme_bw() +
+  theme(legend.position = "bottom",
+        legend.title = element_blank())+
+  xlab("Mean SAE ELDP") + ylab("Interval Score at SAE") + 
+  guides(colour = guide_legend(override.aes = list(size=3), nrow=4))

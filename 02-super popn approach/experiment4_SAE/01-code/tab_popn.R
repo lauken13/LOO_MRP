@@ -1,8 +1,8 @@
 ## combining popn estimates for plotting (from Lauren's email)
-library(tidyverse)
-
 ## data file
-load(here::here('02-super popn approach/experiment4_SAE/03-data/temp/loo_sae_fx3_all.RData'))
+load(here::here('02-super popn approach/experiment4_SAE/03-data/temp/loo_sae_500.RData'))
+
+library(tidyverse)
 
 # getting bias at popn level ----------------------------------------------
 # bias, sum elpd, coverage (0 or 1), truth and lower/upper CI quantile and interval score
@@ -41,10 +41,32 @@ elpd_all_tab
 
 popn_all_tab = left_join(popnest_all_tab, elpd_all_tab, by=c('model', 'iteration')) %>% 
   left_join(., wtdElpd_all_tab, by=c('model', 'iteration')) 
-View(popn_all_tab)
+# View(popn_all_tab)
 
+## loading individual tab
+source(here::here("02-super popn approach/experiment4_SAE/01-code/tab_samp.R"), echo=TRUE)
 
 popn_indv_tab = left_join(popn_all_tab, indv_summ_tab, by=c('model', 'iteration')) 
 
+## loading SAE tab 
+source(here::here("02-super popn approach/experiment4_SAE/01-code/tab_SAE.R"), echo=TRUE)
+
+model_sae_X1_tab
+model_sae_X2_tab
+model_sae_X3_tab
+model_sae_X4_tab
+
+## counts for table
+# source(here::here("02-super popn approach/experiment4_SAE/01-code/popn_counts.R"), echo=TRUE)
+
+res_list_sae = list(indv_all_tab = indv_all_tab,
+                    popn_indv_tab =  popn_indv_tab,
+                    indv_summ_tab = indv_summ_tab,
+                    model_sae_X1_tab = model_sae_X1_tab,
+                    model_sae_X2_tab = model_sae_X2_tab,
+                    model_sae_X3_tab = model_sae_X3_tab,
+                    model_sae_X4_tab = model_sae_X4_tab, 
+                    popn_counts = popn_counts)
+saveRDS(res_list_sae, file=here::here("02-super popn approach/experiment4_SAE/03-data/res_list_sae.rds"), compress=T)                 
 
 

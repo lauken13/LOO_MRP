@@ -3,6 +3,7 @@ library(loo)
 library(posterior) # to convert draws_array() objects 
 library(dplyr)
 library(ggplot2)
+library(survey)
 
 ## elpd_SAE
 source(here::here("02-super popn approach/experiment1_baseWtdloo/01-code/SAE_elpd_all.R"), echo=T)

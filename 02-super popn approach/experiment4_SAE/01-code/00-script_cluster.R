@@ -1,23 +1,20 @@
 ## script for stan files
 ## running for all six models
 
-setwd('/mnt/lustre/projects/Mona0085/skuh/02-super/experiment4d')
+setwd('/mnt/lustre/projects/Mona0085/skuh/02-super/exp_sae_1000')
 
 # data generation ---------------------------------------------------------
 # function to generate data
 source("00-gen_dat_func.R") 
 
-# # iteration number (ITE) from cluster
-# slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
-# iter = as.numeric(slurm_arrayid)
+# iteration number (ITE) from cluster
+slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
+iter = as.numeric(slurm_arrayid)
 
-setwd("~/GitHub/LOO_MRP/02-super popn approach/experiment4_SAE/03-data")
-
-for(iter in 62:100){
 
 # generating data using gen_dat()
 set.seed(65438)
-sim1 = gen_dat(N = 10000, fx = fx3, samp_size = 500, ITE=iter) # generate a list of things
+sim1 = gen_dat(N = 10000, fx = fx3, samp_size = 1000, ITE=iter) # generate a list of things
 
 samp_dat = sim1$samp_data
 popn_ps = sim1$popn_ps
@@ -45,47 +42,39 @@ samp_dat_mrp <- list(
 )
 
 ## compile stan model
-model15a_arPrior = cmdstan_model(file.path('../stancode/model15a.stan'))
-model15_rePrior = cmdstan_model(file.path('../stancode/model15.stan'))
+model15a_arPrior = cmdstan_model(file.path('stancode/model15a.stan'))
+model15_rePrior = cmdstan_model(file.path('stancode/model15.stan'))
 
 # without X2
-model13a_arPrior = cmdstan_model(file.path('../stancode/model13a.stan'))
-model13_rePrior = cmdstan_model(file.path('../stancode/model13.stan'))
+model13a_arPrior = cmdstan_model(file.path('stancode/model13a.stan'))
+model13_rePrior = cmdstan_model(file.path('stancode/model13.stan'))
 
 # without X4
-model11_rePrior = cmdstan_model(file.path('../stancode/model11.stan'))
+model11_rePrior = cmdstan_model(file.path('stancode/model11.stan'))
 
 # without X2 and X4
-model06_rePrior = cmdstan_model(file.path('../stancode/model06.stan'))
+model06_rePrior = cmdstan_model(file.path('stancode/model06.stan'))
 
 # without X3
-model12_rePrior = cmdstan_model(file.path('../stancode/model12.stan'))
+model12_rePrior = cmdstan_model(file.path('stancode/model12.stan'))
 
 # without X1
-model14_rePrior = cmdstan_model(file.path('../stancode/model14.stan'))
+model14_rePrior = cmdstan_model(file.path('stancode/model14.stan'))
 
 
 
 ## fitting stan model 
-model15a_fit_arPrior <- model15a_arPrior$sample(data = samp_dat_mrp, 
-                                              seed = 5678) # setting seed within sampling
-model15_fit_rePrior <- model15_rePrior$sample(data = samp_dat_mrp, 
-                                              seed = 5678) 
+model15a_fit_arPrior <- model15a_arPrior$sample(data = samp_dat_mrp,seed = 5678) # setting seed within sampling
+model15_fit_rePrior <- model15_rePrior$sample(data = samp_dat_mrp, seed = 5678) 
 
-model13a_fit_arPrior <- model13a_arPrior$sample(data = samp_dat_mrp, 
-                                                seed = 5678)
-model13_fit_rePrior <- model13_rePrior$sample(data = samp_dat_mrp, 
-                                              seed = 5678)
+model13a_fit_arPrior <- model13a_arPrior$sample(data = samp_dat_mrp,seed = 5678)
+model13_fit_rePrior <- model13_rePrior$sample(data = samp_dat_mrp, seed = 5678)
 
-model11_fit_rePrior <- model11_rePrior$sample(data = samp_dat_mrp, 
-                                                seed = 5678)
-model06_fit_rePrior <- model06_rePrior$sample(data = samp_dat_mrp, 
-                                              seed = 5678)
+model11_fit_rePrior <- model11_rePrior$sample(data = samp_dat_mrp,seed = 5678)
+model06_fit_rePrior <- model06_rePrior$sample(data = samp_dat_mrp, seed = 5678)
 
-model12_fit_rePrior <- model12_rePrior$sample(data = samp_dat_mrp, 
-                                              seed = 5678)
-model14_fit_rePrior <- model14_rePrior$sample(data = samp_dat_mrp, 
-                                              seed = 5678)
+model12_fit_rePrior <- model12_rePrior$sample(data = samp_dat_mrp, seed = 5678)
+model14_fit_rePrior <- model14_rePrior$sample(data = samp_dat_mrp, seed = 5678)
 
 
 # saving quantities
@@ -139,14 +128,11 @@ sampest_14 = model14_fit_rePrior$draws(variables = "theta_samp") %>%
 
 
 
-save(loo_15a, loo_15, loo_13a,
-     loo_13, loo_11, loo_06,
-     loo_12, loo_14,
-     popnest_15a, popnest_15, popnest_13a,
-     popnest_13, popnest_11, popnest_06,
-      popnest_12, popnest_14,  
-     sampest_15a, sampest_15, sampest_13a,
-     sampest_13, sampest_11, sampest_06,
-     sampest_12, sampest_14, 
+save(loo_15a, loo_15, loo_13a, loo_13, 
+     loo_11, loo_06, loo_12, loo_14,
+     popnest_15a, popnest_15, popnest_13a, popnest_13, 
+     popnest_11, popnest_06, popnest_12, popnest_14,  
+     sampest_15a, sampest_15, sampest_13a, sampest_13, 
+     sampest_11, sampest_06, sampest_12, sampest_14, 
      file = paste0('LOO_arPrior_', iter, '.RData'))
-}
+

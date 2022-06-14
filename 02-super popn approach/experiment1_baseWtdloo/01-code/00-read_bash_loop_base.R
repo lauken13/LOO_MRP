@@ -98,136 +98,91 @@ for(ite in iter){
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model01',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model01')
   
   sampest_tab_02 = apply(sampest_02,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model02',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model02')
   
   sampest_tab_03 = apply(sampest_03,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model03',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model03')
   
   sampest_tab_04 = apply(sampest_04,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model04',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model04')
   
   sampest_tab_05 = apply(sampest_05,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model05',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model05')
   
   sampest_tab_06 = apply(sampest_06,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model06',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model06')
   
   sampest_tab_07 = apply(sampest_07,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model07',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model07')
   
   sampest_tab_08 = apply(sampest_08,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model08',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model08')
   
   sampest_tab_09 = apply(sampest_09,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model09',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model09')
   
   sampest_tab_10 = apply(sampest_10,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model10',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model10')
   
   sampest_tab_11 = apply(sampest_11,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model11',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model11')
   
   sampest_tab_12 = apply(sampest_12,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model12',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model12')
   
   sampest_tab_13 = apply(sampest_13,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model13',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model13')
   
   sampest_tab_14 = apply(sampest_14,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model14',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model14')
   
   sampest_tab_15 = apply(sampest_15,2,quantile,c(0.05,0.5,0.95)) %>% 
     t() %>% 
     as_tibble() %>% 
     rename(sampestX5 = `5%`, sampestX50 = `50%`, sampestX95 = `95%`) %>% 
-    mutate(model = 'model15',
-           prob_truth = samp_data$y_obs,
-           range_int = sampestX95 - sampestX5,
-           coverage = ifelse(prob_truth >= sampestX5 & prob_truth <= sampestX95, 1, 0))
+    mutate(model = 'model15')
   
   
   ## getting posterior of individuals estimate for each of the models
@@ -585,5 +540,5 @@ for(ite in iter){
   
 }  
 
-save.image(file="temp.RData", compress=T)
+save.image(file="loo_N02.RData", compress=T)
 

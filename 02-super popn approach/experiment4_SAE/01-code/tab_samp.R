@@ -1,14 +1,17 @@
 ## table for individual data set 
 library(tidyverse)
 
-## data file
-load(here::here('02-super popn approach/experiment4_SAE/03-data/loo_sae_fx3_all.RData'))
+# ## data file
+# load(here::here('02-super popn approach/experiment4_SAE/03-data/temp/loo_sae_1000.RData'))
 
 # individual bias ---------------------------------------------------------
 alph=0.1
 sampest_list = list()
 for(i in iter){
+  y_obs = pt_samp_list[[i]]
   sampest_list[[i]] = mutate(sampest_tab_all[[i]],
+                             ci_ind_width = sampestX95 - sampestX5,
+                             coverage_ind = ifelse(y_obs >= sampestX5 & y_obs <= sampestX95, 1, 0),
                              bias_X50_ind =  sampestX50 - y_obs,
                              bias_X5_ind =  sampestX5 - y_obs,
                              bias_X95_ind =  sampestX95 - y_obs, 

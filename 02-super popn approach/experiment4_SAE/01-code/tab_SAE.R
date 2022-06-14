@@ -1,10 +1,10 @@
 ## postprocessing the saved objects from cluster
+# load(here::here("02-super popn approach/experiment4_SAE/03-data/loo_sae_1000.RData"))
+
 library(loo)
 library(posterior) # to convert draws_array() objects 
 library(dplyr)
 library(ggplot2)
-
-load(here::here("02-super popn approach/experiment4_SAE/03-data/loo_sae_fx3_all.RData"))
 
 ## elpd_SAE
 source(here::here("02-super popn approach/experiment4_SAE/01-code/SAE_elpd_all.R"), echo=T)

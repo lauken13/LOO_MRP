@@ -38,7 +38,7 @@ for (ite in iter){
   for (lvl in 1:5){
     looX1 = samp_data %>%
       filter(X1 == lvl) %>%
-      select(., elpd_loo_06:elpd_loo_14)
+      select(., elpd_loo_06:elpd_loo_15a)
     ind = which(samp_data$X1 == lvl)
 
     tabX1[[lvl]] = svytotal(looX1, svy_rake[ind,]) %>%
@@ -64,7 +64,7 @@ for (ite in iter){
   for (lvl in 1:5){
     looX2 = samp_data %>%
       filter(X2 == lvl) %>%
-      select(., elpd_loo_06:elpd_loo_14)
+      select(., elpd_loo_06:elpd_loo_15a)
     ind = which(samp_data$X2 == lvl)
 
     tabX2[[lvl]] = svytotal(looX2, svy_rake[ind,]) %>%
@@ -91,7 +91,7 @@ for (ite in iter){
   for (lvl in 1:5){
     looX3 = samp_data %>%
       filter(X3 == lvl) %>%
-      select(., elpd_loo_06:elpd_loo_14)
+      select(., elpd_loo_06:elpd_loo_15a)
     ind = which(samp_data$X3 == lvl)
 
     tabX3[[lvl]] = svytotal(looX3, svy_rake[ind,]) %>%
@@ -118,7 +118,7 @@ for (ite in iter){
   for (lvl in 1:12){
     looX4 = samp_data %>% 
       filter(X4 == lvl) %>% 
-      select(., elpd_loo_06:elpd_loo_14) 
+      select(., elpd_loo_06:elpd_loo_15a) 
     ind = which(samp_data$X4 == lvl)
     
     tabX4[[lvl]] = svytotal(looX4, svy_rake[ind,]) %>% 

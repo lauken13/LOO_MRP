@@ -1,0 +1,620 @@
+
+R version 4.0.5 (2021-03-31) -- "Shake and Throw"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ## postprocessing the saved objects from cluster
+> library(loo)
+This is loo version 2.4.1
+- Online documentation and vignettes at mc-stan.org/loo
+- As of v2.0.0 loo defaults to 1 core but we recommend using as many as possible. Use the 'cores' argument or set options(mc.cores = NUM_CORES) for an entire session. 
+> library(posterior) # to convert draws_array() objects 
+This is posterior version 1.0.1
+
+Attaching package: ‘posterior’
+
+The following objects are masked from ‘package:stats’:
+
+    mad, sd, var
+
+> library(parallel) 
+> 
+> # sourcing gen_dat()
+> source("00-gen_dat_func.R")
+── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
+✔ ggplot2 3.3.5     ✔ purrr   0.3.4
+✔ tibble  3.1.2     ✔ dplyr   1.0.7
+✔ tidyr   1.1.3     ✔ stringr 1.4.0
+✔ readr   1.4.0     ✔ forcats 0.5.1
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+Loading required package: Rcpp
+Loading 'brms' package (version 2.16.7). Useful instructions
+can be found by typing help('brms'). A more detailed introduction
+to the package is available through vignette('brms_overview').
+
+Attaching package: ‘brms’
+
+The following object is masked from ‘package:posterior’:
+
+    rhat
+
+The following object is masked from ‘package:stats’:
+
+    ar
+
+Loading required package: grid
+Loading required package: Matrix
+
+Attaching package: ‘Matrix’
+
+The following objects are masked from ‘package:tidyr’:
+
+    expand, pack, unpack
+
+Loading required package: survival
+
+Attaching package: ‘survival’
+
+The following object is masked from ‘package:brms’:
+
+    kidney
+
+
+Attaching package: ‘survey’
+
+The following object is masked from ‘package:graphics’:
+
+    dotchart
+
+
+Attaching package: ‘tidybayes’
+
+The following objects are masked from ‘package:brms’:
+
+    dstudent_t, pstudent_t, qstudent_t, rstudent_t
+
+> 
+> # sourcing loo_wtd()
+> source("../functions.R")
+> 
+> NUM_CORES = detectCores()
+> options(mc.cores = NUM_CORES)
+> 
+> ## empty matrices
+> # for mrp est
+> popnest_all_list =
++   popnest_summary_list =
++   sampest_tab_all =
++   popnest_sae_X2_all =
++   popnest_sae_X4_all =
++   popnest_sae_X2_list =
++   popnest_sae_X4_list = list()
+> 
+> popnest_sae_X1_all =
++   popnest_sae_X3_all =
++   popnest_sae_X1_list = 
++   popnest_sae_X3_list = list()
+> 
+> pt_list = list()
+> 
+> # elpd values and wtd loo
+> loo_06_list =
++   loo_11_list =
++   loo_13_list =
++   loo_13a_list =
++   loo_15_list =
++   loo_15a_list =
++   loo_12_list =
++   loo_14_list = list()
+> 
+> loo_wtd_06_list =
++   loo_wtd_11_list =
++   loo_wtd_13_list =
++   loo_wtd_13a_list =
++   loo_wtd_15_list =
++   loo_wtd_15a_list =
++   loo_wtd_12_list =
++   loo_wtd_14_list = list()
+> 
+> ## elpd values and std. error
+> elpd_15a_mat =
++   elpd_15_mat =
++   elpd_13a_mat =
++   elpd_13_mat =
++   elpd_11_mat =
++   elpd_06_mat =
++   elpd_12_mat =
++   elpd_14_mat = matrix(NA, ncol=2, nrow=100) # elpd and se, 100 iterations
+> 
+> 
+> pt_samp_list =
++   pt_popn_list =
++   samp_data_list =
++   popn_data_list =
++   popn_ps_list = list()
+> 
+> model06_popnest_sae_X4 =
++   model11_popnest_sae_X4 =
++   model13_popnest_sae_X4 =
++   model13a_popnest_sae_X4 =
++   model15_popnest_sae_X4 =
++   model15a_popnest_sae_X4 =
++   model12_popnest_sae_X4 =
++   model14_popnest_sae_X4 = lapply(1:100,matrix, data=NA,nrow=4000, ncol=12)
+> 
+> model06_popnest_sae_X2 =
++   model11_popnest_sae_X2 =
++   model13_popnest_sae_X2 =
++   model13a_popnest_sae_X2 =
++   model15_popnest_sae_X2 =
++   model15a_popnest_sae_X2 = 
++   model12_popnest_sae_X2 =
++   model14_popnest_sae_X2 = lapply(1:100,matrix, data=NA,nrow=4000, ncol=5)
+> 
+> model12_popnest_sae_X1 = 
++   model14_popnest_sae_X1 = 
++   model06_popnest_sae_X1 = 
++   model11_popnest_sae_X1 =
++   model13_popnest_sae_X1 = 
++   model15_popnest_sae_X1 =  
++   model13a_popnest_sae_X1 = 
++   model15a_popnest_sae_X1 =  lapply(1:100,matrix, data=NA,nrow=4000, ncol=5)
+> 
+> model12_popnest_sae_X3 = 
++   model14_popnest_sae_X3 = 
++   model06_popnest_sae_X3 = 
++   model11_popnest_sae_X3 =
++   model13_popnest_sae_X3 = 
++   model15_popnest_sae_X3 =
++   model13a_popnest_sae_X3 = 
++   model15a_popnest_sae_X3 = lapply(1:100,matrix, data=NA,nrow=4000, ncol=5)
+> 
+> iter = 1:100
+> 
+> for(ite in iter){
++   print(ite)
++   load(paste0('LOO_arPrior_',ite,".RData"))
++   
++   # mrp est -----------------------------------------------------------------
++   # generating data using gen_dat()
++   set.seed(65438)
++   sim1 = gen_dat(N = 10000, fx = fx3, samp_size = 1000, ITE=ite)
++   
++   samp_data = samp_data_list[[ite]] = sim1$samp_data
++   popn_data = popn_data_list[[ite]] = sim1$popn_data
++   popn_ps = popn_ps_list[[ite]] = sim1$popn_ps
++   
++   pt_samp_list[[ite]] = mean(samp_data$y_obs)
++   pt_popn_list[[ite]] = mean(popn_data$y_obs)
++ 
++ ## individual estimates
++ sampest_tab_06 = apply(sampest_06,2,quantile,c(0.05,0.5,0.95)) %>%
++   t(.) %>%
++   as_tibble() %>%
++   rename(sampestX5 = `5%`,
++          sampestX50 = `50%`,
++          sampestX95 = `95%`) %>%
++   mutate(model = 'model06')
++ 
++ sampest_tab_11 = apply(sampest_11,2,quantile,c(0.05,0.5,0.95)) %>%
++   t() %>%
++   as_tibble() %>%
++   rename(sampestX5 = `5%`,
++          sampestX50 = `50%`,
++          sampestX95 = `95%`) %>%
++   mutate(model = 'model11')
++ 
++ sampest_tab_13 = apply(sampest_13,2,quantile,c(0.05,0.5,0.95)) %>%
++   t() %>%
++   as_tibble() %>%
++   rename(sampestX5 = `5%`,
++          sampestX50 = `50%`,
++          sampestX95 = `95%`) %>%
++   mutate(model = 'model13')
++ 
++ 
++ sampest_tab_13a = apply(sampest_13a,2,quantile,c(0.05,0.5,0.95)) %>%
++   t() %>%
++   as_tibble() %>%
++   rename(sampestX5 = `5%`,
++          sampestX50 = `50%`,
++          sampestX95 = `95%`) %>%
++   mutate(model = 'model13a')
++ 
++ sampest_tab_15 = apply(sampest_15,2,quantile,c(0.05,0.5,0.95)) %>%
++   t() %>%
++   as_tibble() %>%
++   rename(sampestX5 = `5%`,
++          sampestX50 = `50%`,
++          sampestX95 = `95%`) %>%
++   mutate(model = 'model15')
++ 
++ sampest_tab_15a = apply(sampest_15a,2,quantile,c(0.05,0.5,0.95)) %>%
++   t() %>%
++   as_tibble() %>%
++   rename(sampestX5 = `5%`,
++          sampestX50 = `50%`,
++          sampestX95 = `95%`) %>%
++   mutate(model = 'model15a')
++ 
++ sampest_tab_12 = apply(sampest_15a,2,quantile,c(0.05,0.5,0.95)) %>%
++   t() %>%
++   as_tibble() %>%
++   rename(sampestX5 = `5%`,
++          sampestX50 = `50%`,
++          sampestX95 = `95%`) %>%
++   mutate(model = 'model12')
++ 
++ sampest_tab_14 = apply(sampest_15a,2,quantile,c(0.05,0.5,0.95)) %>%
++   t() %>%
++   as_tibble() %>%
++   rename(sampestX5 = `5%`,
++          sampestX50 = `50%`,
++          sampestX95 = `95%`) %>%
++   mutate(model = 'model14')
++ 
++ 
++ 
++ ## getting posterior of individuals estimate for each of the models
++ sampest_tab_all[[ite]] = list(sampest_tab_06, sampest_tab_11, sampest_tab_13,
++                               sampest_tab_13a, sampest_tab_15, sampest_tab_15a,
++                               sampest_tab_12, sampest_tab_14) %>%
++   do.call(rbind,.)
++ 
++ 
++ # calculating popnest
++ model06_popnest = apply(as_draws_matrix(popnest_06), 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # applying to each iteration
++ model11_popnest = apply(as_draws_matrix(popnest_11), 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
++ model13_popnest = apply(as_draws_matrix(popnest_13), 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
++ model13a_popnest = apply(as_draws_matrix(popnest_13a), 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
++ model15_popnest = apply(as_draws_matrix(popnest_15), 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
++ model15a_popnest = apply(as_draws_matrix(popnest_15a), 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
++ model12_popnest = apply(as_draws_matrix(popnest_12), 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
++ model14_popnest = apply(as_draws_matrix(popnest_14), 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
++ 
++ popnest_all_list[[ite]] = list(model06_popnest,
++                                model11_popnest,
++                                model13_popnest,
++                                model13a_popnest,
++                                model15_popnest,
++                                model15a_popnest,
++                                model12_popnest,
++                                model14_popnest)
++ 
++ popnest_summary_list[[ite]] = lapply(popnest_all_list[[ite]], function(x)quantile(x,c(0.05, 0.5, 0.95))) %>%
++   do.call(rbind,.) %>%
++   data.frame(.) %>%
++   rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.) %>%
++   mutate(model = paste0('model', c('06','11','13','13a','15','15a', '12', '14')),
++          iter = ite)
++ 
++ ## small area estimation for X4
++ for (s in 1:12){
++   
++   lvl_loc = which(popn_ps$X4 == s)
++   
++   # calculating group popnest for X4-levels
++   model06_popnest_sae_X4[[ite]][,s] = apply(as_draws_matrix(popnest_06[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc])) # applying to each iteration
++   model11_popnest_sae_X4[[ite]][,s] = apply(as_draws_matrix(popnest_11[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model13_popnest_sae_X4[[ite]][,s] = apply(as_draws_matrix(popnest_13[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model13a_popnest_sae_X4[[ite]][,s] = apply(as_draws_matrix(popnest_13a[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model15_popnest_sae_X4[[ite]][,s] = apply(as_draws_matrix(popnest_15[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model15a_popnest_sae_X4[[ite]][,s] = apply(as_draws_matrix(popnest_15a[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model12_popnest_sae_X4[[ite]][,s] = apply(as_draws_matrix(popnest_12[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model14_popnest_sae_X4[[ite]][,s] = apply(as_draws_matrix(popnest_14[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++ }
++ 
++ popnest_sae_X4_all[[ite]] = list(model06_popnest_sae_X4[[ite]],
++                                  model11_popnest_sae_X4[[ite]],
++                                  model13_popnest_sae_X4[[ite]],
++                                  model13a_popnest_sae_X4[[ite]],
++                                  model15_popnest_sae_X4[[ite]],
++                                  model15a_popnest_sae_X4[[ite]],
++                                  model12_popnest_sae_X4[[ite]],
++                                  model14_popnest_sae_X4[[ite]])
++ 
++ popnest_sae_X4_list[[ite]] = lapply(popnest_sae_X4_all[[ite]], function(x)quantile(x,c(0.05, 0.5, 0.95))) %>%
++   do.call(rbind,.) %>%
++   data.frame(.) %>%
++   rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.) %>%
++   mutate(model = paste0('model', c('06','11','13','13a','15','15a','12','14')),
++          iter = ite)
++ 
++ ## small area estimation for X3
++ for (s2 in 1:5){
++   
++   lvl_loc = which(popn_ps$X3 == s2)
++   
++   # calculating group popnest for X3-levels
++   model12_popnest_sae_X3[[ite]][,s2] = apply(as_draws_matrix(popnest_12[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc])) # applying to each iteration
++   model14_popnest_sae_X3[[ite]][,s2] = apply(as_draws_matrix(popnest_14[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   
++   # calculating group popnest for X1-levels
++   model06_popnest_sae_X3[[ite]][,s2] = apply(as_draws_matrix(popnest_06[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc])) # applying to each iteration
++   model11_popnest_sae_X3[[ite]][,s2] = apply(as_draws_matrix(popnest_11[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model13_popnest_sae_X3[[ite]][,s2] = apply(as_draws_matrix(popnest_13[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model15_popnest_sae_X3[[ite]][,s2] = apply(as_draws_matrix(popnest_15[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model13a_popnest_sae_X3[[ite]][,s2] = apply(as_draws_matrix(popnest_13a[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model15a_popnest_sae_X3[[ite]][,s2] = apply(as_draws_matrix(popnest_15a[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++ }
++ 
++ popnest_sae_X3_all[[ite]] = list(model12_popnest_sae_X3[[ite]], 
++                                  model14_popnest_sae_X3[[ite]],
++                                  model06_popnest_sae_X3[[ite]], 
++                                  model11_popnest_sae_X3[[ite]], 
++                                  model13_popnest_sae_X3[[ite]], 
++                                  model15_popnest_sae_X3[[ite]],
++                                  model13a_popnest_sae_X3[[ite]], 
++                                  model15a_popnest_sae_X3[[ite]])
++ 
++ popnest_sae_X3_list[[ite]] = lapply(popnest_sae_X3_all[[ite]], function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
++   do.call(rbind,.) %>% 
++   data.frame(.) %>% 
++   rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.) %>% 
++   mutate(model = paste0('model', c('12','14','06','11','13','15','13a','15a')),
++          iter = ite)
++ 
++ 
++ ## small area estimation for X2
++ for (s2 in 1:5){
++   
++   lvl_loc = which(popn_ps$X2 == s2)
++   
++   # calculating group popnest for X4-levels
++   model06_popnest_sae_X2[[ite]][,s2] = apply(as_draws_matrix(popnest_06[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc])) # applying to each iteration
++   model11_popnest_sae_X2[[ite]][,s2] = apply(as_draws_matrix(popnest_11[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model13_popnest_sae_X2[[ite]][,s2] = apply(as_draws_matrix(popnest_13[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model13a_popnest_sae_X2[[ite]][,s2] = apply(as_draws_matrix(popnest_13a[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model15_popnest_sae_X2[[ite]][,s2] = apply(as_draws_matrix(popnest_15[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model15a_popnest_sae_X2[[ite]][,s2] = apply(as_draws_matrix(popnest_15a[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model12_popnest_sae_X2[[ite]][,s2] = apply(as_draws_matrix(popnest_12[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model14_popnest_sae_X2[[ite]][,s2] = apply(as_draws_matrix(popnest_14[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   
++ }
++ 
++ popnest_sae_X2_all[[ite]] = list(model06_popnest_sae_X2[[ite]],
++                                  model11_popnest_sae_X2[[ite]],
++                                  model13_popnest_sae_X2[[ite]],
++                                  model13a_popnest_sae_X2[[ite]],
++                                  model15_popnest_sae_X2[[ite]],
++                                  model15a_popnest_sae_X2[[ite]],
++                                  model12_popnest_sae_X2[[ite]],
++                                  model14_popnest_sae_X2[[ite]])
++ 
++ popnest_sae_X2_list[[ite]] = lapply(popnest_sae_X2_all[[ite]], function(x)quantile(x,c(0.05, 0.5, 0.95))) %>%
++   do.call(rbind,.) %>%
++   data.frame(.) %>%
++   rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.) %>%
++   mutate(model = paste0('model', c('06','11','13','13a','15','15a','12','14')),
++          iter = ite)
++ 
++ ## small area estimation for X1
++ for (s in 1:5){
++   
++   lvl_loc = which(popn_ps$X1 == s)
++   
++   # calculating group popnest for X1-levels
++   model12_popnest_sae_X1[[ite]][,s] = apply(as_draws_matrix(popnest_12[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc])) # applying to each iteration
++   model14_popnest_sae_X1[[ite]][,s] = apply(as_draws_matrix(popnest_14[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   
++   # calculating group popnest for X1-levels
++   model06_popnest_sae_X1[[ite]][,s] = apply(as_draws_matrix(popnest_06[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc])) # applying to each iteration
++   model11_popnest_sae_X1[[ite]][,s] = apply(as_draws_matrix(popnest_11[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model13_popnest_sae_X1[[ite]][,s] = apply(as_draws_matrix(popnest_13[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model15_popnest_sae_X1[[ite]][,s] = apply(as_draws_matrix(popnest_15[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model13a_popnest_sae_X1[[ite]][,s] = apply(as_draws_matrix(popnest_13a[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   model15a_popnest_sae_X1[[ite]][,s] = apply(as_draws_matrix(popnest_15a[,lvl_loc]), 1, function(x)sum(x*popn_ps$Nj[lvl_loc])/sum(popn_ps$Nj[lvl_loc]))
++   
++ }
++ 
++ popnest_sae_X1_all[[ite]] = list(model12_popnest_sae_X1[[ite]], 
++                                  model14_popnest_sae_X1[[ite]],
++                                  model06_popnest_sae_X1[[ite]], 
++                                  model11_popnest_sae_X1[[ite]], 
++                                  model13_popnest_sae_X1[[ite]], 
++                                  model15_popnest_sae_X1[[ite]],
++                                  model13a_popnest_sae_X1[[ite]], 
++                                  model15a_popnest_sae_X1[[ite]] )
++ 
++ popnest_sae_X1_list[[ite]] = lapply(popnest_sae_X1_all[[ite]], function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
++   do.call(rbind,.) %>% 
++   data.frame(.) %>% 
++   rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.) %>% 
++   mutate(model = paste0('model', c('12','14','06','11','13','15','13a','15a')),
++          iter = ite)
++ 
++ # weighted loo ------------------------------------------------------------
++ # calculating population totals for each level
++ X1_margin = xtabs(~X1, data=popn_data)
++ X2_margin = xtabs(~X2, data=popn_data)
++ X3_margin = xtabs(~X3, data=popn_data)
++ X4_margin = xtabs(~X4, data=popn_data)
++ 
++ ## creating survey design
++ svy1 = svydesign(ids=~1, # cluster id, ~1 for no clusters
++                  weights=~rep(1,nrow(samp_data)), # equal weights for each unit
++                  data=samp_data)
++ 
++ # raked to the population
++ rake1 = rake(design = svy1, sample.margins = list(~X1,~X2,~X3,~X4),
++              population.margins = list(X1_margin, X2_margin, X3_margin, X4_margin))
++ 
++ # raked weights 
++ samp_data$wts = weights(rake1)
++ 
++ # creating survey raked weights
++ svy_rake = svydesign(ids=~1, # cluster id, ~1 for no clusters
++                      weights=~wts, # including raked weights in the survey design
++                      data=samp_data)
++ 
++ ## saving loo object ####
++ loo_06_list[[ite]] = loo_06
++ loo_11_list[[ite]] = loo_11
++ loo_13_list[[ite]] = loo_13
++ loo_13a_list[[ite]] = loo_13a
++ loo_15_list[[ite]] = loo_15
++ loo_15a_list[[ite]] = loo_15a
++ loo_12_list[[ite]] = loo_12
++ loo_14_list[[ite]] = loo_14
++ 
++ 
++ ## elpd values 
++ elpd_06_mat[ite,1] = loo_06_list[[ite]]$estimates[1,1]
++ elpd_06_mat[ite,2] = loo_06_list[[ite]]$estimates[1,2]
++ 
++ elpd_11_mat[ite,1] = loo_11_list[[ite]]$estimates[1,1]
++ elpd_11_mat[ite,2] = loo_11_list[[ite]]$estimates[1,2]
++ 
++ elpd_13_mat[ite,1] = loo_13_list[[ite]]$estimates[1,1]
++ elpd_13_mat[ite,2] = loo_13_list[[ite]]$estimates[1,2]
++ 
++ elpd_13a_mat[ite,1] = loo_13a_list[[ite]]$estimates[1,1]
++ elpd_13a_mat[ite,2] = loo_13a_list[[ite]]$estimates[1,2]
++ 
++ elpd_15_mat[ite,1] = loo_15_list[[ite]]$estimates[1,1]
++ elpd_15_mat[ite,2] = loo_15_list[[ite]]$estimates[1,2]
++ 
++ elpd_15a_mat[ite,1] = loo_15a_list[[ite]]$estimates[1,1]
++ elpd_15a_mat[ite,2] = loo_15a_list[[ite]]$estimates[1,2]
++ 
++ elpd_12_mat[ite,1] = loo_12_list[[ite]]$estimates[1,1]
++ elpd_12_mat[ite,2] = loo_12_list[[ite]]$estimates[1,2]
++ 
++ elpd_14_mat[ite,1] = loo_14_list[[ite]]$estimates[1,1]
++ elpd_14_mat[ite,2] = loo_14_list[[ite]]$estimates[1,2]
++ 
++ 
++ ## wtd_loo ####
++ loo_wtd_06_list[[ite]] = loo_wtd(loo_06_list[[ite]], svy_rake)
++ loo_wtd_11_list[[ite]] = loo_wtd(loo_11_list[[ite]], svy_rake)
++ loo_wtd_13_list[[ite]] = loo_wtd(loo_13_list[[ite]], svy_rake)
++ loo_wtd_13a_list[[ite]] = loo_wtd(loo_13a_list[[ite]], svy_rake)
++ loo_wtd_15_list[[ite]] = loo_wtd(loo_15_list[[ite]], svy_rake)
++ loo_wtd_15a_list[[ite]] = loo_wtd(loo_15a_list[[ite]], svy_rake)
++ loo_wtd_12_list[[ite]] = loo_wtd(loo_12_list[[ite]], svy_rake)
++ loo_wtd_14_list[[ite]] = loo_wtd(loo_14_list[[ite]], svy_rake)
++ 
++ }
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+> 
+> save.image(file="loo_sae_1000.RData", compress=T)
+>   
+> 
+> proc.time()
+    user   system  elapsed 
+7129.678   35.194 7178.427 

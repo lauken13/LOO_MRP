@@ -1,7 +1,7 @@
 ## script for stan files
 ## running for all six models
 
-setwd('/mnt/lustre/projects/Mona0085/skuh/02-super/experiment4a')
+setwd('/mnt/lustre/projects/Mona0085/skuh/02-super/exp_N02')
 
 # data generation ---------------------------------------------------------
 # function to generate data
@@ -12,8 +12,6 @@ slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 iter = as.numeric(slurm_arrayid)
 
 
-for(iter in 1:100){
-  
   # generating data using gen_dat()
   set.seed(65438)
   sim1 = gen_dat(N = 10000, samp_size = 500, ITE=iter) # generate a list of things
@@ -61,21 +59,21 @@ for(iter in 1:100){
   
   
   ## fitting stan model 
-  model01_fit_rePrior <- model01_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model02_fit_rePrior <- model02_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model03_fit_rePrior <- model03_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model04_fit_rePrior <- model04_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model05_fit_rePrior <- model05_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model06_fit_rePrior <- model06_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model07_fit_rePrior <- model07_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model08_fit_rePrior <- model08_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model09_fit_rePrior <- model09_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model10_fit_rePrior <- model10_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model11_fit_rePrior <- model11_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model12_fit_rePrior <- model12_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model13_fit_rePrior <- model13_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model14_fit_rePrior <- model14_rePrior$sample(data = samp_dat_mrp, seed = 5678)
-  model15_fit_rePrior <- model15_rePrior$sample(data = samp_dat_mrp, seed = 5678) 
+  model01_fit_rePrior <- model01_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model02_fit_rePrior <- model02_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model03_fit_rePrior <- model03_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model04_fit_rePrior <- model04_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model05_fit_rePrior <- model05_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model06_fit_rePrior <- model06_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model07_fit_rePrior <- model07_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model08_fit_rePrior <- model08_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model09_fit_rePrior <- model09_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model10_fit_rePrior <- model10_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model11_fit_rePrior <- model11_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model12_fit_rePrior <- model12_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model13_fit_rePrior <- model13_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model14_fit_rePrior <- model14_rePrior$sample(data = samp_dat_mrp, seed = 56789)
+  model15_fit_rePrior <- model15_rePrior$sample(data = samp_dat_mrp, seed = 56789) 
   
   
   # saving quantities
@@ -150,4 +148,3 @@ for(iter in 1:100){
        sampest_06, sampest_07, sampest_08, sampest_09, sampest_10,
        sampest_11, sampest_12, sampest_13, sampest_14, sampest_15,
        file = paste0('LOO_arPrior_', iter, '.RData'), compress=T)
-}

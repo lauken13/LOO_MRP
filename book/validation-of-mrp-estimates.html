@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Chapter 12 Validation of MRP estimates | Multilevel Regression and Poststratification: A Practical Guide and New Developments</title>
+<meta name="author" content="John Doe">
+<meta name="description" content="Written by Lauren Kennedy and Swen Kuh One of the hallmark features of MRP is that the method is model reliant. That is, the quality of our estimation techniques depend entirely on the quality of...">
+<meta name="generator" content="bookdown 0.24 with bs4_book()">
+<meta property="og:title" content="Chapter 12 Validation of MRP estimates | Multilevel Regression and Poststratification: A Practical Guide and New Developments">
+<meta property="og:type" content="book">
+<meta property="og:description" content="Written by Lauren Kennedy and Swen Kuh One of the hallmark features of MRP is that the method is model reliant. That is, the quality of our estimation techniques depend entirely on the quality of...">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chapter 12 Validation of MRP estimates | Multilevel Regression and Poststratification: A Practical Guide and New Developments">
+<meta name="twitter:description" content="Written by Lauren Kennedy and Swen Kuh One of the hallmark features of MRP is that the method is model reliant. That is, the quality of our estimation techniques depend entirely on the quality of...">
+<!-- JS --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://kit.fontawesome.com/6ecbd6c532.js" crossorigin="anonymous"></script><script src="libs/header-attrs-2.11/header-attrs.js"></script><script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link href="libs/bootstrap-4.6.0/bootstrap.min.css" rel="stylesheet">
+<script src="libs/bootstrap-4.6.0/bootstrap.bundle.min.js"></script><script src="libs/bs3compat-0.3.1/transition.js"></script><script src="libs/bs3compat-0.3.1/tabs.js"></script><script src="libs/bs3compat-0.3.1/bs3compat.js"></script><link href="libs/bs4_book-1.0.0/bs4_book.css" rel="stylesheet">
+<script src="libs/bs4_book-1.0.0/bs4_book.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- CSS --><link rel="stylesheet" href="bs4_style.css">
+</head>
+<body data-spy="scroll" data-target="#toc">
+
+<div class="container-fluid">
+<div class="row">
+  <header class="col-sm-12 col-lg-3 sidebar sidebar-book"><a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
+
+    <div class="d-flex align-items-start justify-content-between">
+      <h1>
+        <a href="index.html" title="">Multilevel Regression and Poststratification: A Practical Guide and New Developments</a>
+      </h1>
+      <button class="btn btn-outline-primary d-lg-none ml-2 mt-1" type="button" data-toggle="collapse" data-target="#main-nav" aria-expanded="true" aria-controls="main-nav"><i class="fas fa-bars"></i><span class="sr-only">Show table of contents</span></button>
+    </div>
+
+    <div id="main-nav" class="collapse-lg">
+      <form role="search">
+        <input id="search" class="form-control" type="search" placeholder="Search" aria-label="Search">
+</form>
+
+      <nav aria-label="Table of contents"><h2>Table of contents</h2>
+        <ul class="book-toc list-unstyled"><li><a class="" href="index.html"><span class="header-section-number">Chapter 12</span> Validation of MRP estimates</a></li></ul>
+
+        <div class="book-extra">
+          <p><a id="book-repo" href="https://github.com/rstudio/bookdown-demo">View book source <i class="fab fa-github"></i></a></p>
+        </div>
+      </nav>
+</div>
+  </header><main class="col-sm-12 col-md-9 col-lg-7" id="content"><div id="validation-of-mrp-estimates" class="section level1" number="12">
+<h1>
+<span class="header-section-number">12</span> Validation of MRP estimates<a class="anchor" aria-label="anchor" href="#validation-of-mrp-estimates"><i class="fas fa-link"></i></a>
+</h1>
+<p>Written by Lauren Kennedy and Swen Kuh</p>
+<p>One of the hallmark features of MRP is that the method is model reliant. That is, the quality of our estimation techniques depend entirely on the quality of the model used to produce population predictions. Indeed we see in CITE YAJUAN that the difference between poor and good MRP based estimation is in the quality of the model. It is for this reason that the validation of MRP model and estimates is an essential component of the workflow. In this chapter we focus on how to validate and better understand the model being used to make MRP estimation.</p>
+<p>In this chapter we discuss the specific applications of Bayesian Workflow (CITE) validation within an MRP setting. We first discuss choosing metrics and clearly specifying aims and goals, before discussing how to validate the model within the context of the sample. Following this, we describe how simulation studies can be used to understand and explore differences between MRP models. Lastly we discuss the role of external validation within the context of MRP.</p>
+<div id="formally-decide-on-key-aims" class="section level2" number="12.1">
+<h2>
+<span class="header-section-number">12.1</span> Formally decide on key aims<a class="anchor" aria-label="anchor" href="#formally-decide-on-key-aims"><i class="fas fa-link"></i></a>
+</h2>
+<p>One advantage of MRP as a method is that can be used for multiple aims. Not only is MRP an efficient method when it comes to population estimation, it is also an useful method for creating small area or small demographic subgroup estimates. However, we can see from established literature that there appears to be substantial differences in the effect of modelling decisions given the overall aim. For example, in CITE ALEX, we see that the while structured priors do make a difference when the aim is to make a small area estimate, we do not see the same impact at the population estimate level. Similarly in CITE DEWI, we see through visualisation the impact of expanding race/ethnicity demographic groups has an impact at for the estimates of the additional groups, but not otherwise.</p>
+<p>Why would this happen? To see this we demonstrate using a small example. To do this, first we create a population defined by two demographics (X1 and X2) as well as an outcome y. This outcome is what we would like to predict, but we simulate it in the population directly so we can evaluate prediction error. We don’t have this luxury in real world analysis!</p>
+<p>Then we simulate a probability of inclusion. In MRP we are generally assuming that the probability of inclusion in the sample is heterogeneous, which means that in some way we expect the demographic counts of our sample to be significantly different to those of our population.</p>
+<p>We can then use this probability of inclusion to take a sample to use for our modelling. In this case, we take a sample of 1000 from our population (sample approx 1/10th). The degree of heterogeneity in either the probability of inclusion and relationship between demographics and the outcome varies in different applications. We will discuss in later sections how to vary these two quantities in simulation studies to gain a greater understanding of MRP as a method. The proportion of sample to population will also vary. In many MRP based applications, the sample is generally a very small proportion of the population, but this will not always be the case and should also be explored.</p>
+<p>For now though, we will demonstrate the difference between two random effects models - one that excludes the X1 predictor, and one that doesn’t. Using these two models, we will see how these two models differ in our estimates are at the population and at each level of X1.</p>
+<pre><code>#&gt; Running MCMC with 4 chains, at most 12 in parallel...
+#&gt; 
+#&gt; Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 1 finished in 2.7 seconds.
+#&gt; Chain 2 finished in 2.7 seconds.
+#&gt; Chain 3 finished in 2.7 seconds.
+#&gt; Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 4 finished in 2.8 seconds.
+#&gt; 
+#&gt; All 4 chains finished successfully.
+#&gt; Mean chain execution time: 2.8 seconds.
+#&gt; Total execution time: 3.5 seconds.
+#&gt; Running MCMC with 4 chains, at most 12 in parallel...
+#&gt; 
+#&gt; Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 1 finished in 5.7 seconds.
+#&gt; Chain 4 finished in 5.7 seconds.
+#&gt; Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 2 finished in 5.8 seconds.
+#&gt; Chain 3 finished in 5.7 seconds.
+#&gt; 
+#&gt; All 4 chains finished successfully.
+#&gt; Mean chain execution time: 5.7 seconds.
+#&gt; Total execution time: 6.7 seconds.</code></pre>
+<p>The model with two random effects better reflects the data generating process (where X1 and X2 were both strongly related to both the outcome and the probability of inclusion). However, we can see in Figure @ref(fig:level_of_pred) that the two models make almost identical estimates at the population level. The difference between the two model estimates is at the level of 100th of a percentile. Although the uncertainty is slightly lower in the larger model, the difference between the two uncertainty intervals is very small.</p>
+<p>However, when we look at the subpopulation level (different levels of X1), we can see that there are highly different estimates between the two models. From a traditional modelling perspective this is not surprising, a model without X1 does not model the heterogeneity due to X1. However, the divergence between the two models is striking from an MRP perspective. Indeed the practical decision of which model to use would differ depending on which level of abstraction is used. We see these findings in the literature, for examples see CITE ALEX’s work on structured priors with MRP.</p>
+<div class="figure">
+<img src="14-validation-kennedy_files/figure-html/level_of_pred-1.png" alt="Comparison between two models in estimating small area and population means. Points represent the population median, intervals represent 95% uncertainty intervals. Yellow/Black represents the two models used to complete the first stage of the MRP analysis, while blue represents the true population value." width="672"><p class="caption">
+(#fig:level_of_pred)Comparison between two models in estimating small area and population means. Points represent the population median, intervals represent 95% uncertainty intervals. Yellow/Black represents the two models used to complete the first stage of the MRP analysis, while blue represents the true population value.
+</p>
+</div>
+<p>In more complex MRP applications, it the level of small area/group might not just be the marginal population predictions for a single demographic, but rather estimates between the interactions of a number of demographics. In CITE ALEX2 we see that the impact of modelling decisions could be seen most clearly in particular demographic interactions.</p>
+<p>For this reason, it is very important to decide the key levels of abstraction before conducting and MRP analysis. For complicated post-stratification matrices, the set of potential small areas to consider is too large to consider investigating at all possible levels. Indeed, this would be a poor use of time. Most MRP analyses are interested in population estimation and estimation at a few key demographics. Of course in the case of multiple estimate levels, all levels need to be considered in the validation.</p>
+<div id="metrics-for-mrp" class="section level3" number="12.1.1">
+<h3>
+<span class="header-section-number">12.1.1</span> Metrics for MRP<a class="anchor" aria-label="anchor" href="#metrics-for-mrp"><i class="fas fa-link"></i></a>
+</h3>
+<p>The other aspect of decision making to make when considering an MRP analysis is how to score the success of a particular estimate. In the previous example we compared the MRP estimate by it’s closeness to other estimates (and the truth), and with width of the uncertainty intervals for those estimates. These two metrics are common within the literature [NEED A REVIEW HERE]. In simulation studies, a third metric that quantifies the whether the uncertainty interval is calibrated relative to the simulated population parameters can also be used. In section XX we will explore the use of simulation studies more fully.</p>
+<p>Which metric should be used to score the goodness of the MRP estimate? Currently the best practice from the literature appears to be choosing a metric that is most suitable for the particular goals at hand. In this section a short exploration of the use cases of a few common metrics used with MRP analyses and comparison of the relative information gained with each will be included to assist users in guiding this decision. Using a secondary review of the systematic literature review produced by CITE DEWI, we identify the scoring used in MRP based papers.</p>
+<div id="biaserror" class="section level4" number="12.1.1.1">
+<h4>
+<span class="header-section-number">12.1.1.1</span> Bias/Error<a class="anchor" aria-label="anchor" href="#biaserror"><i class="fas fa-link"></i></a>
+</h4>
+</div>
+<div id="uncertainty" class="section level4" number="12.1.1.2">
+<h4>
+<span class="header-section-number">12.1.1.2</span> Uncertainty<a class="anchor" aria-label="anchor" href="#uncertainty"><i class="fas fa-link"></i></a>
+</h4>
+</div>
+<div id="mean-square-error" class="section level4" number="12.1.1.3">
+<h4>
+<span class="header-section-number">12.1.1.3</span> Mean Square Error<a class="anchor" aria-label="anchor" href="#mean-square-error"><i class="fas fa-link"></i></a>
+</h4>
+</div>
+<div id="calibrationcoverage" class="section level4" number="12.1.1.4">
+<h4>
+<span class="header-section-number">12.1.1.4</span> Calibration/Coverage<a class="anchor" aria-label="anchor" href="#calibrationcoverage"><i class="fas fa-link"></i></a>
+</h4>
+</div>
+</div>
+</div>
+<div id="validate-model" class="section level2" number="12.2">
+<h2>
+<span class="header-section-number">12.2</span> Validate Model<a class="anchor" aria-label="anchor" href="#validate-model"><i class="fas fa-link"></i></a>
+</h2>
+<p>Having decided on the overall aim (or aims) of the current analysis, how can we know the “goodness” of our model when it comes to population or small area predictions? Ideally we would be able to directly compare MPR models when it comes to population estimates. Often this is not possible however (because the population is not known), although in the next two sections we outline two special cases where it is possible. The first is in a simulation study, which can be used to understand the impact of different types of data structure and model on the MRP estimates in a general sense. The second is in an a specific application sense, where benchmarking data from other surveys can be used to identify potential unaccounted for representation issues.</p>
+<p>However, without the population information as truth, we are left validating the goodness of the MRP model using the sample only. This can be illustrative in several ways, which we describe in this section. Notably we do not cover the full Bayesian Workflow (as described at length in CITE WORKFLOW). Instead we focus specifically on the aspects of model validation that are most salient from an MRP perspective. Before the model is fit, we discuss the use of prior predictive checks to understand the appropriateness of the prior in terms of the scale of the outcome that we intend to predict. After a model is fit, we cover two particularly important checks. These identify the impact of the prior (which can be thought of as the amount of regularisation infused through the model). We also cover posterior predictive checks, with the specific focus of identifying model mis-specification in terms of an inappropriately chosen link.</p>
+<p>It is important to understand that while these checks are good practice for understanding the components and limitations of the model, they do not alone guarantee that an MRP estimate will be unbiased relative to the population truth. The reason for this is that they are unable to account for differences between the sample and population, and do not account for the amount of aggreggation between an MRP model of <em>individuals</em> to a MRP estimand of a <em>population</em>.</p>
+<div id="prior-predictive-checks" class="section level3" number="12.2.1">
+<h3>
+<span class="header-section-number">12.2.1</span> Prior Predictive Checks<a class="anchor" aria-label="anchor" href="#prior-predictive-checks"><i class="fas fa-link"></i></a>
+</h3>
+<p>Why to</p>
+<p>How to
+It might be tempting to feel that a prior predictive check will require a large amount of extra code and work, however I believe the opposite is true. The result of a prior predictive check is a set of posterior samples for each individual in the sample. On it’s own, this is a large dataframe that is difficult to interpret or draw wider conclusions for. However, it will be likely that the main analytics workflow should also be used to synthesise these predictions into a summary that is appropriate for your application specific aims and goals. Fortunately, if you are using Stan (CITE) either through a package that writes code for you (e.g., rstanarm CITE or brms CITE) or writing your own code (implemented through rstan CITE or cmdstanr CITE), then this becomes a quick and painless process. To see how, let’s explore how this would be done using the simple single random effect from the previous section.</p>
+<p>In brms the addition of one additional argument (default is “no”) is sufficient to obtain draws without updating the data as seen in the code chunk below. In rstanarm, a similiar additional arguement can be used (prior_PD = TRUE) to achieve a similar effect.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">model1_altprior_pred</span> <span class="op">&lt;-</span> <span class="fu">brm</span><span class="op">(</span><span class="va">y_obs</span><span class="op">~</span> <span class="op">(</span><span class="fl">1</span><span class="op">|</span><span class="va">X2</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">sample</span>, family <span class="op">=</span> <span class="fu">bernoulli</span><span class="op">(</span>link <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span>, backend <span class="op">=</span> <span class="st">"cmdstanr"</span>, prior<span class="op">=</span><span class="va">prior_logistic</span>, silent <span class="op">=</span> <span class="fl">0</span>, sample_prior  <span class="op">=</span> <span class="st">"only"</span><span class="op">)</span>
+<span class="co">#&gt; Start sampling</span>
+<span class="co">#&gt; Running MCMC with 4 chains, at most 12 in parallel...</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) </span>
+<span class="co">#&gt; Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) </span>
+<span class="co">#&gt; Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) </span>
+<span class="co">#&gt; Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) </span>
+<span class="co">#&gt; Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) </span>
+<span class="co">#&gt; Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) </span>
+<span class="co">#&gt; Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) </span>
+<span class="co">#&gt; Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) </span>
+<span class="co">#&gt; Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) </span>
+<span class="co">#&gt; Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) </span>
+<span class="co">#&gt; Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) </span>
+<span class="co">#&gt; Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) </span>
+<span class="co">#&gt; Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) </span>
+<span class="co">#&gt; Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) </span>
+<span class="co">#&gt; Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) </span>
+<span class="co">#&gt; Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) </span>
+<span class="co">#&gt; Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) </span>
+<span class="co">#&gt; Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) </span>
+<span class="co">#&gt; Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) </span>
+<span class="co">#&gt; Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) </span>
+<span class="co">#&gt; Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) </span>
+<span class="co">#&gt; Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) </span>
+<span class="co">#&gt; Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) </span>
+<span class="co">#&gt; Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) </span>
+<span class="co">#&gt; Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) </span>
+<span class="co">#&gt; Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) </span>
+<span class="co">#&gt; Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) </span>
+<span class="co">#&gt; Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) </span>
+<span class="co">#&gt; Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) </span>
+<span class="co">#&gt; Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) </span>
+<span class="co">#&gt; Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) </span>
+<span class="co">#&gt; Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) </span>
+<span class="co">#&gt; Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) </span>
+<span class="co">#&gt; Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) </span>
+<span class="co">#&gt; Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) </span>
+<span class="co">#&gt; Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) </span>
+<span class="co">#&gt; Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) </span>
+<span class="co">#&gt; Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) </span>
+<span class="co">#&gt; Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) </span>
+<span class="co">#&gt; Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) </span>
+<span class="co">#&gt; Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) </span>
+<span class="co">#&gt; Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) </span>
+<span class="co">#&gt; Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) </span>
+<span class="co">#&gt; Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) </span>
+<span class="co">#&gt; Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) </span>
+<span class="co">#&gt; Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) </span>
+<span class="co">#&gt; Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) </span>
+<span class="co">#&gt; Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) </span>
+<span class="co">#&gt; Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) </span>
+<span class="co">#&gt; Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) </span>
+<span class="co">#&gt; Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) </span>
+<span class="co">#&gt; Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) </span>
+<span class="co">#&gt; Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) </span>
+<span class="co">#&gt; Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) </span>
+<span class="co">#&gt; Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) </span>
+<span class="co">#&gt; Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) </span>
+<span class="co">#&gt; Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) </span>
+<span class="co">#&gt; Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) </span>
+<span class="co">#&gt; Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) </span>
+<span class="co">#&gt; Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) </span>
+<span class="co">#&gt; Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) </span>
+<span class="co">#&gt; Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) </span>
+<span class="co">#&gt; Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) </span>
+<span class="co">#&gt; Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) </span>
+<span class="co">#&gt; Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) </span>
+<span class="co">#&gt; Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) </span>
+<span class="co">#&gt; Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) </span>
+<span class="co">#&gt; Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) </span>
+<span class="co">#&gt; Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) </span>
+<span class="co">#&gt; Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) </span>
+<span class="co">#&gt; Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) </span>
+<span class="co">#&gt; Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) </span>
+<span class="co">#&gt; Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) </span>
+<span class="co">#&gt; Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) </span>
+<span class="co">#&gt; Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) </span>
+<span class="co">#&gt; Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) </span>
+<span class="co">#&gt; Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) </span>
+<span class="co">#&gt; Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) </span>
+<span class="co">#&gt; Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) </span>
+<span class="co">#&gt; Chain 1 finished in 0.1 seconds.</span>
+<span class="co">#&gt; Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) </span>
+<span class="co">#&gt; Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) </span>
+<span class="co">#&gt; Chain 2 finished in 0.1 seconds.</span>
+<span class="co">#&gt; Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) </span>
+<span class="co">#&gt; Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) </span>
+<span class="co">#&gt; Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) </span>
+<span class="co">#&gt; Chain 3 finished in 0.1 seconds.</span>
+<span class="co">#&gt; Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) </span>
+<span class="co">#&gt; Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) </span>
+<span class="co">#&gt; Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) </span>
+<span class="co">#&gt; Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) </span>
+<span class="co">#&gt; Chain 4 finished in 0.1 seconds.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; All 4 chains finished successfully.</span>
+<span class="co">#&gt; Mean chain execution time: 0.1 seconds.</span>
+<span class="co">#&gt; Total execution time: 0.9 seconds.</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Warning: 1 of 4000 (0.0%) transitions ended with a divergence.</span>
+<span class="co">#&gt; This may indicate insufficient exploration of the posterior distribution.</span>
+<span class="co">#&gt; Possible remedies include: </span>
+<span class="co">#&gt;   * Increasing adapt_delta closer to 1 (default is 0.8) </span>
+<span class="co">#&gt;   * Reparameterizing the model (e.g. using a non-centered parameterization)</span>
+<span class="co">#&gt;   * Using informative or weakly informative prior distributions</span></code></pre></div>
+<p>If you are working directly with Stancode it is still relatively easy to incorporate this into your workflow. To see how, we can use the code from our brms model previously to see a neat coding trick that can be included in all Stan models. Note the additional variable at the end of the data block “prior_only,” which is a single integer variable that is 1 or 0. It can be used in the model statement to create a switch between the updating the prior given the data (if prior_only is 0) or to simply sample from the prior (if prior_only is 1). The structure of the output for this is the same structure as if sampling from the posterior, which allows us to incorporate the prior predictive check within other analysis workflow code.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">stancode</span><span class="op">(</span><span class="va">model1_altprior_pred</span><span class="op">)</span>
+<span class="co">#&gt; // generated with brms 2.16.3</span>
+<span class="co">#&gt; functions {</span>
+<span class="co">#&gt; }</span>
+<span class="co">#&gt; data {</span>
+<span class="co">#&gt;   int&lt;lower=1&gt; N;  // total number of observations</span>
+<span class="co">#&gt;   int Y[N];  // response variable</span>
+<span class="co">#&gt;   // data for group-level effects of ID 1</span>
+<span class="co">#&gt;   int&lt;lower=1&gt; N_1;  // number of grouping levels</span>
+<span class="co">#&gt;   int&lt;lower=1&gt; M_1;  // number of coefficients per level</span>
+<span class="co">#&gt;   int&lt;lower=1&gt; J_1[N];  // grouping indicator per observation</span>
+<span class="co">#&gt;   // group-level predictor values</span>
+<span class="co">#&gt;   vector[N] Z_1_1;</span>
+<span class="co">#&gt;   int prior_only;  // should the likelihood be ignored?</span>
+<span class="co">#&gt; }</span>
+<span class="co">#&gt; transformed data {</span>
+<span class="co">#&gt; }</span>
+<span class="co">#&gt; parameters {</span>
+<span class="co">#&gt;   real Intercept;  // temporary intercept for centered predictors</span>
+<span class="co">#&gt;   vector&lt;lower=0&gt;[M_1] sd_1;  // group-level standard deviations</span>
+<span class="co">#&gt;   vector[N_1] z_1[M_1];  // standardized group-level effects</span>
+<span class="co">#&gt; }</span>
+<span class="co">#&gt; transformed parameters {</span>
+<span class="co">#&gt;   vector[N_1] r_1_1;  // actual group-level effects</span>
+<span class="co">#&gt;   r_1_1 = (sd_1[1] * (z_1[1]));</span>
+<span class="co">#&gt; }</span>
+<span class="co">#&gt; model {</span>
+<span class="co">#&gt;   // likelihood including constants</span>
+<span class="co">#&gt;   if (!prior_only) {</span>
+<span class="co">#&gt;     // initialize linear predictor term</span>
+<span class="co">#&gt;     vector[N] mu = Intercept + rep_vector(0.0, N);</span>
+<span class="co">#&gt;     for (n in 1:N) {</span>
+<span class="co">#&gt;       // add more terms to the linear predictor</span>
+<span class="co">#&gt;       mu[n] += r_1_1[J_1[n]] * Z_1_1[n];</span>
+<span class="co">#&gt;     }</span>
+<span class="co">#&gt;     target += bernoulli_logit_lpmf(Y | mu);</span>
+<span class="co">#&gt;   }</span>
+<span class="co">#&gt;   // priors including constants</span>
+<span class="co">#&gt;   target += normal_lpdf(Intercept | 0, 1);</span>
+<span class="co">#&gt;   target += normal_lpdf(sd_1 | 0, 1)</span>
+<span class="co">#&gt;     - 1 * normal_lccdf(0 | 0, 1);</span>
+<span class="co">#&gt;   target += std_normal_lpdf(z_1[1]);</span>
+<span class="co">#&gt; }</span>
+<span class="co">#&gt; generated quantities {</span>
+<span class="co">#&gt;   // actual population-level intercept</span>
+<span class="co">#&gt;   real b_Intercept = Intercept;</span>
+<span class="co">#&gt; }</span></code></pre></div>
+<p>Using our simple X2 model from the previous section we can explore the impact of priors within our workflow. I use two types of prior, a standard normal on all coeficients in the model, and the default priors used in brms with a logistic regression . Although for visualisation we have switched to plotting the full density rather than a summary statistic (which would not demonstrate the uptick at the 0/1 probability bounds), the overall workflow comparing these two models is essentially similar.</p>
+<pre><code>#&gt; Running MCMC with 4 chains, at most 12 in parallel...
+#&gt; 
+#&gt; Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 1 finished in 0.1 seconds.
+#&gt; Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 2 finished in 0.1 seconds.
+#&gt; Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 3 finished in 0.1 seconds.
+#&gt; Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 4 finished in 0.1 seconds.
+#&gt; 
+#&gt; All 4 chains finished successfully.
+#&gt; Mean chain execution time: 0.1 seconds.
+#&gt; Total execution time: 1.0 seconds.</code></pre>
+<div class="figure">
+<img src="14-validation-kennedy_files/figure-html/prior_pred_popn-1.png" alt="Comparison between default and alternate priors when the prior has been aggregated to population estimation.  Yellow/Black represents the two priors used to complete the first stage of the MRP analysis." width="672"><p class="caption">
+(#fig:prior_pred_popn)Comparison between default and alternate priors when the prior has been aggregated to population estimation. Yellow/Black represents the two priors used to complete the first stage of the MRP analysis.
+</p>
+</div>
+<div class="figure">
+<img src="14-validation-kennedy_files/figure-html/prior_pred_sae-1.png" alt="Comparison between default and alternate priors when the prior has been aggregated to a small area estimation.  Yellow/Black represents the two priors used to complete the first stage of the MRP analysis." width="672"><p class="caption">
+(#fig:prior_pred_sae)Comparison between default and alternate priors when the prior has been aggregated to a small area estimation. Yellow/Black represents the two priors used to complete the first stage of the MRP analysis.
+</p>
+</div>
+<p>Interestingly the impact of the prior is less dramatic than when compared to an individual level prior predictive check, which is shown in Figure @ref(fig:prior_pred_comparrison) This is because some of the extremity of the cell prior predictive is essentially averaged down in an aggregate. Again, this reinforces the point of the previous section, that the context and aims of the MRP analysis need to be taken into account.</p>
+<div class="figure">
+<img src="14-validation-kennedy_files/figure-html/prior_pred_comparrison-1.png" alt="Comparison between default and alternate priors based on whether the prior predictive is for an individual cell or aggregated to a population estimate.  The two facets represent the type of prior used, demonstrating differing effects depending on the prior." width="672"><p class="caption">
+(#fig:prior_pred_comparrison)Comparison between default and alternate priors based on whether the prior predictive is for an individual cell or aggregated to a population estimate. The two facets represent the type of prior used, demonstrating differing effects depending on the prior.
+</p>
+</div>
+</div>
+<div id="posterior-predictive-checks" class="section level3" number="12.2.2">
+<h3>
+<span class="header-section-number">12.2.2</span> Posterior Predictive Checks<a class="anchor" aria-label="anchor" href="#posterior-predictive-checks"><i class="fas fa-link"></i></a>
+</h3>
+<p>Priors are an important part of an MRP analysis. In the previous section we saw how a prior predictive check can be integrated into a wider MRP analysis code. In this section however, we consider how to validate the result of the MRP analysis <em>within the context of the sample</em>. We focus specifically on the sample because tools already exist for validating models assuming the sample is a random draw of the wider population. In particular we focus on two cases; understanding how the prior changes the posterior estimates, and identifying a miss-specification problem. These cases are not unique to MRP (and indeed can be seen in CITE Bayesian workflow ), but they are of particular importance for an MRP analysis.</p>
+<div id="check-for-impact-of-prior" class="section level4" number="12.2.2.1">
+<h4>
+<span class="header-section-number">12.2.2.1</span> Check for impact of prior<a class="anchor" aria-label="anchor" href="#check-for-impact-of-prior"><i class="fas fa-link"></i></a>
+</h4>
+<p>Having checked to see what the priors look like in the context of your data and likelihood through a prior predictive check, it is also useful and instructive to explore the amount of regularisation due the prior in the posterior estimates. MRP is a method heavily reliant on priors for regularisation, which in term stabilizes estimates and reduces the uncertainty of small area predictions. This means that it is unlikely that we would wish for the prior impact to be zero unless the data is both sufficiently large with a sufficient number of observations in each level of each random effect. In some contexts too much regularisation might overly homogenize small area estimates and the resulting bias might be too strong (e.g., we have gone too far on the bias-variance see-saw). In other contexts the same bias might be acceptable, but it is still important to communicate to data stakeholders that the estimate does rely on the prior chosen, and a different prior could result in a different estimate.</p>
+<p>In LINK VIZ CHAPTER, Kuriwaki shows a more in depth example of exploring the impact of the prior and model misspecification through visualisation. Here we simply show a single example to understand potential comparison choices and reflect on how to decide on how much regularisation is too much regularisation. In the following example we consider the difference in MRP X2 estimates given two models - a model that uses simple fixed effects for all demographics (e.g., no pooling) and a model that uses our tightly regularising priors. I also manipulate the size of the dataset with a very small sample size of 100 and a more standard sample size of 1000 to a very large sample of 10,000 demonstrate that the priors can interact with the sample size.</p>
+<pre><code>#&gt; Running MCMC with 4 chains, at most 12 in parallel...
+#&gt; 
+#&gt; Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 3 finished in 0.4 seconds.
+#&gt; Chain 4 finished in 0.4 seconds.
+#&gt; Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 1 finished in 0.5 seconds.
+#&gt; Chain 2 finished in 0.5 seconds.
+#&gt; 
+#&gt; All 4 chains finished successfully.
+#&gt; Mean chain execution time: 0.5 seconds.
+#&gt; Total execution time: 1.3 seconds.
+#&gt; Running MCMC with 4 chains, at most 12 in parallel...
+#&gt; 
+#&gt; Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 1 finished in 0.2 seconds.
+#&gt; Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 2 finished in 0.2 seconds.
+#&gt; Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 3 finished in 0.2 seconds.
+#&gt; Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 4 finished in 0.2 seconds.
+#&gt; 
+#&gt; All 4 chains finished successfully.
+#&gt; Mean chain execution time: 0.2 seconds.
+#&gt; Total execution time: 1.0 seconds.
+#&gt; Running MCMC with 4 chains, at most 12 in parallel...
+#&gt; 
+#&gt; Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 1 finished in 1.8 seconds.
+#&gt; Chain 2 finished in 1.8 seconds.
+#&gt; Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 3 finished in 2.0 seconds.
+#&gt; Chain 4 finished in 2.0 seconds.
+#&gt; 
+#&gt; All 4 chains finished successfully.
+#&gt; Mean chain execution time: 1.9 seconds.
+#&gt; Total execution time: 2.1 seconds.
+#&gt; Running MCMC with 4 chains, at most 12 in parallel...
+#&gt; 
+#&gt; Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 1 finished in 0.9 seconds.
+#&gt; Chain 2 finished in 1.0 seconds.
+#&gt; Chain 3 finished in 0.9 seconds.
+#&gt; Chain 4 finished in 0.9 seconds.
+#&gt; 
+#&gt; All 4 chains finished successfully.
+#&gt; Mean chain execution time: 0.9 seconds.
+#&gt; Total execution time: 1.1 seconds.
+#&gt; Running MCMC with 4 chains, at most 12 in parallel...
+#&gt; 
+#&gt; Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 3 finished in 57.6 seconds.
+#&gt; Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 4 finished in 57.9 seconds.
+#&gt; Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 2 finished in 58.9 seconds.
+#&gt; Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 1 finished in 60.2 seconds.
+#&gt; 
+#&gt; All 4 chains finished successfully.
+#&gt; Mean chain execution time: 58.7 seconds.
+#&gt; Total execution time: 60.4 seconds.
+#&gt; Running MCMC with 4 chains, at most 12 in parallel...
+#&gt; 
+#&gt; Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
+#&gt; Chain 2 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 3 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 4 Iteration:  100 / 2000 [  5%]  (Warmup) 
+#&gt; Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 2 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 3 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 4 Iteration:  200 / 2000 [ 10%]  (Warmup) 
+#&gt; Chain 2 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 3 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 4 Iteration:  300 / 2000 [ 15%]  (Warmup) 
+#&gt; Chain 3 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 4 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 2 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
+#&gt; Chain 3 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 4 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 2 Iteration:  500 / 2000 [ 25%]  (Warmup) 
+#&gt; Chain 3 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 4 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 2 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
+#&gt; Chain 3 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 4 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 2 Iteration:  700 / 2000 [ 35%]  (Warmup) 
+#&gt; Chain 3 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 4 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 2 Iteration:  800 / 2000 [ 40%]  (Warmup) 
+#&gt; Chain 4 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 3 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 2 Iteration:  900 / 2000 [ 45%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+#&gt; Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
+#&gt; Chain 4 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 2 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 3 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
+#&gt; Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 4 finished in 9.4 seconds.
+#&gt; Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 2 finished in 9.6 seconds.
+#&gt; Chain 3 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
+#&gt; Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 1 finished in 10.0 seconds.
+#&gt; Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+#&gt; Chain 3 finished in 10.2 seconds.
+#&gt; 
+#&gt; All 4 chains finished successfully.
+#&gt; Mean chain execution time: 9.8 seconds.
+#&gt; Total execution time: 10.3 seconds.</code></pre>
+<div class="figure">
+<img src="14-validation-kennedy_files/figure-html/prior_size_compare-1.png" alt="Comparison between fixed effect and strong regularisation through priors.  The three facets represent the sample size used to fit the model, demonstrating that priors are particularly important in small samples." width="672"><p class="caption">
+(#fig:prior_size_compare)Comparison between fixed effect and strong regularisation through priors. The three facets represent the sample size used to fit the model, demonstrating that priors are particularly important in small samples.
+</p>
+</div>
+<p>This illustration shows us the difference between not pooling (yellow) and partially pooling with a relatively strong regularizing prior (black). Note that as you move along the facets, the two models converge to similar estimates, and very close to the population truth (blue). Initially, when the sample size is very small, we see that the prior over-regularises, dragging the area level estimates towards the grand mean. The fixed effects estimates are much more variable (although not particularly accurate), which reflects the very small sample size. In a real world setting we do not have the truth to compare, but we can see that that relative homogeneity of area level random effects when compared to fixed effects. When the sample size increases however, as in panel 3 and 2, we see that the difference between these two models is marginal (particularly in panel 3, which is a model based estimate based on the full population).</p>
+<p>This is an example of regularisation that is potentially too strong. Identifying when this has occurred is difficult, particularly because we use priors in an MRP model for the purpose of regularisation. This means that deciding how much is “too much” depends entirely on the problem at hand (although the first panel represents “too much” regularisation for most applications) including the level that estimates are made at. One way of at quantifying how much work the prior is doing in the overall estimates is comparing to a fixed effect model (like above). Another is to compare against raw sample estimates, but these could be different for representation reasons, rather than model reasons.</p>
+</div>
+<div id="check-for-miss-specification" class="section level4" number="12.2.2.2">
+<h4>
+<span class="header-section-number">12.2.2.2</span> Check for miss-specification<a class="anchor" aria-label="anchor" href="#check-for-miss-specification"><i class="fas fa-link"></i></a>
+</h4>
+</div>
+</div>
+</div>
+<div id="proocess-and-understanding" class="section level2" number="12.3">
+<h2>
+<span class="header-section-number">12.3</span> Proocess and Understanding<a class="anchor" aria-label="anchor" href="#proocess-and-understanding"><i class="fas fa-link"></i></a>
+</h2>
+<p>Throughout this chapter we have seen a large number of different phenomena illustrated through small simulated datasets. These simulated datasets are a way of illustrating my knowledge and experience of things that can occur, and demonstrate occasionally what conditions under which they occur. In this they are a proof of concept, but simulated datasets and simulation studies can be used to understand the behaviour of MRP under different circumstances. This is incredible important for model development (e.g., CITE ALEX), to understand what challenges exist (e.g, see cluster sampling CITE ALEX) and to increase our understanding of how and when certain artefacts can be observed (e.g., combine survey frames, e.g., shiro’s chapter). To fully utilise simulations to understand MRP we need to understand the intended purposes (e.g., counterfactual example, exploration of different methodologies or exploration of phenomenom), and craft simulation studies accordingly.</p>
+</div>
+<div id="external-validation" class="section level2" number="12.4">
+<h2>
+<span class="header-section-number">12.4</span> External validation<a class="anchor" aria-label="anchor" href="#external-validation"><i class="fas fa-link"></i></a>
+</h2>
+
+</div>
+</div>
+  <div class="chapter-nav">
+<div class="empty"></div>
+<div class="empty"></div>
+</div></main><div class="col-md-3 col-lg-2 d-none d-md-block sidebar sidebar-chapter">
+    <nav id="toc" data-toggle="toc" aria-label="On this page"><h2>On this page</h2>
+      <div id="book-on-this-page"></div>
+
+      <div class="book-extra">
+        <ul class="list-unstyled">
+          
+        </ul>
+</div>
+    </nav>
+</div>
+
+</div>
+</div> <!-- .container -->
+
+<footer class="bg-primary text-light mt-5"><div class="container"><div class="row">
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>"<strong>Multilevel Regression and Poststratification: A Practical Guide and New Developments</strong>" was written by John Doe. It was last built on 2021-08-16.</p>
+  </div>
+
+  <div class="col-12 col-md-6 mt-3">
+    <p>This book was built by the <a class="text-light" href="https://bookdown.org">bookdown</a> R package.</p>
+  </div>
+
+</div></div>
+</footer>
+</body>
+</html>

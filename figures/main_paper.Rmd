@@ -63,6 +63,15 @@ popn_indv_tab$model = fct_relevel(popn_indv_tab$model, 'X2 + X4',
 
 shape_base  = c(rep(16,4), rep(15,4), rep(17,4), rep(18,3))
 
+leg_lab= c(bquote(bold('X2')~"+"~bold('X4')),
+           bquote('X1 +'~bold("X2 + X4")), 
+           bquote(bold("X2")~'+ X3 +'~bold("X4")),
+           bquote('X1 +'~bold("X2")~'+ X3 +'~bold("X4")),
+           bquote(bold('X4')), bquote('X1 +'~bold("X4")), 
+           bquote('X3 +'~bold("X4")),  bquote('X1 + X3 +'~bold("X4")),
+           bquote(bold('X2')), bquote('X1 +'~bold("X2")), 
+           bquote(bold("X2")~'+ X3'),  bquote('X1 +'~bold("X2")~' + X3'),
+           'X1', 'X3', 'X1 + X3')
 
 corr_indiv_intervalscore <- popn_indv_tab %>%
   pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score")%>%
@@ -79,9 +88,9 @@ corr_indiv_intervalscore <- popn_indv_tab %>%
            type = fct_recode(type, `LOO` = "elpd_loo", `WTD LOO` = "wtdElpd_loo")) %>% 
     ggplot(., aes(x = model_score, y = ind_intervalScr_mean))+
     guides(fill = guide_legend(override.aes = list(size=8))) +
-    geom_point(size = 3, alpha = .5, aes( colour = model))+
-    scale_colour_manual(values = colour_palette_var_base) + 
-   # scale_shape_manual(values = shape_base) +
+    geom_point(size = 3, alpha = .5, aes( colour = model, shape = model))+
+    scale_colour_manual(values = colour_palette_var_base, labels = leg_lab) + 
+    scale_shape_manual(values = shape_base, labels = leg_lab) +
     geom_text(
       data    = corr_indiv_intervalscore,
       mapping = aes(x = xloc, y = yloc, label = cor_val),
@@ -93,16 +102,14 @@ corr_indiv_intervalscore <- popn_indv_tab %>%
           legend.title = element_blank(),
             plot.margin = margin(10, 70, 10, 10)) + 
     guides(colour = guide_legend(override.aes = list(size=3), nrow=4)) + 
-    labs(tag = paste0(str_pad("X2 and X4", 28, "right"), str_pad("X4-only", 24, "right"), str_pad("X2-only", 22, "right"), "Irrelevant")) +
-    theme(plot.tag.position = c(0.525, 0.16),
-          plot.tag = element_text(size=18, face="bold"))
-
+    labs(tag = paste0(str_pad("Bias-precision", 27, "right"), str_pad("Bias-only", 21, "right"), str_pad("Precision-only", 20, "right"), "Irrelevant")) +
+      # geom_line(se = FALSE, colour = "black", stat = "smooth", alpha = .3, size=1.3) +
+    theme(plot.tag.position = c(0.527, 0.16),
+          plot.tag = element_text(size=18, face="bold")) 
   )
 
-    #    geom_line(aes(group = iteration), method = "lm", se = FALSE, colour = "black", stat = "smooth", alpha = .3)+
 
-
-ggsave(g1, width=15, height=8, filename = here("figures/elpd_indv_test2.png"))
+ggsave(g1, width=16, height=10, filename = here("figures/elpd_indv.png"))
 ```
 
 
@@ -122,35 +129,40 @@ corr_popn_intervalscore <- popn_indv_tab %>%
     mutate(type = factor(type),
            type = fct_recode(type, `LOO` = "elpd_loo", `WTD LOO` = "wtdElpd_loo"),
            colour_code = case_when(model == 'X2 + X4' ~ "#4477AA",
-                              model == 'X1 + X2 + X4' ~ "#88CCEE",
-                               model == 'X1 + X2 + X3 + X4' ~ "#332288", 
-                              model == 'X2 + X3 + X4' ~ "#66CCEE",
-                               model == 'X4' ~ "#CC6677", 
-                               model == 'X1 + X4' ~ "#AA4499", 
-                               model == 'X3 + X4' ~ "#EE6677", 
-                               model == 'X1 + X3 + X4' ~ "#882255", 
-                               model == 'X2' ~ "#228833", 
-                               model == 'X1 + X2' ~ "#117733", 
-                               model == 'X2 + X3' ~ "#999933", 
-                               model == 'X1 + X2 + X3' ~ "#DDCC77", 
-                               model == 'X1' ~ "#DDDDDD", 
-                               model == 'X3' ~ "#BBBBBB", 
-                               model == 'X1 + X3' ~ "#879195FF")) %>% 
+                                   model == 'X1 + X2 + X4' ~ "#88CCEE",
+                                   model == 'X1 + X2 + X3 + X4' ~ "#332288", 
+                                   model == 'X2 + X3 + X4' ~ "#66CCEE",
+                                   model == 'X4' ~ "#CC6677", 
+                                   model == 'X1 + X4' ~ "#AA4499", 
+                                   model == 'X3 + X4' ~ "#EE6677", 
+                                   model == 'X1 + X3 + X4' ~ "#882255", 
+                                   model == 'X2' ~ "#228833", 
+                                   model == 'X1 + X2' ~ "#117733", 
+                                   model == 'X2 + X3' ~ "#999933", 
+                                   model == 'X1 + X2 + X3' ~ "#DDCC77", 
+                                   model == 'X1' ~ "#DDDDDD", 
+                                   model == 'X3' ~ "#BBBBBB", 
+                                   model == 'X1 + X3' ~ "#879195FF")) %>% 
     ggplot(., aes(x = model_score, y = popn_intervalScr))+
-    geom_point(size=3, alpha = .5, aes( colour = model), shape = 16)+
+    geom_point(size=3, alpha = .5, aes( colour = model, shape = model)) +
     geom_text(data  = corr_popn_intervalscore,
               mapping = aes(x = xloc, y = yloc, label = cor_val), size=9)+
-    scale_colour_manual(values = colour_palette_var_base) + 
+    scale_colour_manual(values = colour_palette_var_base, labels = leg_lab) + 
+    scale_shape_manual(values = shape_base, labels = leg_lab) +
     facet_grid(.~type, scales = "free")+
     xlab("LOO-based Model Score")+ ylab("Population MRP Interval Score")+
     theme_bw(base_size = 25) +
     theme(legend.title = element_blank(), legend.position = "bottom",
-            plot.margin = margin(10, 25, 10, 10)) + 
-    guides(colour = guide_legend(override.aes = list(size=3), nrow=4)) 
-     # geom_line(aes(group = model), method = "lm", se = FALSE, colour = 'black', stat = "smooth", alpha = .7, size=1.2) 
+          plot.margin = margin(10, 25, 10, 10)) + 
+    guides(colour = guide_legend(override.aes = list(size=3), nrow=4)) + ylim(0,3.2) +
+    labs(tag = paste0(str_pad("Bias-precision", 30.5, "right"), str_pad("Bias-only", 26, "right"), str_pad("Precision-only", 20, "right"), "Irrelevant")) +
+    # labs(tag = paste0(str_pad("X2 and X4", 28, "right"), str_pad("X4-only", 24, "right"), str_pad("X2-only", 22, "right"), "Irrelevant")) +
+    theme(plot.tag.position = c(0.52, 0.17),
+          plot.tag = element_text(size=18, face="bold")) 
+    # geom_line(span = 0.5, se=F, colour="black", alpha=0.3, stat="smooth", size=1.3) 
   )
 
-ggsave(g2, width=15, height=8, filename = here("figures/elpd_popn.png"))
+ggsave(g2, width=16, height=10, filename = here("figures/elpd_popn.png"))
 
 ```
 
@@ -191,15 +203,26 @@ sae_clean_base <- rbind(saeX1_clean_base,saeX2_clean_base, saeX3_clean_base, sae
     select(-full_model) %>%
     filter(!ar_prior) %>%
     mutate(full_model = grepl("X1 + X2 + X3 + X4", model, fixed = TRUE)) %>%
+    mutate(sae = factor(sae),
+           sae = fct_recode(sae, 
+                            `Ignorable \n X1` = "X1", 
+                            `Precision \n X2` = "X2",
+                            `Inconsequential \n X3` = "X3",
+                            `Bias \n X4` = "X4")) %>% 
     ggplot(., aes(x = elpdmean_sae, y = intervalScr_sae, colour = model))+
     geom_point(alpha=.4, size=1, shape=16)+
     facet_grid(sae~group)+
-    scale_color_manual(values = colour_palette_var_base)+
+    scale_color_manual(values = colour_palette_var_base, labels = leg_lab)+
     geom_rug(alpha=.3)+
-    theme_bw(base_size = 15) +
+    theme_bw(base_size = 19) +
     theme(legend.position = "bottom",
           legend.title = element_blank(),
-          axis.title=element_text(size=16))+
+          axis.title=element_text(size=16),
+          plot.tag.position = c(0.52, 0.13),
+          plot.tag = element_text(size=17, face="bold"),
+          strip.text.y = element_text( face = "bold"),
+          strip.text.x = element_text( face = "bold"))+
+    labs(tag = paste0(str_pad("Bias-precision", 25, "right"), str_pad("Bias-only", 20, "right"), str_pad("Precision-only", 18, "right"), "Irrelevant")) +
     xlab("Mean SAE ELDP") + ylab("Interval Score at SAE") + 
     guides(colour = guide_legend(override.aes = list(size=5), nrow=4)) )
 
@@ -271,7 +294,7 @@ ar_tab = sae_clean %>%
   filter(full_model, sae == "X4")%>%
   pivot_wider(names_from = model, values_from = c(intervalScr_sae, elpdmean_sae), names_sep = "_")%>%
   mutate(elpd_diff = (`elpdmean_sae_*X1 + X2 + X3 + X4`-`elpdmean_sae_X1 + X2 + X3 + X4`), # positive is favours * model
-         intscr_diff = (`intervalScr_sae_*X1 + X2 + X3 + X4`-`intervalScr_sae_X1 + X2 + X3 + X4`)) #positive favours * model
+         intscr_diff = -(`intervalScr_sae_*X1 + X2 + X3 + X4`-`intervalScr_sae_X1 + X2 + X3 + X4`)) #positive favours * model
 
 xloc1 = -0.08; xloc2 = 0.17;
 yloc1 = -1.5; yloc2 = 1.8
@@ -284,15 +307,15 @@ yloc1 = -1.5; yloc2 = 1.8
     geom_vline(xintercept = 0)+
     geom_point(alpha = .5, shape=16, size=2)+
     facet_wrap(.~group)+
-    ggtitle("AR Prior vs non-AR prior")+
-    xlab("ELPD (AR prior) - ELPD (non-AR prior)")+
+    ggtitle("AR Prior vs. non-AR prior")+
+    xlab("LOO (AR prior) - LOO (non-AR prior)")+
     ylab("-(Interval Score (AR prior) - Interval Score (non-AR prior))")+
     theme(plot.title = element_text(hjust = 0.5)) +
     theme_bw(base_size = 17) +
     scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) )
 
 
-ggsave(g4, width=12, height=10, filename = here("figures/elpd_AR_1000.png"))
+ggsave(g4, width=12, height=10, filename = here("figures/elpd_AR_500.png"))
 ```
 
 #### Mean sample size in each group 

@@ -5,8 +5,9 @@ library(loo)
 library(posterior) # to convert draws_array() objects 
 library(dplyr)
 library(ggplot2)
+library(survey)
 
-## elpd_SAE
+# elpd_SAE
 source(here::here("02-super popn approach/experiment4_SAE/01-code/SAE_elpd_all.R"), echo=T)
 source(here::here("02-super popn approach/experiment4_SAE/01-code/SAE_elpd_wtd.R"), echo=T)
 
@@ -519,7 +520,8 @@ model_sae_X1_tab = rbind(sae_X1_tab_m6, sae_X1_tab_m11, sae_X1_tab_m13,
   left_join(., elpd_X1sae_sum_tab, by=c('model', 'iteration', 'X1')) %>% 
   left_join(., elpd_X1sae_mean_tab, by=c('model', 'iteration', 'X1')) %>% 
   left_join(., elpd_X1sae_se_tab, by=c('model', 'iteration', 'X1'))  %>% 
-  left_join(., tabX1_all, by=c('model', 'iteration', 'X1'))
+  left_join(., tabX1_all, by=c('model', 'iteration', 'X1'))  %>% 
+  left_join(., wtdTabX1_all, by=c('model', 'iteration', 'X1'))
 
 # combining all of the iterations - X2 ------------------------------------
 sae_X2_tab_m6 = do.call(rbind, calc_list_X2_m6) %>% 
@@ -551,7 +553,8 @@ model_sae_X2_tab = rbind(sae_X2_tab_m6, sae_X2_tab_m11, sae_X2_tab_m13,
   left_join(., elpd_X2sae_sum_tab, by=c('model', 'iteration', 'X2')) %>% 
   left_join(., elpd_X2sae_mean_tab, by=c('model', 'iteration', 'X2')) %>% 
   left_join(., elpd_X2sae_se_tab, by=c('model', 'iteration', 'X2'))  %>% 
-  left_join(., tabX2_all, by=c('model', 'iteration', 'X2'))
+  left_join(., tabX2_all, by=c('model', 'iteration', 'X2'))  %>% 
+  left_join(., wtdTabX2_all, by=c('model', 'iteration', 'X2'))
 
 # combining all of the iterations - X3 ------------------------------------
 sae_X3_tab_m6 = do.call(rbind, calc_list_X3_m6) %>% 
@@ -583,7 +586,8 @@ model_sae_X3_tab = rbind(sae_X3_tab_m6, sae_X3_tab_m11, sae_X3_tab_m13,
   left_join(., elpd_X3sae_sum_tab, by=c('model', 'iteration', 'X3')) %>% 
   left_join(., elpd_X3sae_mean_tab, by=c('model', 'iteration', 'X3')) %>% 
   left_join(., elpd_X3sae_se_tab, by=c('model', 'iteration', 'X3'))  %>% 
-  left_join(., tabX3_all, by=c('model', 'iteration', 'X3'))
+  left_join(., tabX3_all, by=c('model', 'iteration', 'X3'))  %>% 
+  left_join(., wtdTabX3_all, by=c('model', 'iteration', 'X3'))
 
 
 # combining all of the iterations - X4 ------------------------------------
@@ -616,5 +620,6 @@ model_sae_X4_tab = rbind(sae_X4_tab_m6, sae_X4_tab_m11, sae_X4_tab_m13,
   left_join(., elpd_X4sae_sum_tab, by=c('model', 'iteration', 'X4')) %>% 
   left_join(., elpd_X4sae_mean_tab, by=c('model', 'iteration', 'X4')) %>% 
   left_join(., elpd_X4sae_se_tab, by=c('model', 'iteration', 'X4')) %>% 
-  left_join(., tabX4_all, by=c('model', 'iteration', 'X4'))
+  left_join(., tabX4_all, by=c('model', 'iteration', 'X4')) %>% 
+  left_join(., wtdTabX4_all, by=c('model', 'iteration', 'X4'))
 

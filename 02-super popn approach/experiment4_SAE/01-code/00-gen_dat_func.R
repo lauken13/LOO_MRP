@@ -104,3 +104,4 @@ fx1 = function(x) {dbeta(x,2,2)}
 fx2 = function(x) {1 - dbeta(x, 2,2)}
 fx3 = function(x) {0.7 - (3 * exp(-x/0.2))}
 
+ 

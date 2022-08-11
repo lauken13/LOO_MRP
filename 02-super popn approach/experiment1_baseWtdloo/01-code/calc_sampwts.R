@@ -1,0 +1,20 @@
+## calculating popn indv estimates
+
+
+## combining popn estimates for plotting (from Lauren's email)
+library(tidyverse)
+
+## data file
+load(here::here("02-super popn approach/experiment1_baseWtdloo/03-data/temp/loo_N02_1000.RData"))
+
+names(samp_data_list[[1]])
+
+samp_wts = lapply(1:100, function(x)matrix(NA, nrow=1000,ncol=2))
+for(iter in 1:100){
+  samp_wts[[iter]][,1] = iter
+  samp_wts[[iter]][,2] = samp_data_list[[iter]]$wts
+  
+  colnames(samp_wts[[iter]]) = c('iteration', 'wts')
+}
+
+saveRDS(samp_wts, file='02-super popn approach/experiment1_baseWtdloo/03-data/samp_wts.rds')

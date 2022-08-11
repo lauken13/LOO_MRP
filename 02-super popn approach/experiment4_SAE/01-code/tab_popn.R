@@ -1,6 +1,6 @@
 ## combining popn estimates for plotting (from Lauren's email)
 ## data file
-load(here::here('02-super popn approach/experiment4_SAE/03-data/temp/loo_sae_500.RData'))
+load(here::here('02-super popn approach/experiment4_SAE/03-data/temp/loo_sae.RData'))
 
 library(tidyverse)
 

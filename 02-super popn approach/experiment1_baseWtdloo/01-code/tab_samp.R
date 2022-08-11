@@ -9,16 +9,16 @@ for(i in iter){
   sampest_tab_list[[i]]$y_prob = rep(as.numeric(samp_data_list[[i]]$y_prob), 15)
   
   sampest_list[[i]] = mutate(sampest_tab_list[[i]],
-                             ci_width_ind = sampestX95 - sampestX5,
-                             coverage_ind = ifelse(y_prob >= sampestX5 & y_prob <= sampestX95, 1, 0),
-                             bias_X50_ind =  sampestX50 - y_prob,
-                             bias_X5_ind =  sampestX5 - y_prob,
-                             bias_X95_ind =  sampestX95 - y_prob, 
-                             bias_X50_abs_ind =  abs(sampestX50 - y_prob),
-                             bias_X5_abs_ind =  abs(sampestX5 - y_prob),
-                             bias_X95_abs_ind =  abs(sampestX95 - y_prob), 
-                             bias_width_ind = bias_X95_ind - bias_X5_ind, 
-                             intervalScr_ind = (sampestX95 - sampestX5) + 
+                             ind_ci_width = sampestX95 - sampestX5,
+                             ind_coverage = ifelse(y_prob >= sampestX5 & y_prob <= sampestX95, 1, 0),
+                             ind_bias_X50 =  sampestX50 - y_prob,
+                             ind_bias_X5 =  sampestX5 - y_prob,
+                             ind_bias_X95 =  sampestX95 - y_prob, 
+                             ind_bias_X50_abs =  abs(sampestX50 - y_prob),
+                             ind_bias_X5_abs =  abs(sampestX5 - y_prob),
+                             ind_bias_X95_abs =  abs(sampestX95 - y_prob), 
+                             ind_bias_width = ind_bias_X95 - ind_bias_X5, 
+                             ind_intervalScr = (sampestX95 - sampestX5) + 
                                ((2 / alph * (sampestX5 - y_prob)) * ifelse(y_prob < sampestX5, 1, 0)) + 
                                ((2 / alph * (y_prob - sampestX95)) * ifelse(y_prob > sampestX95, 1, 0)),
                              iteration = i) 
@@ -42,17 +42,17 @@ indv_all_tab = do.call(rbind, sampest_list[iter]) %>%
                                         "model15" = 'X1 + X2 + X3 + X4')))
 
 indv_summ_tab = indv_all_tab %>% 
-  group_by(iteration, model) %>% 
-  summarise(ind_ci_width_mean = mean(ci_width_ind),
-            ind_bias_mean = mean(bias_X50_ind),
-            ind_bias_sd = sd(bias_X50_ind), 
-            ind_bias_mean_abs = mean(bias_X50_abs_ind),
-            ind_bias_sd_abs = sd(bias_X50_abs_ind),
-            ind_coverage_mean = mean(coverage_ind),
-            ind_biasWidth_mean = mean(bias_width_ind),
-            ind_biasWidth_sd = sd(bias_width_ind),
-            ind_intervalScr_mean = mean(intervalScr_ind),
-            ind_intervalScr_sd = sd(intervalScr_ind))
+  group_by(model, iteration) %>% 
+  summarise(ind_ci_width_mean = mean(ind_ci_width),
+            ind_bias_mean = mean(ind_bias_X50),
+            ind_bias_sd = sd(ind_bias_X50), 
+            ind_bias_mean_abs = mean(ind_bias_X50_abs),
+            ind_bias_sd_abs = sd(ind_bias_X50_abs),
+            ind_coverage_mean = mean(ind_coverage),
+            ind_biasWidth_mean = mean(ind_bias_width),
+            ind_biasWidth_sd = sd(ind_bias_width),
+            ind_intervalScr_mean = mean(ind_intervalScr),
+            ind_intervalScr_sd = sd(ind_intervalScr))
 
 indv_summ_tab$model = fct_relevel(indv_summ_tab$model, c('X2 + X4', 'X1 + X2 + X4', 'X2 + X3 + X4', 'X1 + X2 + X3 + X4', 
                                                          'X4', 'X1 + X4', 'X3 + X4', 'X1 + X3 + X4',
@@ -63,10 +63,4 @@ indv_all_tab$model = fct_relevel(indv_all_tab$model, c('X2 + X4', 'X1 + X2 + X4'
                                                          'X4', 'X1 + X4', 'X3 + X4', 'X1 + X3 + X4',
                                                          'X2', 'X1 + X2', 'X2 + X3', 'X1 + X2 + X3',
                                                          'X1', 'X3', 'X1 + X3'))
-
-# # loo ------------------------------------------------------------
-# indv_summ_tab = left_join(indv_summ_tab, elpd_all_tab, by=c('model', 'iteration')) %>%
-#   left_join(., wtdElpd_all_tab, by=c('model', 'iteration')) %>%
-#   as_tibble() %>%
-#   mutate(model = factor(model))
 

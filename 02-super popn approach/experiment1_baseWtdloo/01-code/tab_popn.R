@@ -17,8 +17,8 @@ for(i in iter){
            popn_bias_X5 = as.numeric(popnestX5 - mean_yObs),
            popn_bias_X95 = as.numeric(popnestX95 - mean_yObs),
            popn_ci_width = as.numeric(popnestX95 - popnestX5),
-           popn_coverage = ifelse(mean_yObs >= popnestX5 & mean_yObs <= popnestX95, 1, 0),
-           popn_intervalScr = (popnestX95 - popnestX5) + 
+           MRP_coverage = ifelse(mean_yObs >= popnestX5 & mean_yObs <= popnestX95, 1, 0),
+           MRP_intervalScr = (popnestX95 - popnestX5) + 
              ((2 / alph * (popnestX5 - mean_yObs)) * ifelse(mean_yObs < popnestX5, 1, 0)) + 
              ((2 / alph * (mean_yObs - popnestX95)) * ifelse(mean_yObs > popnestX95, 1, 0))) 
 }
@@ -74,6 +74,6 @@ res_list_N02_1000 = list(indv_all_tab = indv_all_tab,
                  model_sae_X3_tab = model_sae_X3_tab,
                  model_sae_X4_tab = model_sae_X4_tab, 
                  popn_counts = popn_counts)
-saveRDS(res_list_N02_1000, file=here::here("02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_1000.rds"), compress=T)                 
+saveRDS(res_list_N02_1000, file=here::here("02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_1000_new.rds"), compress=T)                 
                  
 

@@ -1,0 +1,469 @@
+# Validation of MRP estimates
+
+Written by Lauren Kennedy and Swen Kuh
+
+One of the hallmark features of MRP is that the method is model reliant. That is, the quality of our estimation techniques depend entirely on the quality of the model used to produce population predictions. Indeed we see in CITE YAJUAN that the difference between poor and good MRP based estimation is in the quality of the model. It is for this reason that the validation of MRP model and estimates is an essential component of the workflow. In this chapter we focus on how to validate and better understand the model being used to make MRP estimation. 
+
+In this chapter we discuss the specific applications of Bayesian Workflow (CITE) validation within an MRP setting. We first discuss choosing metrics and clearly specifying aims and goals, before discussing how to validate the model within the context of the sample. Following this, we describe how simulation studies can be used to understand and explore differences between MRP models. Lastly we discuss the role of external validation within the context of MRP. 
+
+## Formally decide on key aims
+
+One advantage of MRP as a method is that can be used for multiple aims. Not only is MRP an efficient method when it comes to population estimation, it is also an useful method for creating small area or small demographic subgroup estimates. However, we can see from established literature that there appears to be substantial differences in the effect of modelling decisions given the overall aim. For example, in CITE ALEX, we see that the while structured priors do make a difference when the aim is to make a small area estimate, we do not see the same impact at the population estimate level. Similarly in CITE DEWI, we see through visualisation the impact of expanding race/ethnicity demographic groups has an impact at for the estimates of the additional groups, but not otherwise. 
+
+Why would this happen? To see this we demonstrate using a small example. To do this, first we create a population defined by two demographics (X1 and X2) as well as an outcome y. This outcome is what we would like to predict, but we simulate it in the population directly so we can evaluate prediction error. We don't have this luxury in real world analysis!
+
+```{r, echo=F, message=F, warning=F}
+library(tidyverse)
+set.seed(192783)
+sample_size = 10000
+population <- data.frame(X1 = sample(1:4,sample_size,replace=TRUE, prob = c(.1,.2,.4,.3)),
+                         X2 = sample(1:5,sample_size,replace=TRUE, prob = c(.1,.5,.2,.1,.1)))
+population$prob_y <- brms::inv_logit_scaled(rnorm(4,0,1)[population$X1]+
+                                              rnorm(5,0,1)[population$X2])
+population$y_obs <- rbinom(nrow(population),1,population$prob_y)
+```
+
+Then we simulate a probability of inclusion. In MRP we are generally assuming that the probability of inclusion in the sample is heterogeneous, which means that in some way we expect the demographic counts of our sample to be significantly different to those of our population. 
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+population$incl_prob = brms::inv_logit_scaled(c(.1,.2,-.3,.1)[population$X1]+
+                                              c(.6,-2.1,1,.2,.1)[population$X2])
+
+```
+
+We can then use this probability of inclusion to take a sample to use for our modelling. In this case, we take a sample of 1000 from our population (sample approx 1/10th). The degree of heterogeneity in either the probability of inclusion and relationship between demographics and the outcome varies in different applications. We will discuss in later sections how to vary these two quantities in simulation studies to gain a greater understanding of MRP as a method. The proportion of sample to population will also vary. In many MRP based applications, the sample is generally a very small proportion of the population, but this will not always be the case and should also be explored. 
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+sample <- population[sample.int(nrow(population),size = 1000, prob = population$incl_prob),]
+```
+
+For now though, we will demonstrate the difference between two random effects models - one that excludes the X1 predictor, and one that doesn't. Using these two models, we will see how these two models differ in our estimates are at the population and at each level of X1. 
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE, include=F}
+library(brms)
+prior_logistic <- c(prior(normal(0,1), class = "sd"),
+                    prior(normal(0,1), class = "Intercept"))
+model1 <- brm(y_obs~ (1|X2), data = sample, family = bernoulli(link = "logit"), backend = "cmdstanr", prior=prior_logistic, silent = 2, refresh=0)
+model2 <- brm(y_obs~ (1|X1) + (1|X2), data = sample, family = bernoulli(link = "logit"), backend = "cmdstanr", prior=prior_logistic, silent =0, refresh=0)
+
+```
+
+The model with two random effects better reflects the data generating process (where X1 and X2 were both strongly related to both the outcome and the probability of inclusion). However, we can see in Figure \@ref(fig:level_of_pred) that the two models make almost identical estimates at the population level. The difference between the two model estimates is at the level of 100th of a percentile. Although the uncertainty is slightly lower in the larger model, the difference between the two uncertainty intervals is very small.
+
+However, when we look at the subpopulation level (different levels of X1), we can see that there are highly different estimates between the two models. From a traditional modelling perspective this is not surprising, a model without X1 does not model the heterogeneity due to X1. However, the divergence between the two models is striking from an MRP perspective. Indeed the practical decision of which model to use would differ depending on which level of abstraction is used. We see these findings in the literature, for examples see CITE ALEX's work on structured priors with MRP.
+
+
+```{r,level_of_pred, fig.cap = "Comparison between two models in estimating small area and population means. Points represent the population median, intervals represent 95% uncertainty intervals. Yellow/Black represents the two models used to complete the first stage of the MRP analysis, while blue represents the true population value.",echo = FALSE, message = FALSE, warning = FALSE, include=F}
+popn_ps <- population %>%
+  group_by(X1,X2)%>%
+  summarise(Nj = n())
+
+preds1 <- posterior_linpred(model1, newdata = popn_ps,transform = TRUE)
+preds2 <- posterior_linpred(model2, newdata = popn_ps, transform = TRUE)
+
+popn1 <- apply(preds1,1,function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
+popn2 <- apply(preds2,1,function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
+
+ests_popn1 <- data.frame(posterior_ests = popn1) %>%
+  summarise(med = median(posterior_ests),
+            low025 = quantile(posterior_ests,.025),
+            up975 = quantile(posterior_ests,.975))%>%
+  mutate(level = "Population",model = "(1|X2)")
+ests_popn2 <- data.frame(posterior_ests = popn2) %>%
+  summarise(med = median(posterior_ests),
+            low025 = quantile(posterior_ests,.025),
+            up975 = quantile(posterior_ests,.975))%>%
+  mutate(level = "Population",model = "(1|X1) + (1|X2)")
+
+model1_x1_estimates <- data.frame(matrix(nrow=4000,ncol=length(unique(sample$X1))))
+model2_x1_estimates <- data.frame(matrix(nrow=4000,ncol=length(unique(sample$X1))))
+for(i in 1:length(unique(sample$X1))){
+  loc_id <- which(popn_ps$X1==i)
+  model1_x1_estimates[,i] <- apply(preds1[,loc_id],1,function(x)sum(x*popn_ps$Nj[loc_id])/sum(popn_ps$Nj[loc_id]))
+  model2_x1_estimates[,i] <- apply(preds2[,loc_id],1,function(x)sum(x*popn_ps$Nj[loc_id])/sum(popn_ps$Nj[loc_id]))
+}
+
+x1_ests1 <- model1_x1_estimates %>%
+  pivot_longer(everything(), names_to = "level", values_to = "posterior_est")%>%
+  group_by(level)%>%
+  summarise(med = median(posterior_est),
+            low025 = quantile(posterior_est,.025),
+            up975 = quantile(posterior_est,.975))%>%
+  mutate(model = "(1|X2)",
+         level = fct_recode(level,`Group 1` = "X1",
+                            `Group 2` = "X2",
+                            `Group 3` = "X3",
+                            `Group 4` = "X4"))
+
+x1_ests2 <- model2_x1_estimates %>%
+  pivot_longer(everything(), names_to = "level", values_to = "posterior_est")%>%
+  group_by(level)%>%
+  summarise(med = median(posterior_est),
+            low025 = quantile(posterior_est,.025),
+            up975 = quantile(posterior_est,.975))%>%
+  mutate(model = "(1|X1) + (1|X2)",
+         level = fct_recode(level,`Group 1` = "X1",
+                            `Group 2` = "X2",
+                            `Group 3` = "X3",
+                            `Group 4` = "X4"))
+
+x1_ests <- rbind(x1_ests1,x1_ests2,ests_popn1,ests_popn2)
+
+subpopn_vals <- population %>%
+  group_by(X1)%>%
+  summarise(mean = mean(y_obs), low025 = as.numeric(NA), up975 = as.numeric(NA), model = "Truth")%>%
+  mutate(level = paste0("Group ",X1))%>%
+  select(c("mean","low025","up975","model","level"))
+
+overall_popn <- population %>%
+                     mutate(mean = mean(y_obs), low025 = as.numeric(NA), up975 = as.numeric(NA), model = "Truth", level = "Population")%>%
+  select(c("mean","low025","up975","model","level"))
+
+popn_vals <- rbind(overall_popn, subpopn_vals)
+
+x1_ests %>%
+  ggplot(., aes(x = level, y = med,ymin = low025,ymax = up975, colour = model))+
+  geom_errorbar(width = 0.2,position = position_dodge(width =.3))+
+  geom_point(position = position_dodge(width =.3))+
+  geom_point(popn_vals, mapping = aes(y = mean, x = level))+
+  coord_flip()+
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        axis.title = element_blank())+
+  ggthemes::scale_color_colorblind()
+```
+
+In more complex MRP applications, it the level of small area/group might not just be the marginal population predictions for a single demographic, but rather estimates between the interactions of a number of demographics. In CITE ALEX2 we see that the impact of modelling decisions could be seen most clearly in particular demographic interactions.
+
+For this reason, it is very important to decide the key levels of abstraction before conducting and MRP analysis. For complicated post-stratification matrices, the set of potential small areas to consider is too large to consider investigating at all possible levels. Indeed, this would be a poor use of time. Most MRP analyses are interested in population estimation and estimation at a few key demographics. Of course in the case of multiple estimate levels, all levels need to be considered in the validation.
+
+### Metrics for MRP
+
+The other aspect of decision making to make when considering an MRP analysis is how to score the success of a particular estimate. In the previous example we compared the MRP estimate by it's closeness to other estimates (and the truth), and with width of the uncertainty intervals for those estimates. These two metrics are common within the literature [NEED A REVIEW HERE]. In simulation studies, a third metric that quantifies the whether the uncertainty interval is calibrated relative to the simulated population parameters can also be used. In section XX we will explore the use of simulation studies more fully.
+
+Which metric should be used to score the goodness of the MRP estimate? Currently the best practice from the literature appears to be choosing a metric that is most suitable for the particular goals at hand. In this section a short exploration of the use cases of a few common metrics used with MRP analyses and comparison of the relative information gained with each will be included to assist users in guiding this decision. Using a secondary review of the systematic literature review produced by CITE DEWI, we identify the scoring used in MRP based papers.
+
+#### Bias/Error
+
+#### Uncertainty
+
+#### Mean Square Error
+
+#### Calibration/Coverage
+
+## Validate Model
+
+Having decided on the overall aim (or aims) of the current analysis, how can we know the "goodness" of our model when it comes to population or small area predictions? Ideally we would be able to directly compare MPR models when it comes to population estimates. Often this is not possible however (because the population is not known), although in the next two sections we outline two special cases where it is possible. The first is in a simulation study, which can be used to understand the impact of different types of data structure and model on the MRP estimates in a general sense. The second is in an a specific application sense, where benchmarking data from other surveys can be used to identify potential unaccounted for representation issues.
+
+However, without the population information as truth, we are left validating the goodness of the MRP model using the sample only. This can be illustrative in several ways, which we describe in this section. Notably we do not cover the full Bayesian Workflow (as described at length in CITE WORKFLOW). Instead we focus specifically on the aspects of model validation that are most salient from an MRP perspective. Before the model is fit, we discuss the use of prior predictive checks to understand the appropriateness of the prior in terms of the scale of the outcome that we intend to predict. After a model is fit, we cover two particularly important checks. These identify the impact of the prior (which can be thought of as the amount of regularisation infused through the model). We also cover posterior predictive checks, with the specific focus of identifying model mis-specification in terms of an inappropriately chosen link.
+
+It is important to understand that while these checks are good practice for understanding the components and limitations of the model, they do not alone guarantee that an MRP estimate will be unbiased relative to the population truth. The reason for this is that they are unable to account for differences between the sample and population, and do not account for the amount of aggreggation between an MRP model of *individuals* to a MRP estimand of a *population*.
+
+### Prior Predictive Checks
+
+Why to
+
+How to
+It might be tempting to feel that a prior predictive check will require a large amount of extra code and work, however I believe the opposite is true. The result of a prior predictive check is a set of posterior samples for each individual in the sample. On it's own, this is a large dataframe that is difficult to interpret or draw wider conclusions for. However, it will be likely that the main analytics workflow should also be used  to synthesise these predictions into a summary that is appropriate for your application specific aims and goals. Fortunately, if you are using Stan (CITE) either through a package that writes code for you (e.g., rstanarm CITE or brms CITE) or writing your own code (implemented through rstan CITE or cmdstanr CITE), then this becomes a quick and painless process. To see how, let's explore how this would be done using the simple single random effect from the previous section.
+
+In brms the addition of one additional argument (default is "no") is sufficient to obtain draws without updating the data as seen in the code chunk below. In rstanarm, a similiar additional arguement can be used (prior_PD  = TRUE) to achieve a similar effect.
+
+```{r, include=F}
+model1_altprior_pred <- brm(y_obs~ (1|X2), data = sample, family = bernoulli(link = "logit"), backend = "cmdstanr", prior=prior_logistic, silent = 0, sample_prior  = "only")
+```
+
+If you are working directly with Stancode it is still relatively easy to incorporate this into your workflow. To see how, we can use the code from our brms model previously to see a neat coding trick that can be included in all Stan models. Note the additional variable at the end of the data block "prior_only", which is a single integer variable that is 1 or 0. It can be used in the model statement to create a switch between the updating the prior given the data (if prior_only is 0) or to simply sample from the prior (if prior_only is 1). The structure of the output for this is the same structure as if sampling from the posterior, which allows us to incorporate the prior predictive check within other analysis workflow code.
+
+```{r}
+stancode(model1_altprior_pred)
+```
+
+Using our simple X2 model from the previous section we can explore the impact of priors within our workflow. I use two types of prior, a standard normal on all coeficients in the model, and the default priors used in brms with a logistic regression \footnote{Created using the default priors in Version 2.16.3, these might change in future versions.}. Although for visualisation we have switched to plotting the full density rather than a summary statistic (which would not demonstrate the uptick at the 0/1 probability bounds), the overall workflow comparing these two models is essentially similar.
+
+```{r,prior_pred_popn, fig.cap = "Comparison between default and alternate priors when the prior has been aggregated to population estimation.  Yellow/Black represents the two priors used to complete the first stage of the MRP analysis.",echo = FALSE, message = FALSE, warning = FALSE, include=F}
+
+model1_defaultprior_pred <- brm(y_obs~ (1|X2), data = sample, family = bernoulli(link = "logit"), backend = "cmdstanr",  silent = 0, sample_prior  = "only")
+
+popn_ps <- population %>%
+  group_by(X1,X2)%>%
+  summarise(Nj = n())
+
+prior_preds_default <- posterior_linpred(model1_defaultprior_pred, newdata = popn_ps,transform = TRUE)
+prior_preds_alt <- posterior_linpred(model1_altprior_pred, newdata = popn_ps, transform = TRUE)
+
+popn_mrp_prior_preds_default <- apply(prior_preds_default,1,function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
+popn_mrp_prior_preds_alt <- apply(prior_preds_alt,1,function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj))
+
+ests_popn_prior_preds_default <- data.frame(posterior_ests = popn_mrp_prior_preds_default) %>%
+  mutate(level = "Population",model = "(1|X2)", prior = "Default")
+ests_popn_prior_preds_alt <- data.frame(posterior_ests = popn_mrp_prior_preds_alt) %>%
+  mutate(level = "Population",model = "(1|X2)", prior = "Alternate")
+
+ests_model = rbind(ests_popn_prior_preds_alt,ests_popn_prior_preds_default)
+
+ggplot(ests_model, aes(x = posterior_ests, fill = prior)) +
+         geom_density(alpha = .3)+
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        axis.title.y = element_blank())+
+  xlab("MRP Population Estimate")+
+  ggthemes::scale_fill_colorblind()
+```
+
+```{r,prior_pred_sae, fig.cap = "Comparison between default and alternate priors when the prior has been aggregated to a small area estimation.  Yellow/Black represents the two priors used to complete the first stage of the MRP analysis.",echo = FALSE, message = FALSE, warning = FALSE, include=F}
+
+model1_x1_estimates_prior_default <- data.frame(matrix(nrow=4000,ncol=length(unique(sample$X1))))
+model1_x1_estimates_prior_alt <- data.frame(matrix(nrow=4000,ncol=length(unique(sample$X1))))
+for(i in 1:length(unique(sample$X1))){
+  loc_id <- which(popn_ps$X1==i)
+  model1_x1_estimates_prior_alt[,i] <- apply(prior_preds_alt[,loc_id],1,function(x)sum(x*popn_ps$Nj[loc_id])/sum(popn_ps$Nj[loc_id]))
+  model1_x1_estimates_prior_default[,i] <- apply(prior_preds_default[,loc_id],1,function(x)sum(x*popn_ps$Nj[loc_id])/sum(popn_ps$Nj[loc_id]))
+}
+
+model1_x1_estimates_prior_alt <- model1_x1_estimates_prior_alt %>%
+  pivot_longer(everything(), names_to = "level", values_to = "posterior_est")%>%
+  group_by(level)%>%
+  mutate(model = "(1|X2)", prior = "Alternate",
+         level = factor(level),
+         level = fct_recode(level,`Group 1` = "X1",
+                            `Group 2` = "X2",
+                            `Group 3` = "X3",
+                            `Group 4` = "X4",))
+
+model1_x1_estimates_prior_default <- model1_x1_estimates_prior_default %>%
+  pivot_longer(everything(), names_to = "level", values_to = "posterior_est")%>%
+  group_by(level)%>%
+  mutate(model = "(1|X2)", prior = "Default",
+         level = factor(level),
+         level = fct_recode(level,`Group 1` = "X1",
+                            `Group 2` = "X2",
+                            `Group 3` = "X3",
+                            `Group 4` = "X4",))
+
+x1_ests_prior <- rbind(model1_x1_estimates_prior_default,model1_x1_estimates_prior_alt)
+
+ggplot(x1_ests_prior, aes(x = posterior_est, y = level, fill = prior)) +
+         geom_violin(alpha = .3)+
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        axis.title.y = element_blank())+
+  xlab("MRP Population Estimate")+
+  ggthemes::scale_fill_colorblind()
+
+```
+
+
+Interestingly the impact of the prior is less dramatic than when compared to an individual level prior predictive check, which is shown in Figure \@ref(fig:prior_pred_comparrison) This is because some of the extremity of the cell prior predictive is essentially averaged down in an aggregate. Again, this reinforces the point of the previous section, that the context and aims of the MRP analysis need to be taken into account.
+
+```{r,prior_pred_comparrison, fig.cap = "Comparison between default and alternate priors based on whether the prior predictive is for an individual cell or aggregated to a population estimate.  The two facets represent the type of prior used, demonstrating differing effects depending on the prior.",echo = FALSE, message = FALSE, warning = FALSE, include=F}
+single_cell_prior_preds_default <- data.frame(prior_preds_default)%>%
+  pivot_longer(everything(),names_to = "cell_index", values_to = "prior_samp")%>%
+  mutate(type = "Cell predictions", prior = "Default")
+
+single_cell_prior_preds_alternate <- data.frame(prior_preds_alt)%>%
+  pivot_longer(everything(),names_to = "cell_index", values_to = "prior_samp")%>%
+  mutate(type = "Cell predictions", prior = "Alternate")
+
+popn_prior_preds_default <- data.frame(prior_samp = popn_mrp_prior_preds_default) %>%
+  mutate(cell_index = "Population", type = "Population", prior = "Default")
+
+popn_prior_preds_alternate <- data.frame(prior_samp = popn_mrp_prior_preds_alt) %>%
+  mutate(cell_index = "Population", type = "Population", prior = "Alternate")
+
+single_cell_prior_preds <- rbind(single_cell_prior_preds_default, popn_prior_preds_default,
+                                 single_cell_prior_preds_alternate, popn_prior_preds_alternate)
+
+ggplot(single_cell_prior_preds, aes(x = prior_samp, group = cell_index, colour = type))+
+  geom_density()+
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        axis.title.y = element_blank())+
+  xlab("Prior Predictive")+
+  facet_grid(.~prior)+
+  ggthemes::scale_color_colorblind()
+
+```
+
+### Posterior Predictive Checks
+
+Priors are an important part of an MRP analysis. In the previous section we saw how a prior predictive check can be integrated into a wider MRP analysis code. In this section however, we consider how to validate the result of the MRP analysis *within the context of the sample*. We focus specifically on the sample because tools already exist for validating models assuming the sample is a random draw of the wider population. In particular we focus on two cases; understanding how the prior changes the posterior estimates, and identifying a miss-specification problem. These cases are not unique to MRP (and indeed can be seen in CITE Bayesian workflow ), but they are of particular importance for an MRP analysis.
+
+#### Check for impact of prior
+
+Having checked to see what the priors look like in the context of your data and likelihood through a prior predictive check, it is also useful and instructive to explore the amount of regularisation due the prior in the posterior estimates. MRP is a method heavily reliant on priors for regularisation, which in term stabilizes estimates and reduces the uncertainty of small area predictions. This means that it is unlikely that we would wish for the prior impact to be zero unless the data is both sufficiently large with a sufficient number of observations in each level of each random effect. In some contexts too much regularisation might overly homogenize small area estimates and the resulting bias might be too strong (e.g., we have gone too far on the bias-variance see-saw). In other contexts the same bias might be acceptable, but it is still important to communicate to data stakeholders that the estimate does rely on the prior chosen, and a different prior could result in a different estimate.
+
+In LINK VIZ CHAPTER, Kuriwaki shows a more in depth example of exploring the impact of the prior and model misspecification through visualisation. Here we simply show a single example to understand potential comparison choices and reflect on how to decide on how much regularisation is too much regularisation. In the following example we consider the difference in MRP X2 estimates given two models - a model that uses simple fixed effects for all demographics (e.g., no pooling) and a model that uses our tightly regularising priors. I also manipulate the size of the dataset with a very small sample size of 100 and a more standard sample size of 1000 to a very large sample of 10,000 demonstrate that the priors can interact with the sample size.
+
+```{r,prior_size_compare, fig.cap = "Comparison between fixed effect and strong regularisation through priors.  The three facets represent the sample size used to fit the model, demonstrating that priors are particularly important in small samples.",echo = FALSE, message = FALSE, warning = FALSE, include=F}
+small_sample <- population[sample.int(nrow(population),size = 100, prob = population$incl_prob),]
+large_sample <- population[sample.int(nrow(population),size = 10000, prob = population$incl_prob),]
+prior_tight <- c(prior(normal(0,.1), class = "sd"),
+            prior(normal(0,.1), class = "Intercept"))
+
+model1_altprior_smallsample <- brm(y_obs~ (1|X1) + (1|X2), data = small_sample, family = bernoulli(link = "logit"), backend = "cmdstanr", prior=prior_tight, silent = 0)
+
+model1_fixedeffect_smallsample <- brm(y_obs~ factor(X1) + factor(X2), data = small_sample, family = bernoulli(link = "logit"), backend = "cmdstanr", prior=prior(normal(0,1), class = "Intercept"), silent = 0)
+
+model1_altprior_sample <- brm(y_obs~ (1|X1) +  (1|X2), data = sample, family = bernoulli(link = "logit"), backend = "cmdstanr", prior=prior_tight, silent = 0)
+
+model1_fixedeffect_sample <- brm(y_obs~ factor(X1) + factor(X2), data = sample, family = bernoulli(link = "logit"), backend = "cmdstanr", prior=prior(normal(0,1), class = "Intercept"), silent = 0)
+
+model1_altprior_largesample <- brm(y_obs~ (1|X1) + (1|X2), data = large_sample, family = bernoulli(link = "logit"), backend = "cmdstanr", prior=prior_tight, silent = 0)
+
+model1_fixedeffect_largesample <- brm(y_obs~ factor(X1) + factor(X2), data = large_sample, family = bernoulli(link = "logit"), backend = "cmdstanr", prior=prior(normal(0,1), class = "Intercept"), silent = 0)
+
+popn_ps <- population %>%
+  group_by(X1, X2)%>%
+  summarise(Nj = n())
+
+popn_preds_altprior_smallsample <- posterior_linpred(model1_altprior_smallsample, newdata = popn_ps,transform = TRUE)
+popn_preds_fixedeffect_smallsample <- posterior_linpred(model1_fixedeffect_smallsample, newdata = popn_ps,transform = TRUE)
+
+popn_preds_altprior_sample <- posterior_linpred(model1_altprior_sample, newdata = popn_ps,transform = TRUE)
+popn_preds_fixedeffect_sample <- posterior_linpred(model1_fixedeffect_sample, newdata = popn_ps,transform = TRUE)
+
+popn_preds_altprior_largesample <- posterior_linpred(model1_altprior_largesample, newdata = popn_ps,transform = TRUE)
+popn_preds_fixedeffect_largesample <- posterior_linpred(model1_fixedeffect_largesample, newdata = popn_ps,transform = TRUE)
+
+x2_estimates_altprior_smallsample <- data.frame(matrix(nrow=4000,ncol=length(unique(sample$X2))))
+x2_estimates_fixedeffect_smallsample <- data.frame(matrix(nrow=4000,ncol=length(unique(sample$X2))))
+x2_estimates_altprior_sample <- data.frame(matrix(nrow=4000,ncol=length(unique(sample$X2))))
+x2_estimates_fixedeffect_sample <- data.frame(matrix(nrow=4000,ncol=length(unique(sample$X2))))
+x2_estimates_altprior_largesample <- data.frame(matrix(nrow=4000,ncol=length(unique(sample$X2))))
+x2_estimates_fixedeffect_largesample <- data.frame(matrix(nrow=4000,ncol=length(unique(sample$X2))))
+for(i in 1:length(unique(sample$X2))){
+  loc_id <- which(popn_ps$X2==i)
+  x2_estimates_altprior_smallsample[,i] <- apply(popn_preds_altprior_smallsample[,loc_id],1,function(x)sum(x*popn_ps$Nj[loc_id])/sum(popn_ps$Nj[loc_id]))
+  x2_estimates_fixedeffect_smallsample[,i] <- apply(popn_preds_fixedeffect_smallsample [,loc_id],1,function(x)sum(x*popn_ps$Nj[loc_id])/sum(popn_ps$Nj[loc_id]))
+    x2_estimates_altprior_sample[,i] <- apply(popn_preds_altprior_sample[,loc_id],1,function(x)sum(x*popn_ps$Nj[loc_id])/sum(popn_ps$Nj[loc_id]))
+  x2_estimates_fixedeffect_sample[,i] <- apply(popn_preds_fixedeffect_sample [,loc_id],1,function(x)sum(x*popn_ps$Nj[loc_id])/sum(popn_ps$Nj[loc_id]))
+    x2_estimates_altprior_largesample[,i] <- apply(popn_preds_altprior_largesample[,loc_id],1,function(x)sum(x*popn_ps$Nj[loc_id])/sum(popn_ps$Nj[loc_id]))
+  x2_estimates_fixedeffect_largesample[,i] <- apply(popn_preds_fixedeffect_largesample [,loc_id],1,function(x)sum(x*popn_ps$Nj[loc_id])/sum(popn_ps$Nj[loc_id]))
+}
+
+x2_estimates_altprior_smallsample<- x2_estimates_altprior_smallsample%>%
+  pivot_longer(everything(), names_to = "level", values_to = "posterior_est")%>%
+  group_by(level)%>%
+  mutate(model = "(1|X2)", prior = "Alternate", size = "n = 100",
+         level = factor(level),
+         level = fct_recode(level,`Group 1` = "X1",
+                            `Group 2` = "X2",
+                            `Group 3` = "X3",
+                            `Group 4` = "X4",
+                            `Group 5` = "X5"))
+
+x2_estimates_fixedeffect_smallsample<- x2_estimates_fixedeffect_smallsample%>%
+  pivot_longer(everything(), names_to = "level", values_to = "posterior_est")%>%
+  group_by(level)%>%
+  mutate(model = "~ X2", prior = "Alternate", size = "n = 100",
+         level = factor(level),
+         level = fct_recode(level,`Group 1` = "X1",
+                            `Group 2` = "X2",
+                            `Group 3` = "X3",
+                            `Group 4` = "X4",
+                            `Group 5` = "X5"))
+x2_estimates_altprior_sample<- x2_estimates_altprior_sample%>%
+  pivot_longer(everything(), names_to = "level", values_to = "posterior_est")%>%
+  group_by(level)%>%
+  mutate(model = "(1|X2)", prior = "Alternate", size = "n = 1000",
+         level = factor(level),
+         level = fct_recode(level,`Group 1` = "X1",
+                            `Group 2` = "X2",
+                            `Group 3` = "X3",
+                            `Group 4` = "X4",
+                            `Group 5` = "X5"))
+
+x2_estimates_fixedeffect_sample<- x2_estimates_fixedeffect_sample%>%
+  pivot_longer(everything(), names_to = "level", values_to = "posterior_est")%>%
+  group_by(level)%>%
+  mutate(model = "~ X2", prior = "Alternate", size = "n = 1000",
+         level = factor(level),
+         level = fct_recode(level,`Group 1` = "X1",
+                            `Group 2` = "X2",
+                            `Group 3` = "X3",
+                            `Group 4` = "X4",
+                            `Group 5` = "X5"))
+
+x2_estimates_altprior_largesample<- x2_estimates_altprior_largesample%>%
+  pivot_longer(everything(), names_to = "level", values_to = "posterior_est")%>%
+  group_by(level)%>%
+    mutate(model = "(1|X2)", prior = "Alternate", size = "n = 10,000",
+         level = factor(level),
+         level = fct_recode(level,`Group 1` = "X1",
+                            `Group 2` = "X2",
+                            `Group 3` = "X3",
+                            `Group 4` = "X4",
+                            `Group 5` = "X5"))
+
+x2_estimates_fixedeffect_largesample<- x2_estimates_fixedeffect_largesample%>%
+  pivot_longer(everything(), names_to = "level", values_to = "posterior_est")%>%
+  group_by(level)%>%
+  mutate(model = "~ X2", prior = "Alternate", size = "n = 10,000",
+         level = factor(level),
+         level = fct_recode(level,`Group 1` = "X1",
+                            `Group 2` = "X2",
+                            `Group 3` = "X3",
+                            `Group 4` = "X4",
+                            `Group 5` = "X5"))
+
+x2_size_ests <- rbind(x2_estimates_altprior_smallsample,x2_estimates_fixedeffect_smallsample,
+                      x2_estimates_altprior_sample,x2_estimates_fixedeffect_sample,
+                      x2_estimates_altprior_largesample,x2_estimates_fixedeffect_largesample) %>%
+  group_by(level, size, model)%>%
+  summarise(median = median(posterior_est),
+            lowCI = quantile(posterior_est,.025),
+            upCI = quantile(posterior_est,.975))
+
+population_truth <- population %>%
+  group_by(X2)%>%
+  summarise(median = mean(y_obs))%>%
+  mutate(level = factor(X2),
+         level = fct_recode(level,`Group 1` = "1",
+                            `Group 2` = "2",
+                            `Group 3` = "3",
+                            `Group 4` = "4",
+                            `Group 5` = "5"),
+         `MRP estimate` = median,
+         model = "Population")%>%
+  ungroup()
+
+x2_size_ests %>%
+  mutate(size = ordered(size, levels = c("n = 100","n = 1000","n = 10,000")))%>%
+  mutate(`MRP estimate` = median) %>%
+  ggplot(.,aes(x= level, y = `MRP estimate`, ymin = lowCI, ymax = upCI,  colour = model))+
+  geom_point(position = position_dodge(width = .5))+
+  geom_errorbar(position = position_dodge(width = .5), width = .2)+
+  geom_point(data = population_truth, mapping = aes(x = level, y = `MRP estimate`, colour = model), inherit.aes =  FALSE)+
+  facet_grid(.~size)+
+  ggthemes::scale_color_colorblind()+
+  theme(axis.text.x=element_text(angle=45,hjust=1,vjust=0.5),
+        axis.title.x = element_blank(),
+        legend.title = element_blank())
+```
+This illustration shows us the difference between not pooling (yellow) and partially pooling with a relatively strong regularizing prior (black). Note that as you move along the facets, the two models converge to similar estimates, and very close to the population truth (blue). Initially, when the sample size is very small, we see that the prior over-regularises, dragging the area level estimates towards the grand mean. The fixed effects estimates are much more variable (although not particularly accurate), which reflects the very small sample size. In a real world setting we do not have the truth to compare, but we can see that that relative homogeneity of area level random effects when compared to fixed effects. When the sample size increases however, as in panel 3 and 2, we see that the difference between these two models is marginal (particularly in panel 3, which is a model based estimate based on the full population).
+
+This is an example of regularisation that is potentially too strong. Identifying when this has occurred is difficult, particularly because we use priors in an MRP model for the purpose of regularisation. This means that deciding how much is "too much" depends entirely on the problem at hand (although the first panel represents "too much" regularisation for most applications) including the level that estimates are made at. To compare the regularisation imposed by different priors, a similar process can be used. It's worth remembering that the end goal is *not* to have no effect of prior, but instead to be aware of the effect of the prior and the resulting implications for estimates and thus conclusions from the survey.
+
+We have compared the amount of regularisation imposed by a relatively strict prior on the variance terms of the random effect by comparing it to a no-pooling or fixed effect model. One could be tempted to compare against raw sample estimates to quantify this, and indeed this is a technique more broadly employed for mixed effect modelling (CITE). However, within an MRP context this is not desirable. MRP is employed specifically where raw sample estimates are not appropriate due to known or potential sampling issues, which can also cause differences between model based population estimates and raw disaggregated estimates. It is important not to confuse the two.
+
+#### Check for miss-specification
+
+In the previous section we compared considered how much priors regularize when compared to a fixed effects model. We distinguished between comparing raw estimates and MRP estimates - they are estimates of different estimands. However, there is one aspect of MRP validation where looking specifically at sample will be highly useful. We know from the Bayesian workflow (CITE) that checking posterior predictive checks can help to detect if the model predicts data at a substantially different pattern than the observed data it can be an indication that the model is not appropriate for some reason. TO explore this we simulate a new outcome in the population, y_log, which is simulated from a log-normal.
+
+We see in this figure the relationship between predicted and observed values. If the model makes well calibrated predictions we would expect it to fall along the
+
+
+## Proocess and Understanding
+
+Throughout this chapter we have seen a large number of different phenomena illustrated through small simulated datasets. These simulated datasets are a way of illustrating my knowledge and experience of things that can occur, and demonstrate occasionally what conditions under which they occur. In this they are a proof of concept, but simulated datasets and simulation studies can be used to understand the behaviour of MRP under different circumstances. This is incredible important for model development (e.g., CITE ALEX), to understand what challenges exist (e.g, see cluster sampling CITE ALEX) and to increase our understanding of how and when certain artefacts can be observed (e.g., combine survey frames, e.g., shiro's chapter). To fully utilise simulations to understand MRP we need to understand the intended purposes (e.g., counterfactual example, exploration of different methodologies or exploration of phenomenom), and craft simulation studies accordingly.
+
+All simulations studies for MRP exploration should have common steps:
+
+1. Simulate a population to estimate.
+This means that a population of individuals needs to be created. Typically we would create these individuals so they are described by some set of demographic covariates $X$. To best represent the reality of the real world, complex relationships between the demographics should be simulated, and inbalance in numbers (e.g., some minority demographic categories rather than similar numbers for each) should also be created. These are demographic challenges that specifically impact MRP. Interactions between the demographics can create spurious relationships with the outcome, which to my knowledge has not been studied currently. Similiarly for a method intended for partial pooling, the imbalance in numbers in each demographic group increases the chance of
+
+
+In this section we explore how
+
+## External validation
+

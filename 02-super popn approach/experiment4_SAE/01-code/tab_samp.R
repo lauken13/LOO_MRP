@@ -1,9 +1,6 @@
 ## table for individual data set 
 library(tidyverse)
 
-# ## data file
-# load(here::here('02-super popn approach/experiment4_SAE/03-data/temp/loo_sae_1000.RData'))
-
 # individual bias ---------------------------------------------------------
 alph=0.1
 sampest_list = list()
@@ -37,9 +34,7 @@ indv_all_tab = do.call(rbind, sampest_list[iter]) %>%
 
 indv_summ_tab = indv_all_tab %>% 
   group_by(iteration, model) %>% 
-  summarise(
-    # ind_ci_width_mean = mean(ci_ind_width),
-            ind_bias_mean = mean(bias_X50_ind),
+  summarise(ind_bias_mean = mean(bias_X50_ind),
             ind_bias_sd = sd(bias_X50_ind), 
             ind_bias_mean_abs = mean(bias_X50_abs_ind),
             ind_bias_sd_abs = sd(bias_X50_abs_ind),

@@ -1,6 +1,8 @@
 ## combining popn estimates for plotting (from Lauren's email)
 ## data file
-load(here::here('02-super popn approach/experiment4_SAE/03-data/temp/loo_sae.RData'))
+load(here::here('02-super popn approach/experiment4_SAE/03-data/temp/loo_sae_500_wtd.RData'))
+
+load(here::here('02-super popn approach/experiment4_SAE/03-data/temp/loo_sae_1000.RData'))
 
 library(tidyverse)
 
@@ -57,7 +59,7 @@ model_sae_X3_tab
 model_sae_X4_tab
 
 ## counts for table
-# source(here::here("02-super popn approach/experiment4_SAE/01-code/popn_counts.R"), echo=TRUE)
+source(here::here("02-super popn approach/experiment4_SAE/01-code/popn_counts.R"), echo=TRUE)
 
 res_list_sae = list(indv_all_tab = indv_all_tab,
                     popn_indv_tab =  popn_indv_tab,
@@ -66,7 +68,8 @@ res_list_sae = list(indv_all_tab = indv_all_tab,
                     model_sae_X2_tab = model_sae_X2_tab,
                     model_sae_X3_tab = model_sae_X3_tab,
                     model_sae_X4_tab = model_sae_X4_tab, 
-                    popn_counts = popn_counts)
-saveRDS(res_list_sae, file=here::here("02-super popn approach/experiment4_SAE/03-data/res_list_sae.rds"), compress=T)                 
+                    popn_counts = popn_counts,
+                    samp_counts = samp_counts)
+saveRDS(res_list_sae, file=here::here("02-super popn approach/experiment4_SAE/03-data/res_list_sae_1000_wtd.rds"), compress=T)                 
 
 

@@ -43,8 +43,8 @@ for (ite in iter){
     
     t1 = svymean(looX1, svy_rake[ind,]) %>%
       data.frame(.) %>%
-      rename(elpd_mean = mean,
-             elpd_mean_se = SE)
+      rename(wtdMean_X1sae = mean,
+             wtdMean_SE_X1sae = SE)
 
     tabX1[[lvl]] = svytotal(looX1, svy_rake[ind,]) %>%
       data.frame(.) %>%
@@ -52,8 +52,8 @@ for (ite in iter){
       mutate(X1 = lvl,
              n_X1sae = length(ind),
              iteration = ite) %>%
-      rename(elpd_sum = total,
-             elpd_sum_se = SE) %>% 
+      rename(wtdTotal_X1sae = total,
+             wtdTotal_SE_X1sae = SE) %>% 
       cbind(., t1) %>% 
       mutate(model = plyr::revalue(model, c('elpd_loo_01' = 'X1', 
                                             'elpd_loo_02' = 'X2', 
@@ -83,8 +83,8 @@ for (ite in iter){
     
     t2 = svymean(looX2, svy_rake[ind,]) %>%
       data.frame(.) %>%
-      rename(elpd_mean = mean,
-             elpd_mean_se = SE)
+      rename(wtdMean_X2sae = mean,
+             wtdMean_SE_X2sae = SE)
     
     tabX2[[lvl]] = svytotal(looX2, svy_rake[ind,]) %>%
       data.frame(.) %>%
@@ -92,8 +92,8 @@ for (ite in iter){
       mutate(X2 = lvl,
              n_X2sae = length(ind),
              iteration = ite) %>%
-      rename(elpd_sum = total,
-             elpd_sum_se = SE) %>%
+      rename(wtdTotal_X2sae = total,
+             wtdTotal_SE_X2sae = SE) %>%
       cbind(., t2) %>% 
       mutate(model = plyr::revalue(model, c('elpd_loo_01' = 'X1', 
                                             'elpd_loo_02' = 'X2', 
@@ -124,8 +124,8 @@ for (ite in iter){
     
     t3 = svymean(looX3, svy_rake[ind,]) %>%
       data.frame(.) %>%
-      rename(elpd_mean = mean,
-             elpd_mean_se = SE)
+      rename(wtdMean_X3sae = mean,
+             wtdMean_SE_X3sae = SE)
 
     tabX3[[lvl]] = svytotal(looX3, svy_rake[ind,]) %>%
       data.frame(.) %>%
@@ -133,8 +133,8 @@ for (ite in iter){
       mutate(X3 = lvl,
              n_X3sae = length(ind),
              iteration = ite) %>%
-      rename(elpd_sum = total,
-             elpd_sum_se = SE) %>%
+      rename(wtdTotal_X3sae = total,
+             wtdTotal_SE_X3sae = SE) %>%
       cbind(., t3) %>% 
       mutate(model = plyr::revalue(model, c('elpd_loo_01' = 'X1', 
                                             'elpd_loo_02' = 'X2', 
@@ -165,8 +165,8 @@ for (ite in iter){
     
     t4 = svymean(looX4, svy_rake[ind,]) %>%
       data.frame(.) %>%
-      rename(elpd_mean = mean,
-             elpd_mean_se = SE)
+      rename(wtdMean_X4sae = mean,
+             wtdMean_SE_X4sae = SE)
     
     tabX4[[lvl]] = svytotal(looX4, svy_rake[ind,]) %>% 
       data.frame(.) %>% 
@@ -174,8 +174,8 @@ for (ite in iter){
       mutate(X4 = lvl,
              n_X4sae = length(ind),
              iteration = ite) %>% 
-      rename(elpd_sum = total,
-             elpd_sum_se = SE) %>%
+      rename(wtdTotal_X4sae = total,
+             wtdTotal_SE_X4sae = SE) %>%
       cbind(., t4) %>% 
       mutate(model = plyr::revalue(model, c('elpd_loo_01' = 'X1', 
                                             'elpd_loo_02' = 'X2', 
@@ -197,27 +197,18 @@ for (ite in iter){
 }
 
 tabX1_all = do.call(rbind,tabX1_ite) %>% 
-  rename(wtdElpd_X1sae = elpd_sum,
-         wtd_SE_X1sae = elpd_sum_se) %>% 
-  mutate(wtdElpd_low90_X1sae = .$wtdElpd_X1sae - (.$wtd_SE_X1sae*1.64), # calculating upper and lower bound of the elpd values
-         wtdElpd_upp90_X1sae = .$wtdElpd_X1sae + (.$wtd_SE_X1sae*1.64),
-         wtdElpd_width_X1sae = wtdElpd_upp90_X1sae - wtdElpd_low90_X1sae)
+  mutate(wtdMean_low90_X1sae = .$wtdMean_X1sae - (.$wtdMean_SE_X1sae*1.64), # calculating upper and lower bound of the elpd values
+         wtdMean_upp90_X1sae = .$wtdMean_X1sae + (.$wtdMean_SE_X1sae*1.64),
+         wtdMean_width_X1sae = wtdMean_upp90_X1sae - wtdMean_low90_X1sae)
 tabX2_all = do.call(rbind,tabX2_ite)  %>% 
-  rename(wtdElpd_X2sae = elpd_sum,
-         wtd_SE_X2sae = elpd_sum_se) %>% 
-  mutate(wtdElpd_low90_X2sae = .$wtdElpd_X2sae - (.$wtd_SE_X2sae*1.64), # calculating upper and lower bound of the elpd values
-         wtdElpd_upp90_X2sae = .$wtdElpd_X2sae + (.$wtd_SE_X2sae*1.64),
-         wtdElpd_width_X2sae = wtdElpd_upp90_X2sae - wtdElpd_low90_X2sae)
+  mutate(wtdMean_low90_X2sae = .$wtdMean_X2sae - (.$wtdMean_SE_X2sae*1.64), # calculating upper and lower bound of the elpd values
+         wtdMean_upp90_X2sae = .$wtdMean_X2sae + (.$wtdMean_SE_X2sae*1.64),
+         wtdMean_width_X2sae = wtdMean_upp90_X2sae - wtdMean_low90_X2sae)
 tabX3_all = do.call(rbind,tabX3_ite) %>% 
-  rename(wtdElpd_X3sae = elpd_sum,
-         wtd_SE_X3sae = elpd_sum_se) %>% 
-  mutate(wtdElpd_low90_X3sae = .$wtdElpd_X3sae - (.$wtd_SE_X3sae*1.64), # calculating upper and lower bound of the elpd values
-         wtdElpd_upp90_X3sae = .$wtdElpd_X3sae + (.$wtd_SE_X3sae*1.64),
-         wtdElpd_width_X3sae = wtdElpd_upp90_X3sae - wtdElpd_low90_X3sae)
+  mutate(wtdMean_low90_X3sae = .$wtdMean_X3sae - (.$wtdMean_SE_X3sae*1.64), # calculating upper and lower bound of the elpd values
+         wtdMean_upp90_X3sae = .$wtdMean_X3sae + (.$wtdMean_SE_X3sae*1.64),
+         wtdMean_width_X3sae = wtdMean_upp90_X3sae - wtdMean_low90_X3sae)
 tabX4_all = do.call(rbind,tabX4_ite)  %>% 
-  rename(wtdElpd_X4sae = elpd_sum,
-         wtd_SE_X4sae = elpd_sum_se) %>% 
-  mutate(wtdElpd_low90_X4sae = .$wtdElpd_X4sae - (.$wtd_SE_X4sae*1.64), # calculating upper and lower bound of the elpd values
-         wtdElpd_upp90_X4sae = .$wtdElpd_X4sae + (.$wtd_SE_X4sae*1.64),
-         wtdElpd_width_X4sae = wtdElpd_upp90_X4sae - wtdElpd_low90_X4sae)
-
+  mutate(wtdMean_low90_X4sae = .$wtdMean_X4sae - (.$wtdMean_SE_X4sae*1.64), # calculating upper and lower bound of the elpd values
+         wtdMean_upp90_X4sae = .$wtdMean_X4sae + (.$wtdMean_SE_X4sae*1.64),
+         wtdMean_width_X4sae = wtdMean_upp90_X4sae - wtdMean_low90_X4sae)

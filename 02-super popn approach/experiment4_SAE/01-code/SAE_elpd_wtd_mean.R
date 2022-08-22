@@ -13,40 +13,13 @@ wtdTabX1 = wtdTabX2 =
 # LOO by SAE --------------------------------------------------------------
 # calculating the sum and mean by X1 groups
 for (ite in iter){
-  
   samp_data = samp_data_list[[ite]]
-  
-  ## creating survey design
-  svy1 = svydesign(ids=~1, # cluster id, ~1 for no clusters
-                   weights=~rep(1,nrow(samp_data)), # equal weights for each unit
-                   data=samp_data)
-  
-  # raked to the population
-  rake1 = rake(design = svy1, sample.margins = list(~X1,~X2,~X3,~X4),
-               population.margins = list(X1_margin, X2_margin, X3_margin, X4_margin))
-  
-  # raked weights 
-  samp_data$wts = weights(rake1)
-  
-  # creating survey raked weights
-  svy_rake = svydesign(ids=~1, # cluster id, ~1 for no clusters
-                       weights=~wts, # including raked weights in the survey design
-                       data=samp_data)
-  
-  samp_data$wtdElpd_loo_06 =  loo_06_list[[ite]]$pointwise[,1]
-  samp_data$wtdElpd_loo_11 =  loo_11_list[[ite]]$pointwise[,1]
-  samp_data$wtdElpd_loo_12 =  loo_12_list[[ite]]$pointwise[,1]
-  samp_data$wtdElpd_loo_13 =  loo_13_list[[ite]]$pointwise[,1]
-  samp_data$wtdElpd_loo_14 =  loo_14_list[[ite]]$pointwise[,1]
-  samp_data$wtdElpd_loo_13a =  loo_13a_list[[ite]]$pointwise[,1]
-  samp_data$wtdElpd_loo_15 =  loo_15_list[[ite]]$pointwise[,1]
-  samp_data$wtdElpd_loo_15a =  loo_15a_list[[ite]]$pointwise[,1]
   
   # X1 ----------------------------------------------------------------------
   for (lvl in 1:5){
     looX1 = samp_data %>%
       filter(X1 == lvl) %>%
-      select(., wtdElpd_loo_06:wtdElpd_loo_15a)
+      select(., elpd_loo_06:elpd_loo_15a)
     
     ind = which(samp_data$X1 == lvl)
     
@@ -56,14 +29,14 @@ for (ite in iter){
       mutate(X1 = lvl,
              n_X1sae = length(ind),
              iteration = ite) %>%
-      mutate(model = plyr::revalue(model, c('wtdElpd_loo_06' = 'X1 + X3',
-                                            'wtdElpd_loo_11' = 'X1 + X2 + X3',
-                                            'wtdElpd_loo_13' = 'X1 + X3 + X4',
-                                            'wtdElpd_loo_15' = 'X1 + X2 + X3 + X4',
-                                            'wtdElpd_loo_13a' = '*X1 + X3 + X4',
-                                            'wtdElpd_loo_15a' = '*X1 + X2 + X3 + X4',
-                                            'wtdElpd_loo_12' = 'X1 + X2 + X4',
-                                            'wtdElpd_loo_14' = 'X2 + X3 + X4'))) %>% 
+      mutate(model = plyr::revalue(model, c('elpd_loo_06' = 'X1 + X3',
+                                            'elpd_loo_11' = 'X1 + X2 + X3',
+                                            'elpd_loo_13' = 'X1 + X3 + X4',
+                                            'elpd_loo_15' = 'X1 + X2 + X3 + X4',
+                                            'elpd_loo_13a' = '*X1 + X3 + X4',
+                                            'elpd_loo_15a' = '*X1 + X2 + X3 + X4',
+                                            'elpd_loo_12' = 'X1 + X2 + X4',
+                                            'elpd_loo_14' = 'X2 + X3 + X4'))) %>% 
       mutate(X1 = as.factor(X1))
   }
   wtdTabX1_ite[[ite]] = do.call(rbind, wtdTabX1)
@@ -73,7 +46,7 @@ for (ite in iter){
   for (lvl in 1:5){
     looX2 = samp_data %>%
       filter(X2 == lvl) %>%
-      select(., wtdElpd_loo_06:wtdElpd_loo_15a)
+      select(., elpd_loo_06:elpd_loo_15a)
     ind = which(samp_data$X2 == lvl)
     
     wtdTabX2[[lvl]] = svymean(looX2, svy_rake[ind,]) %>%
@@ -82,14 +55,14 @@ for (ite in iter){
       mutate(X2 = lvl,
              n_X2sae = length(ind),
              iteration = ite) %>%
-      mutate(model = plyr::revalue(model, c('wtdElpd_loo_06' = 'X1 + X3',
-                                            'wtdElpd_loo_11' = 'X1 + X2 + X3',
-                                            'wtdElpd_loo_13' = 'X1 + X3 + X4',
-                                            'wtdElpd_loo_15' = 'X1 + X2 + X3 + X4',
-                                            'wtdElpd_loo_13a' = '*X1 + X3 + X4',
-                                            'wtdElpd_loo_15a' = '*X1 + X2 + X3 + X4',
-                                            'wtdElpd_loo_12' = 'X1 + X2 + X4',
-                                            'wtdElpd_loo_14' = 'X2 + X3 + X4'))) %>% 
+      mutate(model = plyr::revalue(model, c('elpd_loo_06' = 'X1 + X3',
+                                            'elpd_loo_11' = 'X1 + X2 + X3',
+                                            'elpd_loo_13' = 'X1 + X3 + X4',
+                                            'elpd_loo_15' = 'X1 + X2 + X3 + X4',
+                                            'elpd_loo_13a' = '*X1 + X3 + X4',
+                                            'elpd_loo_15a' = '*X1 + X2 + X3 + X4',
+                                            'elpd_loo_12' = 'X1 + X2 + X4',
+                                            'elpd_loo_14' = 'X2 + X3 + X4'))) %>% 
       mutate(X2 = as.factor(X2))
   }
   wtdTabX2_ite[[ite]] = do.call(rbind, wtdTabX2)
@@ -100,7 +73,7 @@ for (ite in iter){
   for (lvl in 1:5){
     looX3 = samp_data %>%
       filter(X3 == lvl) %>%
-      select(., wtdElpd_loo_06:wtdElpd_loo_15a)
+      select(., elpd_loo_06:elpd_loo_15a)
     ind = which(samp_data$X3 == lvl)
     
     wtdTabX3[[lvl]] = svymean(looX3, svy_rake[ind,]) %>%
@@ -109,14 +82,14 @@ for (ite in iter){
       mutate(X3 = lvl,
              n_X3sae = length(ind),
              iteration = ite) %>%
-      mutate(model = plyr::revalue(model, c('wtdElpd_loo_06' = 'X1 + X3',
-                                            'wtdElpd_loo_11' = 'X1 + X2 + X3',
-                                            'wtdElpd_loo_13' = 'X1 + X3 + X4',
-                                            'wtdElpd_loo_15' = 'X1 + X2 + X3 + X4',
-                                            'wtdElpd_loo_13a' = '*X1 + X3 + X4',
-                                            'wtdElpd_loo_15a' = '*X1 + X2 + X3 + X4',
-                                            'wtdElpd_loo_12' = 'X1 + X2 + X4',
-                                            'wtdElpd_loo_14' = 'X2 + X3 + X4'))) %>% 
+      mutate(model = plyr::revalue(model, c('elpd_loo_06' = 'X1 + X3',
+                                            'elpd_loo_11' = 'X1 + X2 + X3',
+                                            'elpd_loo_13' = 'X1 + X3 + X4',
+                                            'elpd_loo_15' = 'X1 + X2 + X3 + X4',
+                                            'elpd_loo_13a' = '*X1 + X3 + X4',
+                                            'elpd_loo_15a' = '*X1 + X2 + X3 + X4',
+                                            'elpd_loo_12' = 'X1 + X2 + X4',
+                                            'elpd_loo_14' = 'X2 + X3 + X4'))) %>% 
       mutate(X3 = as.factor(X3))
   }
   wtdTabX3_ite[[ite]] = do.call(rbind, wtdTabX3)
@@ -127,7 +100,7 @@ for (ite in iter){
   for (lvl in 1:12){
     looX4 = samp_data %>% 
       filter(X4 == lvl) %>% 
-      select(., wtdElpd_loo_06:wtdElpd_loo_15a) 
+      select(., elpd_loo_06:elpd_loo_15a) 
     ind = which(samp_data$X4 == lvl)
     
     wtdTabX4[[lvl]] = svymean(looX4, svy_rake[ind,]) %>% 
@@ -136,14 +109,14 @@ for (ite in iter){
       mutate(X4 = lvl,
              n_X4sae = length(ind),
              iteration = ite) %>% 
-      mutate(model = plyr::revalue(model, c('wtdElpd_loo_06' = 'X1 + X3',
-                                            'wtdElpd_loo_11' = 'X1 + X2 + X3',  
-                                            'wtdElpd_loo_13' = 'X1 + X3 + X4', 
-                                            'wtdElpd_loo_15' = 'X1 + X2 + X3 + X4',
-                                            'wtdElpd_loo_13a' = '*X1 + X3 + X4', 
-                                            'wtdElpd_loo_15a' = '*X1 + X2 + X3 + X4',
-                                            'wtdElpd_loo_12' = 'X1 + X2 + X4', 
-                                            'wtdElpd_loo_14' = 'X2 + X3 + X4'))) %>% 
+      mutate(model = plyr::revalue(model, c('elpd_loo_06' = 'X1 + X3',
+                                            'elpd_loo_11' = 'X1 + X2 + X3',  
+                                            'elpd_loo_13' = 'X1 + X3 + X4', 
+                                            'elpd_loo_15' = 'X1 + X2 + X3 + X4',
+                                            'elpd_loo_13a' = '*X1 + X3 + X4', 
+                                            'elpd_loo_15a' = '*X1 + X2 + X3 + X4',
+                                            'elpd_loo_12' = 'X1 + X2 + X4', 
+                                            'elpd_loo_14' = 'X2 + X3 + X4'))) %>% 
       mutate(X4 = as.factor(X4))
   }
   wtdTabX4_ite[[ite]] = do.call(rbind, wtdTabX4)

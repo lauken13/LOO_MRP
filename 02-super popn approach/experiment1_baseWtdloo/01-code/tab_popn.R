@@ -73,7 +73,8 @@ res_list_N02_1000 = list(indv_all_tab = indv_all_tab,
                  model_sae_X2_tab = model_sae_X2_tab,
                  model_sae_X3_tab = model_sae_X3_tab,
                  model_sae_X4_tab = model_sae_X4_tab, 
-                 popn_counts = popn_counts)
-saveRDS(res_list_N02_1000, file=here::here("02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_1000_new.rds"), compress=T)                 
+                 popn_counts = popn_counts,
+                 samp_counts = samp_counts)
+saveRDS(res_list_N02_1000, file=here::here("02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_1000.rds"), compress=T)                 
                  
 

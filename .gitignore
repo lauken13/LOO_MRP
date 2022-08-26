@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 .DS_Store
+data/
 01-finite popn approach/
 02-super popn approach/experiment1_baseWtdloo/03-data
 02-super popn approach/experiment1_baseWtdloo/02-results/temp
@@ -16,4 +17,6 @@
 02-super popn approach/experiment3_ARprior/02-results/brms code
 tests/
 figures/main_paper.html
+figures/temp
 .Rproj.user
+nhanes/NHANES 2017-20

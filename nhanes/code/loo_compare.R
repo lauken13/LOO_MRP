@@ -13,9 +13,9 @@ nhdata = readRDS(file=here("nhanes/data/clean_data.rds"))
 nhsub = readRDS(file=here("nhanes/data/nhsub.rds"))
 
 nhmodel_allvar = readRDS(file=here('nhanes/data/nhmodel_allvar.rds'))
-nhmodel_biasprec = readRDS(file=here('nhanes/data/nhmodel_biasprec_CI.rds'))
-nhmodel_bias = readRDS(file=here('nhanes/data/nhmodel_bias_CI.rds'))
-nhmodel_prec = readRDS(file=here('nhanes/data/nhmodel_prec_CI.rds'))
+nhmodel_biasprec = readRDS(file=here('nhanes/data/nhmodel_biasprec.rds'))
+nhmodel_bias = readRDS(file=here('nhanes/data/nhmodel_bias.rds'))
+nhmodel_prec = readRDS(file=here('nhanes/data/nhmodel_prec.rds'))
 
 loo_allvar = loo(nhmodel_allvar)
 loo_biasprec = loo(nhmodel_biasprec)
@@ -24,7 +24,7 @@ loo_prec = loo(nhmodel_prec)
 
 loo_all = list(loo_allvar, loo_biasprec, loo_bias, loo_prec)
 modelnames =  c('allvar', 'biasprec', 'bias', 'prec')
-loo_tab = loo_all %>% 
+loo_tab = loo_all %>%  # extracting elpd_loo estimates
   lapply(., function(x)x[[1]][1,]) %>% 
   do.call(rbind, .) %>% 
   as.data.frame(.) %>% 
@@ -82,7 +82,7 @@ popnest_tab = lapply(popnest_all, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>%
   mutate(model = modelnames)
 
 # intervalScr 
-alph = 0.9
+alph = 0.1
 popnest_tab = popnest_tab %>%  
   mutate(mean_yObs = mean(as.numeric(nhdata$high_bp)-1),
          popn_ci_width = as.numeric(popnestX95 - popnestX5),
@@ -100,61 +100,61 @@ popn_all_tab = left_join(join1, popnest_tab, by="model")
   geom_point(size=3, alpha = .5, aes(colour = model)) + 
   facet_grid(~type, scales = "free") + 
   theme_bw(base_size = 15) +
-  ggtitle('credible interval approach') )
+  ggtitle('p-value approach') )
 
-ggsave(g1, file=here("nhanes/figures/elpd_CI.png"))
+ggsave(g1, file=here("nhanes/figures/elpd_pval.png"))
 
 
 ## individual level
 # all var - sample
 modelallvar_pred_sampInd = posterior_linpred(nhmodel_allvar, newdata = nhsub, transform = T) %>% # getting model estimate for each sample indv
-  apply(., 2, function(x)quantile(x,c(0.05, 0.95))) %>% 
-  set_rownames(c('sampIndX5', 'sampIndX95')) %>% 
+  apply(., 2, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
+  set_rownames(c('sampIndX5', 'sampIndX50', 'sampIndX95')) %>% 
   t() %>% as_tibble %>% 
   mutate(model="allvar")
 # all var - popn
 modelallvar_pred_popnInd = posterior_linpred(nhmodel_allvar, newdata = nhdata, transform = T) %>% # getting model estimate for each popn indv
-  apply(., 2, function(x)quantile(x,c(0.05, 0.95))) %>% 
-  set_rownames(c('popnIndX5', 'popnIndX95')) %>% 
+  apply(., 2, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
+  set_rownames(c('popnIndX5', 'popnIndX50', 'popnIndX95')) %>% 
   t() %>% as_tibble %>% 
   mutate(model="allvar")
 
 # biasprec - sample
 modelbiasprec_pred_sampInd = posterior_linpred(nhmodel_biasprec, newdata = nhsub, transform = T) %>% 
-  apply(., 2, function(x)quantile(x,c(0.05, 0.95))) %>% 
-  set_rownames(c('sampIndX5', 'sampIndX95')) %>% 
+  apply(., 2, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
+  set_rownames(c('sampIndX5',  'sampIndX50', 'sampIndX95')) %>% 
   t() %>% as_tibble %>% 
   mutate(model="biasprec")
 # biasprec - popn
 modelbiasprec_pred_popnInd = posterior_linpred(nhmodel_biasprec, newdata = nhdata, transform = T) %>% 
-  apply(., 2, function(x)quantile(x,c(0.05, 0.95))) %>% 
-  set_rownames(c('popnIndX5', 'popnIndX95')) %>% 
+  apply(., 2, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
+  set_rownames(c('popnIndX5', 'popnIndX50', 'popnIndX95')) %>% 
   t() %>% as_tibble %>% 
   mutate(model="biasprec")
 
 # bias - sample
 modelbias_pred_sampInd = posterior_linpred(nhmodel_bias, newdata = nhsub, transform = T)  %>% 
-  apply(., 2, function(x)quantile(x,c(0.05, 0.95))) %>% 
-  set_rownames(c('sampIndX5', 'sampIndX95')) %>% 
+  apply(., 2, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
+  set_rownames(c('sampIndX5',  'sampIndX50', 'sampIndX95')) %>% 
   t() %>% as_tibble %>% 
   mutate(model="bias")
 # bias - popn
 modelbias_pred_popnInd = posterior_linpred(nhmodel_bias, newdata = nhdata, transform = T) %>% 
-  apply(., 2, function(x)quantile(x,c(0.05, 0.95))) %>% 
-  set_rownames(c('popnIndX5', 'popnIndX95')) %>% 
+  apply(., 2, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
+  set_rownames(c('popnIndX5', 'popnIndX50', 'popnIndX95')) %>% 
   t() %>% as_tibble %>% 
   mutate(model="bias")
 
 # precision - sample
 modelprec_pred_sampInd = posterior_linpred(nhmodel_prec, newdata = nhsub, transform = T)  %>% 
-  apply(., 2, function(x)quantile(x,c(0.05, 0.95))) %>% 
-  set_rownames(c('sampIndX5', 'sampIndX95')) %>% 
+  apply(., 2, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
+  set_rownames(c('sampIndX5',  'sampIndX50','sampIndX95')) %>% 
   t() %>% as_tibble %>% 
   mutate(model="prec")
-# precision - bias
+# precision - popn
 modelprec_pred_popnInd = posterior_linpred(nhmodel_prec, newdata = nhdata, transform = T)  %>% 
-  apply(., 2, function(x)quantile(x,c(0.05, 0.95))) %>% 
-  set_rownames(c('popnIndX5', 'popnIndX95')) %>% 
+  apply(., 2, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
+  set_rownames(c('popnIndX5', 'popnIndX50', 'popnIndX95')) %>% 
   t() %>% as_tibble %>% 
   mutate(model="prec")
 
@@ -163,9 +163,13 @@ pred_sampInd = list(modelallvar_pred_sampInd, modelbiasprec_pred_sampInd, modelb
   mutate(mean_yObs = mean(as.numeric(nhsub$high_bp)-1),
          sampInd_intervalScr = (sampIndX95 - sampIndX5) + 
            ((2 / alph * (sampIndX5 - mean_yObs)) * ifelse(mean_yObs < sampIndX5, 1, 0)) + 
-           ((2 / alph * (mean_yObs - sampIndX95)) * ifelse(mean_yObs > sampIndX95, 1, 0))) %>% 
+           ((2 / alph * (mean_yObs - sampIndX95)) * ifelse(mean_yObs > sampIndX95, 1, 0)),
+         sampInd_bias = sampIndX50 - mean_yObs, 
+         sampInd_ci_width = sampIndX95 - sampIndX5) %>% 
   group_by(model) %>% 
-  summarise(intervalScr = mean(sampInd_intervalScr)) %>% 
+  summarise(intervalScr = mean(sampInd_intervalScr),
+            mean_bias = mean(sampInd_bias),
+            mean_ci_width = mean(sampInd_ci_width)) %>% 
   mutate(popnInd = 0) 
 
 pred_popnInd = list(modelallvar_pred_popnInd, modelbiasprec_pred_popnInd, modelbias_pred_popnInd, modelprec_pred_popnInd) %>% 
@@ -173,9 +177,13 @@ pred_popnInd = list(modelallvar_pred_popnInd, modelbiasprec_pred_popnInd, modelb
   mutate(mean_yObs = mean(as.numeric(nhdata$high_bp)-1),
          popnInd_intervalScr = (popnIndX95 - popnIndX5) + 
            ((2 / alph * (popnIndX5 - mean_yObs)) * ifelse(mean_yObs < popnIndX5, 1, 0)) + 
-           ((2 / alph * (mean_yObs - popnIndX95)) * ifelse(mean_yObs > popnIndX95, 1, 0))) %>% 
+           ((2 / alph * (mean_yObs - popnIndX95)) * ifelse(mean_yObs > popnIndX95, 1, 0)),
+         popnInd_bias = popnIndX50 - mean_yObs, 
+         popnInd_ci_width = popnIndX95 - popnIndX5) %>% 
   group_by(model) %>% 
-  summarise(intervalScr = mean(popnInd_intervalScr)) %>% 
+  summarise(intervalScr = mean(popnInd_intervalScr),
+            mean_bias = mean(popnInd_bias),
+            mean_ci_width = mean(popnInd_ci_width)) %>% 
   mutate(popnInd = 1) 
 
 t1 = left_join(pred_sampInd, loo_tab, by="model")
@@ -189,12 +197,13 @@ t4 = left_join(t3, wtd_loo_tab, by="model")
     mutate(popnInd = factor(popnInd),
            popnInd = fct_recode(popnInd, `Sample` = "0", `Population` = "1")) %>% 
   pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score") %>%
-  ggplot(., aes(x = model_score, y = intervalScr)) +
+  ggplot(., aes(x = model_score, y = mean_bias)) +
   geom_point(size=3, alpha = .5, aes(colour = model)) + 
   facet_grid(popnInd~type, scales = "free") + 
   theme_bw(base_size = 15) +
-  ggtitle('individual approach') )
-ggsave(g2, file=here("nhanes/figures/elpd_indv.png"))
+  ggtitle('individual mean bias - "p-value approach"') )
+
+ggsave(g2, file=here("nhanes/figures/elpd_indv_bias_pval.png"))
 
 
 

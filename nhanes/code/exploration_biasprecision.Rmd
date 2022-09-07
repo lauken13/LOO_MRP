@@ -1,0 +1,206 @@
+---
+title: "Identifying bias & precision variables"
+author: "Swen Kuh"
+date: "2022-08-29"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+## exploratory - to find bias and precision variables
+library(tidyverse)
+library(brms)
+library(bayesplot) # visualising posteriors 
+library(tidybayes) # get_variables()
+library(here)
+
+# reading in data
+nhdata = readRDS(here('nhanes/data/clean_data.rds')) 
+```
+
+```{r models, warning=F, messages=F, cache=T, error=F, eval=F}
+# brms ####
+nhmodel_outcome_popn = brm(high_bp ~ (1|age) + (1|ethnicity) + gender + (1|educ) +
+                        (1|marital_status) + phys_act + overweight + (1|alc_exc) +  (1|BMI_range) + 
+                        (1|dep_severity) + (1|diabetes) + trb_sleep + (1|pov_level) + smk2_exp +
+                        smk_tobcig + (1|sodium_lvl) + (1|potassium_lvl),
+                      data = nhdata,
+                      seed = 5678,
+                      chain = 2,  
+                      backend = "cmdstanr", silent = 2,
+                      cores=2,
+                      family = bernoulli(link = "logit"),
+                      control = list(adapt_delta = 0.9),
+                      file=here('nhanes/data/nhmodel_outcome_popn.rds'))
+
+ptm = proc.time()
+nhmodel_incl_popn = brm(inclusion ~ (1|age) + (1|ethnicity) + gender + (1|educ) +
+                     (1|marital_status) + phys_act + overweight + (1|alc_exc) +  (1|BMI_range) + 
+                     (1|dep_severity) + (1|diabetes) + trb_sleep + (1|pov_level) + smk2_exp +
+                     smk_tobcig + (1|sodium_lvl) + (1|potassium_lvl),
+                   data = nhdata,
+                   seed = 5678,
+                   chain = 2,
+                   backend = "cmdstanr", silent = 2,
+                    cores=2,
+                   family = bernoulli(link = "logit"),
+                   control = list(adapt_delta = 0.9), 
+                   file=here('nhanes/data/nhmodel_incl_popn.rds'))
+proc.time() - ptm
+```
+
+
+```{r outcome model densities, echo=FALSE}
+nhmodel_outcome_popn = readRDS(file=here('nhanes/data/nhmodel_outcome_popn.rds'))
+nhmodel_incl_popn = readRDS(file=here('nhanes/data/nhmodel_incl_popn.rds'))
+
+# fixed effects
+plot(nhmodel_outcome_popn)
+
+# random effects
+# ranef(nhmodel_outcome_popn)
+# get_variables(nhmodel_outcome_popn)[grep("^r_*", get_variables(nhmodel_outcome_popn))]
+
+# plotting density
+(p1 <- nhmodel_outcome_popn %>%  
+    tidy_draws() %>%   
+    select(contains(c("r_a", "r_b"))) %>% 
+    mcmc_areas(., prob=0.9) )
+
+(p2 = nhmodel_outcome_popn %>%  
+    tidy_draws() %>%   
+    select(contains(c("r_d"))) %>% 
+    mcmc_areas(., prob=0.9) )
+
+(p3 = nhmodel_outcome_popn %>%  
+    tidy_draws() %>%   
+    select(contains(c("r_e", "r_m"))) %>% 
+    mcmc_areas(., prob=0.9) )
+
+(p4 = nhmodel_outcome_popn %>%  
+    tidy_draws() %>%   
+    select(contains(c("r_p", "r_s"))) %>% 
+    mcmc_areas(., prob=0.9) )
+```
+
+```{r inclusion model densities, warning=F, echo=F}
+# fixed effects
+plot(nhmodel_incl_popn)
+
+# random effects
+# ranef(nhmodel_incl_popn)
+# get_variables(nhmodel_incl_popn)[grep("^r_*", get_variables(nhmodel_incl_popn))]
+
+# plotting density
+(p1 <- nhmodel_incl_popn %>%  
+    tidy_draws() %>%   
+    select(contains(c("r_a", "r_b"))) %>% 
+    mcmc_areas(., prob=0.9) )
+
+(p2 = nhmodel_incl_popn %>% 
+    tidy_draws() %>%   
+    select(contains(c("r_d"))) %>% 
+    mcmc_areas(., prob=0.9) )
+
+(p3 = nhmodel_incl_popn %>%  
+    tidy_draws() %>%    
+    select(contains(c("r_e", "r_m"))) %>% 
+    mcmc_areas(., prob=0.9) )
+
+(p4 = nhmodel_incl_popn %>%  
+    tidy_draws() %>%   
+    select(contains(c("r_p", "r_s"))) %>% 
+    mcmc_areas(., prob=0.9) )
+```
+
+```{r}
+## identifying 'significant' variables
+# using credible interval and see if it contains 0
+cr_outc = nhmodel_outcome_popn %>% 
+  tidy_draws() %>% 
+  select(contains(c("b_", "r_"))) %>% 
+  summarise(across(1:"r_sodium_lvl[very.high,Intercept]", function(x)quantile(x, c(0.1, 0.16, 0.20, 0.80, 0.84, 0.9)))) %>%
+  t() %>%
+  magrittr::set_colnames(c('q10', 'q16', 'q20', 'q80', 'q84', 'q90')) %>% 
+  as_tibble(., rownames = "rowname") %>% 
+  mutate(cri80 = ifelse(q10 < 0 & q90 < 0, 1,
+                        ifelse(q10 > 0 & q90 > 0, 1, 0)),
+         cri68 = ifelse(q16 < 0 & q84 < 0, 1,
+                        ifelse(q16 > 0 & q84 > 0, 1, 0)),
+         cri60 = ifelse(q20 < 0 & q80 < 0, 1,
+                        ifelse(q20 > 0 & q80 > 0, 1, 0)))
+
+
+cr_incl = nhmodel_incl_popn %>% 
+  tidy_draws() %>% 
+  select(contains(c("b_", "r_"))) %>% 
+  summarise(across(1:"r_sodium_lvl[very.high,Intercept]", function(x)quantile(x, c(0.1, 0.16, 0.20, 0.80, 0.84, 0.9)))) %>%
+  t() %>%
+  magrittr::set_colnames(c('q10', 'q16', 'q20', 'q80', 'q84', 'q90')) %>% 
+  as_tibble(., rownames = "rowname") %>% 
+  mutate(cri80 = ifelse(q10 < 0 & q90 < 0, 1,
+                        ifelse(q10 > 0 & q90 > 0, 1, 0)),
+         cri68 = ifelse(q16 < 0 & q84 < 0, 1,
+                        ifelse(q16 > 0 & q84 > 0, 1, 0)),
+         cri60 = ifelse(q20 < 0 & q80 < 0, 1,
+                        ifelse(q20 > 0 & q80 > 0, 1, 0)))
+cr_incl %>% filter(cri60 == 1)
+cr_outc %>% filter(cri60 == 1)
+
+# using "pvalue" approach
+(pv0_outc = nhmodel_outcome_popn %>%  
+    tidy_draws() %>%   
+    select(contains(c("b_", "r_"))) %>% 
+    summarise(across(1:"r_sodium_lvl[very.high,Intercept]", function(x)mean(x<0))) %>% 
+    t() %>%
+    magrittr::set_colnames('less0') %>% 
+    as_tibble(., rownames = "rowname") %>% 
+    mutate(less0 = as.numeric(less0), 
+           significance = ifelse(less0 < 0.4 | less0 > 0.6, 1, 0)))
+
+(pv0_incl = nhmodel_incl_popn %>%  
+    tidy_draws() %>%   
+    select(contains(c("b_", "r_"))) %>% 
+    summarise(across(1:"r_sodium_lvl[very.high,Intercept]", function(x)mean(x<0))) %>% 
+    t() %>%
+    magrittr::set_colnames('less0') %>% 
+    as_tibble(., rownames = "rowname") %>% 
+    mutate(less0 = as.numeric(less0), 
+           significance = ifelse(less0 < 0.4 | less0 > 0.6, 1, 0)))
+
+pv0_outc %>% filter(significance==1)
+pv0_incl %>% filter(significance==1)
+
+```
+
+```{r}
+# different way of plotting ####
+# potassium_level
+nhmodel_incl_popn %>% 
+  spread_rvars(b_Intercept, r_potassium_lvl[potassium_lvl,]) %>%
+  mutate(condition_mean = b_Intercept + r_potassium_lvl) %>%
+  ggplot(aes(y = potassium_lvl, dist = condition_mean, fill = stat(abs(x) < 1))) +
+  stat_dist_halfeye() +
+  geom_vline(xintercept = c(-1, 1), linetype = "dashed") +
+    geom_vline(xintercept = 0) +
+  scale_fill_manual(values = c("gray80", "skyblue")) + 
+  ggtitle('potassium_lvl')
+
+nhmodel_incl_popn %>% 
+  spread_rvars(b_Intercept, r_sodium_lvl[sodium_lvl,]) %>%
+  mutate(condition_mean = b_Intercept + r_sodium_lvl) %>%
+  ggplot(aes(y = sodium_lvl, dist = condition_mean, fill = stat(abs(x) < 1))) +
+  stat_dist_halfeye() +
+  geom_vline(xintercept = c(-1, 1), linetype = "dashed") +
+  geom_vline(xintercept = 0) +
+  scale_fill_manual(values = c("gray80", "skyblue")) + 
+  ggtitle('r_sodium_lvl')
+
+nhmodel_outcome_popn %>% 
+  spread_rvars(b_Intercept, r_age[age,]) %>%
+  mutate(condition_mean = b_Intercept + r_age) %>%
+  ggplot(aes(y = age, dist = condition_mean, fill = stat(abs(x) < 1))) +
+  stat_dist_halfeye() +
+  geom_vline(xintercept = c(-1, 1), linetype = "dashed") +
+  scale_fill_manual(values = c("gray80", "skyblue")) + 
+  ggtitle('age')
+```

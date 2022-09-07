@@ -1,0 +1,97 @@
+---
+title: "Exploratory plots and tables"
+author: "Swen Kuh"
+date: "2022-08-29"
+output: pdf_document
+---
+
+## Exploratory plots
+
+```{r, echo=F, warning=F, error=F, message=F}
+library(tidyverse)
+library(GGally) #ggpairs()
+library(foreign)
+library(here)
+
+nhdata = readRDS(here::here('nhanes/data/clean_data.rds'))
+nhsub = readRDS(here::here('nhanes/data/nhsub.rds'))
+```
+
+
+High school grads have high inclusion probability in the urine sample, but also have large weights. Supposedly if you're more likely to be in the sample, you've smaller weights? 
+
+For intermediate sodium level intake, they've a high inclusion probability, but small mean and median weights 
+```{r,  warning=F, error=F, message=F}
+summary(nhdata)
+summary(nhsub)
+# checking inclusino of education variable
+# HS grad have higher inclusion 
+t1 = nhdata %>% 
+  group_by(educ) %>% 
+  summarise(mean_incl_fulldat = mean(inclusion))
+ 
+t2 = nhsub %>% 
+  group_by(educ) %>% 
+  summarise(mean_weights_subdat = mean(wts),
+            median_weights_subdat = median(wts)) %>% 
+  mutate(prob_incl = 1/median_weights_subdat)
+
+t3 = nhdata %>% 
+  group_by(sodium_lvl) %>% 
+  summarise(mean_incl_fulldat = mean(inclusion))
+ 
+t4 = nhsub %>% 
+  group_by(sodium_lvl) %>% 
+  summarise(mean_weights_subdat = mean(wts),
+            median_weights_subdat = median(wts)) %>% 
+  mutate(prob_incl = 1/median_weights_subdat)
+
+
+t5 = nhdata %>% 
+  group_by(potassium_lvl) %>% 
+  summarise(mean_incl_fulldat = mean(inclusion))
+
+t6 = nhsub %>% 
+  group_by(potassium_lvl) %>% 
+  summarise(mean_weights_subdat = mean(wts),
+            median_weights_subdat = median(wts)) %>% 
+  mutate(prob_incl = 1/median_weights_subdat)
+
+t7 = nhdata %>% 
+  group_by(age) %>% 
+  summarise(mean_incl_fulldat = mean(inclusion))
+
+t8 = nhsub %>% 
+  group_by(age) %>% 
+  summarise(mean_weights_subdat = mean(wts),
+            median_weights_subdat = median(wts)) %>% 
+  mutate(prob_incl = 1/median_weights_subdat)
+
+t9 = nhdata %>% 
+  group_by(dep_severity) %>% 
+  summarise(mean_incl_fulldat = mean(inclusion))
+
+t10 = nhsub %>% 
+  group_by(dep_severity) %>% 
+  summarise(mean_weights_subdat = mean(wts),
+            median_weights_subdat = median(wts)) %>% 
+  mutate(prob_incl = 1/median_weights_subdat)
+
+
+left_join(t1,t2) # educ
+left_join(t3,t4) # sodium_lvl
+left_join(t5,t6) # potassium_lvl
+left_join(t7,t8) # age
+left_join(t9,t10) # dep_severity
+
+# checking for interaction effects
+with(nhdata, tapply(as.numeric(high_bp), list(potassium_lvl, sodium_lvl), sum))
+with(nhdata, tapply(as.numeric(high_bp), list(gender, marital_status), sum))
+with(nhdata, tapply(as.numeric(high_bp), list(gender, dep_severity), sum))
+
+summary(nhdata)
+ggpairs(nhdata[,c(7,2:6,8:10)])
+ggpairs(nhdata[,c(7,11:18)])
+
+
+```

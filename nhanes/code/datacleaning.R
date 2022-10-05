@@ -218,26 +218,200 @@ fulldat = left_join(demo1720, bp, by='SEQN') %>%
          potassium_lvl = recode(as.factor(potassium_lvl), '1' = 'low', '2' = 'adequate','3' = 'high'),
          potassium_lvl = fct_relevel(potassium_lvl, c('low', 'adequate', 'high'))) %>% 
   select(-c(smk2_ind, smk2_home, tob_last5, cig_now, preg_fem, sodium_intake1, sodium_intake2, potassium_intake1, potassium_intake2,
-            sodium_avg, potassium_avg))
+            sodium_avg, potassium_avg, preg_yes)) %>% 
+  na.omit()
 
 
 # subsample
-# urine sample
+# urine sample ------------------------------------------------------------
 urn = read.xport(here('nhanes/data/NHANES 2017-20/P_UM.XPT')) %>% 
-  select(SEQN, WTSAPRP)
-nhdata = left_join(fulldat, urn, by='SEQN') %>%  # 2224 obs
-  mutate(inclusion = ifelse(WTSAPRP==0 | is.na(WTSAPRP) , 0, 1)) %>% 
-  select(-c(WTSAPRP, preg_yes)) %>% 
-  na.omit()
+  select(SEQN, WTSAPRP) %>% 
+  mutate(inclusion = ifelse(WTSAPRP==0 | is.na(WTSAPRP), 0, 1)) %>% 
+  select(-WTSAPRP)
 
-# 'sample' using urine sample only
-nhsub= left_join(urn, nhdata, by="SEQN") %>% 
-  na.omit() %>%  
-  mutate(n_row = nrow(.),
-    wts = WTSAPRP/sum(WTSAPRP)*n_row)
-                        
+nhdata_urn = left_join(fulldat, urn, by="SEQN") %>% 
+  mutate(inclusion = replace_na(inclusion, 0),
+         inclusion = as.factor(inclusion)) %>% 
+  filter(inclusion == 1) %>% 
+  sample_n(., size=1500, replace=F)
 
-saveRDS(nhdata, file="nhanes/data/clean_data.rds")
-saveRDS(nhsub, file="nhanes/data/nhsub.rds")
+dat1 = left_join(fulldat, nhdata_urn[,c("SEQN", 'inclusion')], by="SEQN") %>% 
+  mutate(incl_urn = case_when(inclusion == '1' ~ 1,
+                              is.na(inclusion) ~ 0)) %>% 
+  select(-inclusion)
+
+# voc sample --------------------------------------------------------------
+voc = read.xport(here('nhanes/data/NHANES 2017-20/P_VOCWB.XPT')) %>% 
+  select(SEQN, WTSVOCPR) %>% 
+  mutate(inclusion = ifelse(WTSVOCPR==0 | is.na(WTSVOCPR), 0, 1)) %>% 
+  select(-WTSVOCPR)
+
+# joining with full data
+nhdata_voc = left_join(fulldat, voc, by="SEQN") %>% 
+  mutate(inclusion = replace_na(inclusion, 0),
+         inclusion = as.factor(inclusion)) %>% 
+  filter(inclusion == 1) %>%
+  sample_n(., size=1500, replace=F)
+
+dat2 = left_join(dat1, nhdata_voc[,c("SEQN", 'inclusion')], by="SEQN") %>% 
+  mutate(incl_voc = case_when(inclusion == '1' ~ 1,
+                              is.na(inclusion) ~ 0)) %>% 
+  select(-inclusion)
+
+
+# dietary subsample -------------------------------------------------------
+dr1 = read.xport(here('nhanes/data/NHANES 2017-20/P_DR1TOT.XPT')) %>% 
+  select(SEQN, WTDRD1PP) %>% 
+  mutate(inclusion = ifelse(WTDRD1PP==0 | is.na(WTDRD1PP), 0, 1)) %>% 
+  select(-WTDRD1PP)
+
+# joining with full data
+nhdata_dr1 = left_join(fulldat, dr1, by="SEQN") %>% 
+  mutate(inclusion = replace_na(inclusion, 0),
+         inclusion = as.factor(inclusion)) %>% 
+  filter(inclusion == 1) %>%
+  sample_n(., size=1500, replace=F)
+
+dat3 = left_join(dat2, nhdata_dr1[,c("SEQN", 'inclusion')], by="SEQN") %>% 
+  mutate(incl_dr1 = case_when(inclusion == '1' ~ 1,
+                              is.na(inclusion) ~ 0)) %>% 
+  select(-inclusion)
+
+# fasting subsample -------------------------------------------------------
+fas = read.xport(here('nhanes/data/NHANES 2017-20/P_TRIGLY.XPT')) %>% 
+  select(SEQN, WTSAFPRP) %>% 
+  mutate(inclusion = ifelse(WTSAFPRP==0 | is.na(WTSAFPRP), 0, 1)) %>% 
+  select(-WTSAFPRP)
+
+# joining with full data
+nhdata_fas = left_join(fulldat, fas, by="SEQN") %>% 
+  mutate(inclusion = replace_na(inclusion, 0),
+         inclusion = as.factor(inclusion)) %>% 
+  filter(inclusion == 1) %>%
+  sample_n(., size=1500, replace=F)
+
+dat4 = left_join(dat3, nhdata_fas[,c("SEQN", 'inclusion')], by="SEQN") %>% 
+  mutate(incl_fas = case_when(inclusion == '1' ~ 1,
+                              is.na(inclusion) ~ 0)) %>% 
+  select(-inclusion)
+
+
+# weights -----------------------------------------------------------------
+library(survey)
+library(dbarts)
+library(tidyverse)
+
+# creating weights for the population
+nhdata = dat4
+
+nhsub_fas = nhdata %>% 
+  filter(incl_fas == 1) 
+
+nhsub_urn = nhdata %>% 
+  filter(incl_urn == 1) 
+
+nhsub_dr1 = nhdata %>% 
+  filter(incl_dr1 == 1) 
+
+nhsub_voc = nhdata %>% 
+  filter(incl_voc == 1) 
+
+# bart --------------------------------------------------------------------
+# urn ---------------------------------------------------------------------
+x_urn = nhdata %>% 
+  select(-c(SEQN, high_bp, names(nhdata)[grep('incl_*', names(nhdata))])) 
+
+y_urn = as.numeric(nhdata$incl_urn)
+
+nhsub2_urn = nhsub_urn %>% 
+  select(-c(SEQN, high_bp, names(nhsub_urn)[grep('incl_*', names(nhsub_urn))])) 
+
+bartfit_urn = bart(x_urn, y_urn, keeptrees=T) 
+bartpred_urn = predict(bartfit_urn, newdata = nhsub2_urn)
+bartpred_med_urn = apply(bartpred_urn, 2, median)
+
+hist(bartpred_med_urn)
+hist(as.numeric(nhdata$incl_urn))
+
+# dr1 ---------------------------------------------------------------------
+x_dr1 = nhdata %>% 
+  select(-c(SEQN, high_bp, names(nhdata)[grep('incl_*', names(nhdata))])) 
+
+y_dr1 = as.numeric(nhdata$incl_dr1)
+
+nhsub2_dr1 = nhsub_dr1 %>% 
+  select(-c(SEQN, high_bp, names(nhsub_dr1)[grep('incl_*', names(nhsub_dr1))])) 
+
+bartfit_dr1 = bart(x_dr1, y_dr1, keeptrees=T) 
+bartpred_dr1 = predict(bartfit_dr1, newdata = nhsub2_dr1)
+bartpred_med_dr1 = apply(bartpred_dr1,2,median)
+
+hist(bartpred_med_dr1)
+hist(as.numeric(nhdata$incl_dr1))
+
+# voc ---------------------------------------------------------------------
+x_voc = nhdata %>% 
+  select(-c(SEQN, high_bp, names(nhdata)[grep('incl_*', names(nhdata))])) 
+
+y_voc = as.numeric(nhdata$incl_voc)
+
+nhsub2_voc= nhsub_voc %>% 
+  select(-c(SEQN, high_bp, names(nhsub_voc)[grep('incl_*', names(nhsub_voc))])) 
+
+bartfit_voc = bart(x_voc, y_voc, keeptrees=T) 
+bartpred_voc = predict(bartfit_voc, newdata = nhsub2_voc)
+bartpred_med_voc = apply(bartpred_voc,2,median)
+
+hist(bartpred_med_voc)
+hist(as.numeric(nhdata$incl_voc))
+
+# fas ---------------------------------------------------------------------
+x_fas = nhdata %>% 
+  select(-c(SEQN, high_bp, names(nhdata)[grep('incl_*', names(nhdata))])) 
+
+y_fas = as.numeric(nhdata$incl_fas)
+
+nhsub2_fas = nhsub_fas %>% 
+  select(-c(SEQN, high_bp, names(nhsub_fas)[grep('incl_*', names(nhsub_fas))])) 
+
+bartfit_fas = bart(x_fas, y_fas, keeptrees=T) 
+bartpred_fas = predict(bartfit_fas, newdata = nhsub2_fas)
+bartpred_med_fas = apply(bartpred_fas,2,median)
+
+hist(bartpred_med_fas)
+hist(as.numeric(nhdata$incl_fas))
+
+nhdata_full = nhdata %>% 
+  mutate(wts_urn = ifelse(incl_urn ==1, 1/bartpred_med_urn, 0),
+         wts_voc = ifelse(incl_voc ==1, 1/bartpred_med_voc, 0),
+         wts_dr1 = ifelse(incl_dr1 ==1, 1/bartpred_med_dr1, 0),
+         wts_fas = ifelse(incl_fas ==1, 1/bartpred_med_fas, 0))
+
+saveRDS(nhdata_full, file=here("nhanes/data/nhdata_full.rds"))
+
+# checking counts using the weights -----------------------------------
+  nhdata_full %>% 
+  group_by(gender) %>% 
+  summarise(sum_n = n(),
+            sum_wts_fas = sum(wts_fas),
+            sum_wts_dr1 = sum(wts_dr1),
+            sum_wts_voc = sum(wts_voc),
+            sum_wts_urn = sum(wts_urn))
+
+nhdata_full %>% 
+  group_by(ethnicity) %>% 
+  summarise(sum_n = n(),
+            sum_wts_fas = sum(wts_fas),
+            sum_wts_dr1 = sum(wts_dr1),
+            sum_wts_voc = sum(wts_voc),
+            sum_wts_urn = sum(wts_urn))
+
+nhdata_full %>% 
+  group_by(age) %>% 
+  summarise(sum_n = n(),
+            sum_wts_fas = sum(wts_fas),
+            sum_wts_dr1 = sum(wts_dr1),
+            sum_wts_voc = sum(wts_voc),
+            sum_wts_urn = sum(wts_urn))
 
 

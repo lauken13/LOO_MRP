@@ -6,7 +6,8 @@ alph=0.1
 sampest_list = list()
 for(i in iter){
   
-  sampest_tab_list[[i]]$y_prob = rep(as.numeric(samp_data_list[[i]]$y_prob), 15)
+  sampest_tab_list[[i]]$y_prob = rep(as.numeric(samp_data_list[[i]]$y_prob), 15) # repeat for 15 models
+  sampest_tab_list[[i]]$wts = rep(as.numeric(samp_data_list[[i]]$wts), 15)
   
   sampest_list[[i]] = mutate(sampest_tab_list[[i]],
                              ind_ci_width = sampestX95 - sampestX5,
@@ -25,7 +26,8 @@ for(i in iter){
 }
 
 indv_all_tab = do.call(rbind, sampest_list[iter]) %>%
-  mutate(model = plyr::revalue(model, c("model01" = 'X1',
+  mutate(popnInd_intervalScr = ind_intervalScr * wts,
+         model = plyr::revalue(model, c("model01" = 'X1',
                                         "model02" = 'X2', 
                                         "model03" = 'X3',
                                         "model04" = 'X4', 
@@ -43,7 +45,8 @@ indv_all_tab = do.call(rbind, sampest_list[iter]) %>%
 
 indv_summ_tab = indv_all_tab %>% 
   group_by(model, iteration) %>% 
-  summarise(ind_ci_width_mean = mean(ind_ci_width),
+  summarise(ind_wtd_intervalScr_sum = sum(popnInd_intervalScr),
+            ind_ci_width_mean = mean(ind_ci_width),
             ind_bias_mean = mean(ind_bias_X50),
             ind_bias_sd = sd(ind_bias_X50), 
             ind_bias_mean_abs = mean(ind_bias_X50_abs),
@@ -64,3 +67,8 @@ indv_all_tab$model = fct_relevel(indv_all_tab$model, c('X2 + X4', 'X1 + X2 + X4'
                                                          'X2', 'X1 + X2', 'X2 + X3', 'X1 + X2 + X3',
                                                          'X1', 'X3', 'X1 + X3'))
 
+## calculating weighted popn interval Scr
+indv_all_tab %>% 
+  mutate(popnInd_intervalScr = ind_intervalScr * wts) %>% 
+ group_by(model, iteration) %>% 
+  summarise()

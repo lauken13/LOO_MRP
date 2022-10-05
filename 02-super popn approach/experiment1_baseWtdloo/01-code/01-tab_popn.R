@@ -45,15 +45,16 @@ popnest_all_tab = do.call(rbind, popnest_list) %>%
 source(here::here("02-super popn approach/experiment1_baseWtdloo/01-code/popn_elpd.R"), echo=TRUE)
 elpd_all_tab
 
-
 popn_all_tab = left_join(popnest_all_tab, elpd_all_tab, by=c('model', 'iteration')) %>% 
   left_join(., wtdElpd_all_tab, by=c('model', 'iteration')) 
-# View(popn_all_tab)
 
 ## loading individual tab
 source(here::here("02-super popn approach/experiment1_baseWtdloo/01-code/tab_samp.R"), echo=TRUE)
 
 popn_indv_tab = left_join(popn_all_tab, indv_summ_tab, by=c('model', 'iteration')) 
+
+## calculating weighted interval score at the population
+popn_indv_wts = popn_indv_tab 
 
 ## loading SAE tab 
 source(here::here("02-super popn approach/experiment1_baseWtdloo/01-code/tab_SAE.R"), echo=TRUE)

@@ -48,16 +48,6 @@ model_sae_X4_tab = res_list_sae_1000$model_sae_X4_tab
 
 ## MRP bias and precision 
 ```{r}
-popn_indv_tab$model = fct_relevel(popn_indv_tab$model, c('X2 + X4', 'X1 + X2 + X4', 'X2 + X3 + X4', 'X1 + X2 + X3 + X4', 
-                                                         'X4', 'X1 + X4', 'X3 + X4', 'X1 + X3 + X4',
-                                                         'X2', 'X1 + X2', 'X2 + X3', 'X1 + X2 + X3',
-                                                         'X1', 'X3', 'X1 + X3'))
-pc = popn_indv_tab %>% 
-  mutate(pe_90width = popn_bias_X95 - popn_bias_X5) %>% 
-  rename(pe_mean = popn_bias_X50,
-         pe_low = popn_bias_X5, 
-         pe_upp = popn_bias_X95) 
-
 colour_palette_var_base  =  c(`X2 + X4` =  "#4477AA",
                          `X1 + X2 + X4` = "#88CCEE", 
                          `X2 + X3 + X4` = "#66CCEE",
@@ -67,7 +57,6 @@ colour_palette_var_base  =  c(`X2 + X4` =  "#4477AA",
                          `X2` = "#228833", `X1 + X2` = "#117733",
                          `X2 + X3` = "#999933", `X1 + X2 + X3` = "#DDCC77",
                          `X1` = "#DDDDDD", `X3` = "#BBBBBB", `X1 + X3` = "#879195FF")
-
 
 shape_base  = c(rep(16,4), rep(15,4), rep(17,4), rep(18,3))
 
@@ -80,6 +69,17 @@ leg_lab= c(bquote(bold('X2')~"+"~bold('X4')),
            bquote(bold('X2')), bquote('X1 +'~bold("X2")), 
            bquote(bold("X2")~'+ X3'),  bquote('X1 +'~bold("X2")~' + X3'),
            'X1', 'X3', 'X1 + X3')
+
+popn_indv_tab$model = fct_relevel(popn_indv_tab$model, c('X2 + X4', 'X1 + X2 + X4', 'X2 + X3 + X4', 'X1 + X2 + X3 + X4', 
+                                                         'X4', 'X1 + X4', 'X3 + X4', 'X1 + X3 + X4',
+                                                         'X2', 'X1 + X2', 'X2 + X3', 'X1 + X2 + X3',
+                                                         'X1', 'X3', 'X1 + X3'))
+pc = popn_indv_tab %>% 
+  mutate(pe_90width = popn_bias_X95 - popn_bias_X5) %>% 
+  rename(pe_mean = popn_bias_X50,
+         pe_low = popn_bias_X5, 
+         pe_upp = popn_bias_X95) 
+
 
 # bias
 (g0 = ggplot(pc, aes(x = pe_mean, y = model, group = iteration, colour = model))+
@@ -139,7 +139,7 @@ ggsave(g0c, width=10, height=8, filename = here("figures/mrp_app.png"))
 ```
 
 ## ELPD and individual interval score
-```{r}
+```{r, sample and popn}
 # sample individual
 t2 = popn_indv_tab %>%
   pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score") %>%
@@ -187,7 +187,7 @@ corr_popnindv_intervalscore <- union(t2,t3) %>%
          xloc = ifelse(type == 'PSIS-LOO', -430, -4500),
          yloc =  ifelse(popnInd == 'Sample', 5, 5.5))
 
-# merging sample and 
+# merging sample and population ind
 ( g1a = union(t2,t3) %>% 
     mutate(popnInd = factor(popnInd),
            popnInd = fct_recode(popnInd, `Sample` = "0", `Population` = "1")) %>% 
@@ -245,7 +245,7 @@ ggsave(g1b, width=16, height=10, filename = here("figures/elpd_indv_popn_X4.png"
 
 
 ## ELPD and population MRP interval score
-```{r}
+```{r base model}
 corr_popn_intervalscore <- popn_indv_tab %>%
   pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score")%>%
   mutate(type = factor(type),
@@ -301,6 +301,77 @@ popn_indv_tab$model = fct_relevel(popn_indv_tab$model, 'X2 + X4',
   )
 
 ggsave(g2, width=16, height=10, filename = here("figures/elpd_popn.png"))
+```
+
+## ELPD and population MRP interval score - X2 and X4 experiment
+```{r X2 and X4 experiment}
+res_list_X2 <- readRDS(here('02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_X2.rds'))
+res_list_X4 <- readRDS(here('02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_X4.rds'))
+
+popn_indv_tab_X2 = res_list_X2$popn_indv_tab %>% 
+  mutate(var = "X2")
+popn_indv_tab_X4 = res_list_X4$popn_indv_tab %>% 
+  mutate(var = "X4")
+
+# joining two sets together to plot 2 x 2
+popn_indv_tab_all = bind_rows(popn_indv_tab_X2, popn_indv_tab_X4)
+
+corr_popn_intervalscore_all <- popn_indv_tab_all %>%
+  pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score")%>%
+  mutate(type = factor(type),
+         type = fct_recode(type, `PSIS-LOO` = "elpd_loo", `WTD-PSIS-LOO` = "wtdElpd_loo"))%>%
+  group_by(var, type)%>%
+  summarise(cor_val = paste0("cor: ",round(cor(model_score, MRP_intervalScr),2)))%>%
+  mutate(xloc = c(-390,-4000),yloc = rep(2.5,2))
+
+popn_indv_tab_all$model = fct_relevel(popn_indv_tab_all$model, 'X2 + X4',
+                                     'X1 + X2 + X4', 
+                                     'X2 + X3 + X4',
+                                     'X1 + X2 + X3 + X4',
+                                     'X4', 'X1 + X4', 
+                                     'X3 + X4', 'X1 + X3 + X4',
+                                     'X2', 'X1 + X2',
+                                     'X2 + X3', 'X1 + X2 + X3',
+                                     'X1', 'X3', 'X1 + X3')
+
+( g2a = popn_indv_tab_all %>%
+    pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score") %>%
+    mutate(type = factor(type),
+           type = fct_recode(type, `PSIS-LOO` = "elpd_loo", `WTD-PSIS-LOO` = "wtdElpd_loo"),
+           colour_code = case_when(model == 'X2 + X4' ~ "#4477AA",
+                                   model == 'X1 + X2 + X4' ~ "#88CCEE",
+                                   model == 'X1 + X2 + X3 + X4' ~ "#332288", 
+                                   model == 'X2 + X3 + X4' ~ "#66CCEE",
+                                   model == 'X4' ~ "#CC6677", 
+                                   model == 'X1 + X4' ~ "#AA4499", 
+                                   model == 'X3 + X4' ~ "#EE6677", 
+                                   model == 'X1 + X3 + X4' ~ "#882255", 
+                                   model == 'X2' ~ "#228833", 
+                                   model == 'X1 + X2' ~ "#117733", 
+                                   model == 'X2 + X3' ~ "#999933", 
+                                   model == 'X1 + X2 + X3' ~ "#DDCC77", 
+                                   model == 'X1' ~ "#DDDDDD", 
+                                   model == 'X3' ~ "#BBBBBB", 
+                                   model == 'X1 + X3' ~ "#879195FF")) %>% 
+    ggplot(., aes(x = model_score, y = MRP_intervalScr))+
+    geom_point(size=3, alpha = .5, aes( colour = model, shape = model)) +
+    geom_text(data  = corr_popn_intervalscore_all,
+              mapping = aes(x = xloc, y = yloc, label = cor_val), size=9) +
+    scale_colour_manual(values = colour_palette_var_base, labels = leg_lab) + 
+    scale_shape_manual(values = shape_base, labels = leg_lab) +
+    facet_grid(var~type, scales = "free")+
+    xlab("PSIS-LOO-based model score")+ ylab("Interval score")+
+    theme_bw(base_size = 25) +
+    theme(legend.title = element_blank(), legend.position = "bottom",
+          plot.margin = margin(10, 25, 10, 10)) + 
+    guides(colour = guide_legend(override.aes = list(size=3), nrow=4)) +
+    labs(tag = paste0(str_pad("Bias-precision", 30.5, "right"), str_pad("Bias-only", 26, "right"), str_pad("Precision-only", 20, "right"), "Irrelevant")) +
+    theme(plot.tag.position = c(0.52, 0.145),
+          plot.tag = element_text(size=18, face="bold")) 
+  )
+
+ggsave(g2a, width=16, height=10, filename = here("figures/elpd_popn_X2X4.png"))
+
 
 ```
 

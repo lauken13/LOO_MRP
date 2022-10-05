@@ -1,7 +1,7 @@
 library(dplyr)
 library(ggplot2)
 
-res_list_N02_1000 <- readRDS(here::here("02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_1000_new.rds"))
+res_list_N02_1000 <- readRDS(here::here("02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_1000.rds"))
 samp_wts <- readRDS(here::here("02-super popn approach/experiment1_baseWtdloo/03-data/samp_wts.rds"))
 
 
@@ -72,3 +72,5 @@ ggplot(t4, aes(x=wtdElpd_loo, y = mean_intervalScr_popnind, group=model) ) +
   theme(legend.position = "",
         legend.title = element_blank(),
         plot.margin = margin(10, 70, 10, 10)) 
+
+

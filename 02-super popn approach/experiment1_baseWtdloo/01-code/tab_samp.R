@@ -26,7 +26,7 @@ for(i in iter){
 }
 
 indv_all_tab = do.call(rbind, sampest_list[iter]) %>%
-  mutate(popnInd_intervalScr = ind_intervalScr * wts,
+  mutate(ind_wtd_intervalScr = ind_intervalScr * wts,
          model = plyr::revalue(model, c("model01" = 'X1',
                                         "model02" = 'X2', 
                                         "model03" = 'X3',
@@ -45,7 +45,9 @@ indv_all_tab = do.call(rbind, sampest_list[iter]) %>%
 
 indv_summ_tab = indv_all_tab %>% 
   group_by(model, iteration) %>% 
-  summarise(ind_wtd_intervalScr_sum = sum(popnInd_intervalScr),
+  summarise(ind_wtd_intervalScr_sum = sum(ind_wtd_intervalScr),
+            wts_sum = sum(wts),
+            popnInd_intervalScr_mean = ind_wtd_intervalScr_sum/wts_sum,
             ind_ci_width_mean = mean(ind_ci_width),
             ind_bias_mean = mean(ind_bias_X50),
             ind_bias_sd = sd(ind_bias_X50), 
@@ -55,7 +57,8 @@ indv_summ_tab = indv_all_tab %>%
             ind_biasWidth_mean = mean(ind_bias_width),
             ind_biasWidth_sd = sd(ind_bias_width),
             ind_intervalScr_mean = mean(ind_intervalScr),
-            ind_intervalScr_sd = sd(ind_intervalScr))
+            ind_intervalScr_sd = sd(ind_intervalScr),
+            ind_intervalScr_sum = sum(ind_intervalScr))
 
 indv_summ_tab$model = fct_relevel(indv_summ_tab$model, c('X2 + X4', 'X1 + X2 + X4', 'X2 + X3 + X4', 'X1 + X2 + X3 + X4', 
                                                          'X4', 'X1 + X4', 'X3 + X4', 'X1 + X3 + X4',
@@ -67,8 +70,4 @@ indv_all_tab$model = fct_relevel(indv_all_tab$model, c('X2 + X4', 'X1 + X2 + X4'
                                                          'X2', 'X1 + X2', 'X2 + X3', 'X1 + X2 + X3',
                                                          'X1', 'X3', 'X1 + X3'))
 
-## calculating weighted popn interval Scr
-indv_all_tab %>% 
-  mutate(popnInd_intervalScr = ind_intervalScr * wts) %>% 
- group_by(model, iteration) %>% 
-  summarise()
+

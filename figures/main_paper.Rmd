@@ -20,8 +20,6 @@ res_list_sae_1000 <- readRDS(here('02-super popn approach/experiment4_SAE/03-dat
 
 res_list_sae_500 <- readRDS(here('02-super popn approach/experiment4_SAE/03-data/res_list_sae_500_wtd.rds'))
 
-popn_indv_wts <- readRDS(here("02-super popn approach/experiment1_baseWtdloo/03-data/popn_indv_wts.rds"))
-
 indv_all_tab = res_list_base$indv_all_tab
 popn_indv_tab = res_list_base$popn_indv_tab
 popn_counts = res_list_base$popn_counts
@@ -150,19 +148,19 @@ t2 = popn_indv_tab %>%
   select(intervalScr, model, model_score, popnInd, type)
 
 # population individual
-t3 = popn_indv_wts %>%
+t3 = popn_indv_tab %>%
   pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score") %>%
   mutate(type = factor(type),
          type = fct_recode(type, `PSIS-LOO` = "elpd_loo", `WTD-PSIS-LOO` = "wtdElpd_loo")) %>% 
    mutate(popnInd = 1) %>% #naming 1 for popn individual instead of samp ind
-  rename(intervalScr = popn_ind_intervalScr) %>% 
+  rename(intervalScr = popnInd_intervalScr_mean) %>% 
   select(intervalScr, model, model_score, popnInd, type)
 
 t3$model = fct_relevel(t3$model, 'X2 + X4',
-                         'X1 + X2 + X4', 
+                         'X1 + X2 + X4',
                          'X2 + X3 + X4',
                          'X1 + X2 + X3 + X4',
-                         'X4', 'X1 + X4', 
+                         'X4', 'X1 + X4',
                          'X3 + X4', 'X1 + X3 + X4',
                          'X2', 'X1 + X2',
                          'X2 + X3', 'X1 + X2 + X3',

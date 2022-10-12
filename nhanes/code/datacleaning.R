@@ -415,3 +415,65 @@ nhdata_full %>%
             sum_wts_urn = sum(wts_urn))
 
 
+# attempt to include more variables ---------------------------------------------
+nhdata = readRDS(file="nhanes/data/nhdata_full.rds")
+
+# elastography
+lux = read.xport(here('nhanes/data/NHANES 2017-20/P_LUX.XPT')) %>% 
+  mutate(elst_status = as.factor(LUAXSTAT)) %>% 
+  select(SEQN, elst_status)
+
+# pesticide use
+puq = read.xport(here('nhanes/data/NHANES 2017-20/P_PUQMEC.XPT')) %>% 
+  mutate(pest_use = recode(as.factor(PUQ100), '7' = '9')) %>% 
+  select(SEQN, pest_use)
+
+# hepA
+hepa = read.xport(here('nhanes/data/NHANES 2017-20/P_HEPA.XPT')) %>%
+  mutate(hepA_ind = as.factor(LBXHA)) %>%
+  select(SEQN, hepA_ind)
+
+# hepB antibody
+hepb_ab = read.xport(here('nhanes/data/NHANES 2017-20/P_HEPB_S.XPT')) %>%
+  mutate(hepB_ind = as.factor(LBXHBS)) %>%
+  select(SEQN, hepB_ind)
+
+# told have AIDS
+hsq = read.xport(here('nhanes/data/NHANES 2017-20/P_HSQ.XPT')) %>%
+  mutate(hiv_ind = as.factor(HSQ590)) %>%
+  select(SEQN, hiv_ind)
+
+# asthma indicator
+mcq = read.xport(here('nhanes/data/NHANES 2017-20/P_MCQ.XPT')) %>%
+  mutate(asth_ind = as.factor(MCQ010)) %>%
+  select(SEQN, asth_ind)
+
+
+fulldat = left_join(lux, puq, by='SEQN') %>% 
+  left_join(., hepa, by="SEQN") %>%
+  left_join(., hepb_ab, by="SEQN") %>%
+  left_join(., hsq, by="SEQN") %>% 
+  left_join(., mcq, by="SEQN") 
+
+nhnew = left_join(nhdata, fulldat, by="SEQN") %>% 
+  na.omit() 
+
+saveRDS(nhnew, file=here("nhanes/data/nhnew.rds"))
+
+
+
+names(nhnew)
+corInd = c(2:19,28:33) 
+nhnew %>% 
+  mutate_if(is.factor, as.numeric) %>% 
+  select(corInd) %>% 
+  cor(.)
+
+
+str(nhnew)
+nhtest = nhnew[,corInd]
+nhtest = nhdata[,c(2:19,28:34) ]
+glm(high_bp~., data = nhtest, family="binomial") %>% summary(.)
+
+
+

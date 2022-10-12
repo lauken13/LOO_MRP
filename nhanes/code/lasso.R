@@ -3,7 +3,7 @@ library(glmnet)
 nhdata = readRDS(file="nhanes/data/nhdata_full.rds")
 
 names(nhdata)
-m = model.matrix(~., nhdata[,-c(1,7,20:27)])
+m = model.matrix(~., nhdata[,covind])
 
 y = nhdata[,7]
 
@@ -28,8 +28,8 @@ coef(mod_incl_cv_fas, c(mod_incl_cv_fas$lambda.1se))
 
 
 
-8192 8193 12648 17054
-)
+# 8192 8193 12648 17054
+
 
 
 

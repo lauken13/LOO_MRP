@@ -3,6 +3,7 @@ library(here)
 library(loo)
 library(tidyverse)
 library(brms)
+library(survey)
 source(here('02-super popn approach/functions.R'))
 
 # reading in data
@@ -339,7 +340,7 @@ join1_fas = left_join(loo_tab_fas, wtd_loo_tab_fas, by = "model")
 popn_all_tab_fas = left_join(join1_fas, popnest_tab_fas, by="model") %>% 
   mutate(MRP_intScr_scaled = (MRP_intervalScr - min(MRP_intervalScr)) / (max(MRP_intervalScr) - min(MRP_intervalScr)))
 
-shape_base  = c(21, 22, 24, 23)
+shape_base  = c(21, 22, 24, 23, 25)
 colour_palette_var_base  =  c(`All variables` =  "#4477AA",
                               `Bias-precision` = "#88CCEE", 
                               `Bias-only` = "#CC6677",
@@ -350,6 +351,10 @@ bd_col = c(`All variables` =  "black",
            `Bias-only` = "black",
            `Precision-only` = "black", 
            `Irrelevant` = "black")
+
+show_col(colorblind_pal()(8))
+colour_palette_var_base2 = c('#E69F00', '#009E73', '#F0E442', '#D55E00')
+
 
 ( g1 = rbind(popn_all_tab_dr1, popn_all_tab_urn, popn_all_tab_voc, popn_all_tab_fas) %>% 
     mutate(model = case_when(model == 'allvar' ~ "All variables",
@@ -362,23 +367,24 @@ bd_col = c(`All variables` =  "black",
     pivot_longer(cols = c("elpd_loo_std","wtdElpd_loo_std"), names_to = "type", values_to = "model_score") %>%
     mutate(type = factor(type),
            type = fct_recode(type, `PSIS-LOO` = "elpd_loo_std", `WTD-PSIS-LOO` = "wtdElpd_loo_std")) %>% 
-    ggplot(., aes(x = model_score, y = MRP_intScr_scaled)) +
+    ggplot(., aes(x = model_score, y = MRP_intScr_scaled, group=sample, shape = model, fill = sample, colour = sample)) +
     facet_grid(~type, scales = "free")+
-    geom_point(size=4.5, alpha = .7, aes(shape = sample, colour = model, fill = model)) + 
+    geom_line(alpha=0.6) + 
+    geom_point(size=4, alpha = .7) + 
     theme_bw(base_size = 15)  +
     scale_shape_manual(values = shape_base) +
-    scale_fill_manual(values = colour_palette_var_base) +
-    scale_colour_manual(values = bd_col) +
-    ylab("Interval score for MRP estimates") +
+    scale_fill_manual(values = colour_palette_var_base2) +
+    scale_colour_manual(values = colour_palette_var_base2) +
+    ylab("Scaled interval score for MRP estimates") +
     xlab("Model score") + 
-    guides(fill = guide_legend("Model", override.aes=list(color=colour_palette_var_base)),
+    guides(fill = guide_legend("Sample", override.aes=list(color=colour_palette_var_base2)),
            colour = "none",
-           shape = guide_legend("Sample")) +
+           shape = guide_legend("Model")) +
     ggtitle('MRP interval score') +
     theme(legend.title = element_text(size=15, face="bold"),
           legend.text = element_text(size=15)))
 
-ggsave(g1, width=16, height=10, file=here("nhanes/figures/elpd_MRP_all.png"))
+ggsave(g1, width=14, height=8, file=here("nhanes/figures/elpd_MRP_all.png"))
 
 
 
@@ -903,39 +909,39 @@ j1_fas = left_join(pred_sampInd_fas, loo_tab_fas, by="model")
 t1_fas =left_join(j1_fas, wtd_loo_tab_fas, by="model")
 
 j2_fas = left_join(pred_popnInd_fas, loo_tab_fas, by="model")
-t2_fas =left_join(j2_fas, wtd_loo_tab_fas, by="model")
-
+t2_fas =left_join(j2_fas, wtd_loo_tab_fas, by="model") 
 
 # individuals plot --------------------------------------------------------------------
 (g2 = rbind(t1_voc, t2_voc, t1_dr1, t2_dr1, 
             t1_urn, t2_urn, t1_fas, t2_fas) %>%
-   mutate(model = case_when(model == 'allvar' ~ "All variables",
-                            model == 'biasprec' ~ "Bias-precision",
-                            model == 'bias' ~ "Bias-only",
-                            model == 'prec' ~ "Precision-only",
-                            model == 'none' ~ "Irrelevant")) %>% 
+    mutate(model = case_when(model == 'allvar' ~ "All variables",
+                             model == 'biasprec' ~ "Bias-precision",
+                             model == 'bias' ~ "Bias-only",
+                             model == 'prec' ~ "Precision-only",
+                             model == 'none' ~ "Irrelevant")) %>% 
     mutate(popnInd = factor(popnInd),
            popnInd = fct_recode(popnInd, `Sample` = "0", `Population` = "1"),
            elpd_loo_std = (elpd_loo - min(elpd_loo)) / (max(elpd_loo) - min(elpd_loo)),
            wtdElpd_loo_std = (wtdElpd_loo - min(wtdElpd_loo)) / (max(wtdElpd_loo) - min(wtdElpd_loo))) %>% 
-    pivot_longer(cols = c("elpd_loo_std","wtdElpd_loo_std"), names_to = "type", values_to = "model_score") %>%
+    pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score") %>%
     mutate(type = factor(type),
-           type = fct_recode(type, `PSIS-LOO` = "elpd_loo_std", `WTD-PSIS-LOO` = "wtdElpd_loo_std"))  %>% 
-    ggplot(., aes(x = model_score, y = 1-mean_prob_pred_out, shape = sample, colour = factor(model), fill = model)) +
-    geom_point(size=3, alpha = .7) + 
+           type = fct_recode(type, `PSIS-LOO` = "elpd_loo", `WTD-PSIS-LOO` = "wtdElpd_loo"))  %>% 
+    ggplot(., aes(x = model_score, y = 1-mean_prob_pred_out, colour = sample, shape = factor(model), fill = sample, group=sample)) +
+    geom_line(alpha=0.6) +
+    geom_point(size=4, alpha = .7) + 
     scale_shape_manual(values = shape_base) +
-    scale_fill_manual(values = colour_palette_var_base) +
-   scale_colour_manual(values = bd_col) +
+    scale_fill_manual(values = colour_palette_var_base2) +
+    scale_colour_manual(values = colour_palette_var_base2) +
     facet_grid(popnInd~type, scales = "free") +
     theme_bw(base_size = 15) +
     ggtitle('Individual mean prediction of outcome') +
     ylab('1 - mean of prediction of outcome') +
     xlab("Model score") +
-   guides(fill = guide_legend("Model", override.aes=list(color=colour_palette_var_base)),
-          colour = "none",
-           shape = guide_legend("Sample")) +
-   theme(legend.title = element_text(size=15, face="bold"),
-         legend.text = element_text(size=15)) )
+    guides(fill = guide_legend("Sample", override.aes=list(color=colour_palette_var_base2)),
+           colour = "none",
+           shape = guide_legend("Model")) +
+    theme(legend.title = element_text(size=15, face="bold"),
+          legend.text = element_text(size=15)) )
 
-ggsave(g2, width=16, height=10, file=here("nhanes/figures/elpd_indv_pred_outcome_all_test.png"))
+ggsave(g2, width=14, height=8, file=here("nhanes/figures/elpd_indv_pred_outcome.png"))
 

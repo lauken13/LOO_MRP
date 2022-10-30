@@ -11,16 +11,16 @@ library(forcats) #fct_relevel
 ## 2017-2020 
 # demographic - age, race, sex/gender, education, married status ####
 demo1720 = read.xport(here('nhanes/data/NHANES 2017-20/P_DEMO.XPT'))  %>% # 15560 obs total
-  filter(RIDAGEYR >= 18) %>% # 10195 for 16 y/o and above, 9693 for 18 y/o 
+  filter(RIDAGEYR >= 18) %>% # 13218 for 6 y/o and above, 11233 for 12 y/o, 10195 for 16 y/o, 9693 for 18 y/o 
   mutate(age = cut(RIDAGEYR, breaks = c(18, 29, 39, 49, 59, 69, 80), right = F, labels = F),
          age = recode(as.factor(age), '1' = '18-29', '2' = '30-39', '3' = '40-49', '4' = '50-59', '5' = '60-69', '6' = '70-80'),
          ethnicity = recode(as.factor(RIDRETH3), '1' = 'MexAme', '2' =  'OtherHisp', '3' = 'NonHispWhite', '4' = 'NonHispBlack', '6' = 'NonHispAsian', '7' = 'Other'),    #'1-Mexican American; 2-Other Hispanic; 3-Non-Hispanic White; 4-Non-Hispanic Black; 6-Non-Hispanic Asian; 7-Other Race including Multi-Racial'
          gender = recode(as.factor(RIAGENDR), '1' = 'male', '2' = 'female'),  # '1-male; 2-female
          DMDEDUC2 = recode.na(as.factor(DMDEDUC2), c('7', '9')), #1-Less than 9th grade; 2-9-11th grade (Includes 12th grade with no diploma);3-High school graduate/GED or equivalent;4-Some college or AA degree;5-College graduate or above; 7-Refused; 9-Don't Know,
          educ = recode(as.factor(DMDEDUC2), '1' = 'less9th', '2' = '9-11thgrade', '3' = 'HSgrad', '4' = 'SomecollegeAA', '5' = 'Collegegrad'),
-         marital_status = recode(as.factor(DMDMARTZ), '1' = 'married/living tgt', '2' = 'widowed/separated', 
-                                  '3' = 'never married'),
-         marital_status = recode.na(as.factor(DMDMARTZ), c('77', '99'))) %>% 
+         marital_status = recode.na(as.factor(DMDMARTZ), c('77', '99')), 
+        marital_status = recode(marital_status, '1' = 'married/living tgt', '2' = 'widowed/separated', 
+                                  '3' = 'never married')) %>% 
   select(SEQN, age, ethnicity, gender, educ, marital_status)
 # sum(demo1720$RIDAGEYR >= 18 & demo1720$RIDAGEYR < 25)
 
@@ -218,88 +218,140 @@ fulldat = left_join(demo1720, bp, by='SEQN') %>%
          potassium_lvl = recode(as.factor(potassium_lvl), '1' = 'low', '2' = 'adequate','3' = 'high'),
          potassium_lvl = fct_relevel(potassium_lvl, c('low', 'adequate', 'high'))) %>% 
   select(-c(smk2_ind, smk2_home, tob_last5, cig_now, preg_fem, sodium_intake1, sodium_intake2, potassium_intake1, potassium_intake2,
-            sodium_avg, potassium_avg, preg_yes)) %>% 
+            sodium_avg, potassium_avg, preg_yes)) 
+
+
+saveRDS(fulldat, file=here("nhanes/data/fulldat.RDS"))
+
+# attempt to include more variables ---------------------------------------------
+fulldat = readRDS(file="nhanes/data/fulldat.rds") 
+
+# elastography
+lux = read.xport(here('nhanes/data/NHANES 2017-20/P_LUX.XPT')) %>%
+  mutate(elst_status = recode(as.factor(LUAXSTAT), '1' = 'complete', '2' = 'partial', '3' = 'ineligible', '4' = 'not done')) %>%
+  select(SEQN, elst_status)
+
+# pesticide use
+puq = read.xport(here('nhanes/data/NHANES 2017-20/P_PUQMEC.XPT')) %>%
+  mutate(pest_use = recode(as.factor(PUQ100), '7' = '9'),
+         pest_use = recode(pest_use, '1' = 'yes', '2' = 'no', '9' = 'dont know/refused')) %>%
+  select(SEQN, pest_use)
+
+
+# ever tested for AIDS
+hsq = read.xport(here('nhanes/data/NHANES 2017-20/P_HSQ.XPT')) %>%
+  mutate(hiv_test = as.factor(HSQ590),
+         hiv_test = recode(hiv_test, '1' = 'yes', '2' = 'no', '9' = 'dont know')) %>%
+  select(SEQN, hiv_test)
+
+# dentist visit
+ohq = read.xport(here('nhanes/data/NHANES 2017-20/P_OHQ.XPT')) %>%
+  mutate(den_vst = recode(as.factor(OHQ030), '4' = '3', '6' = '5', '77' = '99'),
+         den_vst = recode(as.factor(den_vst), '1' = 'less6mths', '2' = '6mthto1year', '3' = '1to3years', '5' = '3yrormore', '7' = 'never'),
+         den_vst = recode.na((den_vst), '99')) %>%
+  select(SEQN, den_vst)
+
+# urine collected at test
+ucf = read.xport(here('nhanes/data/NHANES 2017-20/P_UCFLOW.XPT')) %>%
+  mutate(urn_vol = cut_number((URXVOL1),4),
+         urn_vol = recode(as.factor(urn_vol), '[0,47]' = 'low', '(47,85]' = 'med', '(85,145]' = 'high', '(145,455]' = 'veryhigh')) %>%
+  select(SEQN, urn_vol)
+
+fulldat_ext = left_join(fulldat, lux, by='SEQN') %>% 
+  left_join(., puq, by="SEQN") %>% # pesticide use
+  left_join(., hsq, by="SEQN") %>% # HIV
+  left_join(., ohq, by="SEQN") %>%
+  left_join(., ucf, by="SEQN") %>% 
   na.omit()
 
-
-# subsample
-# urine sample ------------------------------------------------------------
-urn = read.xport(here('nhanes/data/NHANES 2017-20/P_UM.XPT')) %>% 
+# subsample  ------------------------------------------------------------
+# urine sample ####
+set.seed(523652) 
+nhdata_env = read.xport(here('nhanes/data/NHANES 2017-20/P_UM.XPT')) %>% 
   select(SEQN, WTSAPRP) %>% 
-  mutate(inclusion = ifelse(WTSAPRP==0 | is.na(WTSAPRP), 0, 1)) %>% 
-  select(-WTSAPRP)
-
-nhdata_urn = left_join(fulldat, urn, by="SEQN") %>% 
+  mutate(inclusion = ifelse(WTSAPRP==0 | is.na(WTSAPRP), 0, 1)) %>% # environmental subsample A weights
+  select(-WTSAPRP) %>% 
+  left_join(fulldat_ext, ., by="SEQN") %>% 
   mutate(inclusion = replace_na(inclusion, 0),
-         inclusion = as.factor(inclusion)) %>% 
-  filter(inclusion == 1) %>% 
-  sample_n(., size=1500, replace=F)
+         inclusion = as.factor(inclusion))
 
-dat1 = left_join(fulldat, nhdata_urn[,c("SEQN", 'inclusion')], by="SEQN") %>% 
-  mutate(incl_urn = case_when(inclusion == '1' ~ 1,
-                              is.na(inclusion) ~ 0)) %>% 
-  select(-inclusion)
-
-# voc sample --------------------------------------------------------------
-voc = read.xport(here('nhanes/data/NHANES 2017-20/P_VOCWB.XPT')) %>% 
-  select(SEQN, WTSVOCPR) %>% 
-  mutate(inclusion = ifelse(WTSVOCPR==0 | is.na(WTSVOCPR), 0, 1)) %>% 
-  select(-WTSVOCPR)
-
-# joining with full data
-nhdata_voc = left_join(fulldat, voc, by="SEQN") %>% 
-  mutate(inclusion = replace_na(inclusion, 0),
-         inclusion = as.factor(inclusion)) %>% 
+# joining with full data to sample 1500 
+env = nhdata_env %>% 
   filter(inclusion == 1) %>%
   sample_n(., size=1500, replace=F)
 
-dat2 = left_join(dat1, nhdata_voc[,c("SEQN", 'inclusion')], by="SEQN") %>% 
+# join back selected individuals with main frame
+dat1 = left_join(fulldat_ext, env[,c("SEQN", 'inclusion')], by="SEQN") %>% 
+  mutate(incl_env = case_when(inclusion == '1' ~ 1,
+                              is.na(inclusion) ~ 0)) %>% 
+  select(-inclusion)
+
+# voc sample ####
+nhdata_voc = read.xport(here('nhanes/data/NHANES 2017-20/P_VOCWB.XPT')) %>% 
+  select(SEQN, WTSVOCPR) %>% 
+  mutate(inclusion = ifelse(WTSVOCPR==0 | is.na(WTSVOCPR), 0, 1)) %>% 
+  select(-WTSVOCPR) %>% 
+  left_join(fulldat_ext, ., by="SEQN") %>% 
+  mutate(inclusion = replace_na(inclusion, 0),
+         inclusion = as.factor(inclusion)) 
+
+# joining with full data
+voc = nhdata_voc %>% 
+  filter(inclusion == 1) %>%
+  sample_n(., size=1500, replace=F)
+
+dat2 = left_join(dat1, voc[,c("SEQN", 'inclusion')], by="SEQN") %>% 
   mutate(incl_voc = case_when(inclusion == '1' ~ 1,
                               is.na(inclusion) ~ 0)) %>% 
   select(-inclusion)
 
 
-# dietary subsample -------------------------------------------------------
-dr1 = read.xport(here('nhanes/data/NHANES 2017-20/P_DR1TOT.XPT')) %>% 
-  select(SEQN, WTDRD1PP) %>% 
-  mutate(inclusion = ifelse(WTDRD1PP==0 | is.na(WTDRD1PP), 0, 1)) %>% 
-  select(-WTDRD1PP)
+# dietary subsample ####
+nhdata_dr2 = read.xport(here('nhanes/data/NHANES 2017-20/P_DR2TOT.XPT')) %>% 
+  select(SEQN, WTDR2DPP) %>% 
+  mutate(inclusion = ifelse(WTDR2DPP==0 | is.na(WTDR2DPP), 0, 1)) %>% 
+  select(-WTDR2DPP) %>% 
+  left_join(fulldat_ext, ., by="SEQN") %>% 
+  mutate(inclusion = replace_na(inclusion, 0),
+         inclusion = as.factor(inclusion))
 
 # joining with full data
-nhdata_dr1 = left_join(fulldat, dr1, by="SEQN") %>% 
-  mutate(inclusion = replace_na(inclusion, 0),
-         inclusion = as.factor(inclusion)) %>% 
+dr2 = nhdata_dr2  %>% 
   filter(inclusion == 1) %>%
   sample_n(., size=1500, replace=F)
 
-dat3 = left_join(dat2, nhdata_dr1[,c("SEQN", 'inclusion')], by="SEQN") %>% 
-  mutate(incl_dr1 = case_when(inclusion == '1' ~ 1,
+dat3 = left_join(dat2, dr2[,c("SEQN", 'inclusion')], by="SEQN") %>% 
+  mutate(incl_dr2 = case_when(inclusion == '1' ~ 1,
                               is.na(inclusion) ~ 0)) %>% 
   select(-inclusion)
 
-# fasting subsample -------------------------------------------------------
-fas = read.xport(here('nhanes/data/NHANES 2017-20/P_TRIGLY.XPT')) %>% 
+
+# fasting subsample ####
+nhdata_fas = read.xport(here('nhanes/data/NHANES 2017-20/P_TRIGLY.XPT')) %>% 
   select(SEQN, WTSAFPRP) %>% 
   mutate(inclusion = ifelse(WTSAFPRP==0 | is.na(WTSAFPRP), 0, 1)) %>% 
-  select(-WTSAFPRP)
+  select(-WTSAFPRP) %>% 
+  left_join(fulldat_ext, ., by="SEQN") %>% 
+  mutate(inclusion = replace_na(inclusion, 0),
+         inclusion = as.factor(inclusion))
 
 # joining with full data
-nhdata_fas = left_join(fulldat, fas, by="SEQN") %>% 
-  mutate(inclusion = replace_na(inclusion, 0),
-         inclusion = as.factor(inclusion)) %>% 
+fas = nhdata_fas %>% 
   filter(inclusion == 1) %>%
   sample_n(., size=1500, replace=F)
 
-dat4 = left_join(dat3, nhdata_fas[,c("SEQN", 'inclusion')], by="SEQN") %>% 
+dat4 = left_join(dat3, fas[,c("SEQN", 'inclusion')], by="SEQN") %>% 
   mutate(incl_fas = case_when(inclusion == '1' ~ 1,
                               is.na(inclusion) ~ 0)) %>% 
   select(-inclusion)
 
 
+names(dat4)
+
+
 # weights -----------------------------------------------------------------
 library(survey)
 library(dbarts)
-library(tidyverse)
 
 # creating weights for the population
 nhdata = dat4
@@ -307,47 +359,47 @@ nhdata = dat4
 nhsub_fas = nhdata %>% 
   filter(incl_fas == 1) 
 
-nhsub_urn = nhdata %>% 
-  filter(incl_urn == 1) 
+nhsub_env = nhdata %>% 
+  filter(incl_env == 1) 
 
-nhsub_dr1 = nhdata %>% 
-  filter(incl_dr1 == 1) 
+nhsub_dr2 = nhdata %>% 
+  filter(incl_dr2 == 1) 
 
 nhsub_voc = nhdata %>% 
   filter(incl_voc == 1) 
 
 # bart --------------------------------------------------------------------
-# urn ---------------------------------------------------------------------
-x_urn = nhdata %>% 
+# env ---------------------------------------------------------------------
+x_env = nhdata %>% 
   select(-c(SEQN, high_bp, names(nhdata)[grep('incl_*', names(nhdata))])) 
 
-y_urn = as.numeric(nhdata$incl_urn)
+y_env = as.numeric(nhdata$incl_env)
 
-nhsub2_urn = nhsub_urn %>% 
-  select(-c(SEQN, high_bp, names(nhsub_urn)[grep('incl_*', names(nhsub_urn))])) 
+nhsub2_env = nhsub_env %>% 
+  select(-c(SEQN, high_bp, names(nhsub_env)[grep('incl_*', names(nhsub_env))])) 
 
-bartfit_urn = bart(x_urn, y_urn, keeptrees=T) 
-bartpred_urn = predict(bartfit_urn, newdata = nhsub2_urn)
-bartpred_med_urn = apply(bartpred_urn, 2, median)
+bartfit_env = bart(x_env, y_env, keeptrees=T) 
+bartpred_env = predict(bartfit_env, newdata = nhsub2_env)
+bartpred_med_env = apply(bartpred_env, 2, median)
 
-hist(bartpred_med_urn)
-hist(as.numeric(nhdata$incl_urn))
+hist(bartpred_med_env)
+hist(as.numeric(nhdata$incl_env))
 
-# dr1 ---------------------------------------------------------------------
-x_dr1 = nhdata %>% 
+# dr2 ---------------------------------------------------------------------
+x_dr2 = nhdata %>% 
   select(-c(SEQN, high_bp, names(nhdata)[grep('incl_*', names(nhdata))])) 
 
-y_dr1 = as.numeric(nhdata$incl_dr1)
+y_dr2 = as.numeric(nhdata$incl_dr2)
 
-nhsub2_dr1 = nhsub_dr1 %>% 
-  select(-c(SEQN, high_bp, names(nhsub_dr1)[grep('incl_*', names(nhsub_dr1))])) 
+nhsub2_dr2 = nhsub_dr2 %>% 
+  select(-c(SEQN, high_bp, names(nhsub_dr2)[grep('incl_*', names(nhsub_dr2))])) 
 
-bartfit_dr1 = bart(x_dr1, y_dr1, keeptrees=T) 
-bartpred_dr1 = predict(bartfit_dr1, newdata = nhsub2_dr1)
-bartpred_med_dr1 = apply(bartpred_dr1,2,median)
+bartfit_dr2 = bart(x_dr2, y_dr2, keeptrees=T) 
+bartpred_dr2 = predict(bartfit_dr2, newdata = nhsub2_dr2)
+bartpred_med_dr2 = apply(bartpred_dr2,2,median)
 
-hist(bartpred_med_dr1)
-hist(as.numeric(nhdata$incl_dr1))
+hist(bartpred_med_dr2)
+hist(as.numeric(nhdata$incl_dr2))
 
 # voc ---------------------------------------------------------------------
 x_voc = nhdata %>% 
@@ -382,98 +434,35 @@ hist(bartpred_med_fas)
 hist(as.numeric(nhdata$incl_fas))
 
 nhdata_full = nhdata %>% 
-  mutate(wts_urn = ifelse(incl_urn ==1, 1/bartpred_med_urn, 0),
+  mutate(wts_env = ifelse(incl_env ==1, 1/bartpred_med_env, 0),
          wts_voc = ifelse(incl_voc ==1, 1/bartpred_med_voc, 0),
-         wts_dr1 = ifelse(incl_dr1 ==1, 1/bartpred_med_dr1, 0),
+         wts_dr2 = ifelse(incl_dr2 ==1, 1/bartpred_med_dr2, 0),
          wts_fas = ifelse(incl_fas ==1, 1/bartpred_med_fas, 0))
 
-saveRDS(nhdata_full, file=here("nhanes/data/nhdata_full.rds"))
-
 # checking counts using the weights -----------------------------------
-  nhdata_full %>% 
+nhdata_full %>% 
   group_by(gender) %>% 
   summarise(sum_n = n(),
             sum_wts_fas = sum(wts_fas),
-            sum_wts_dr1 = sum(wts_dr1),
+            sum_wts_dr2 = sum(wts_dr2),
             sum_wts_voc = sum(wts_voc),
-            sum_wts_urn = sum(wts_urn))
+            sum_wts_env = sum(wts_env))
 
 nhdata_full %>% 
   group_by(ethnicity) %>% 
   summarise(sum_n = n(),
             sum_wts_fas = sum(wts_fas),
-            sum_wts_dr1 = sum(wts_dr1),
+            sum_wts_dr2 = sum(wts_dr2),
             sum_wts_voc = sum(wts_voc),
-            sum_wts_urn = sum(wts_urn))
+            sum_wts_env = sum(wts_env))
 
 nhdata_full %>% 
   group_by(age) %>% 
   summarise(sum_n = n(),
             sum_wts_fas = sum(wts_fas),
-            sum_wts_dr1 = sum(wts_dr1),
+            sum_wts_dr2 = sum(wts_dr2),
             sum_wts_voc = sum(wts_voc),
-            sum_wts_urn = sum(wts_urn))
+            sum_wts_env = sum(wts_env))
 
 
-# attempt to include more variables ---------------------------------------------
-nhdata = readRDS(file="nhanes/data/nhdata_full.rds")
-
-# elastography
-lux = read.xport(here('nhanes/data/NHANES 2017-20/P_LUX.XPT')) %>% 
-  mutate(elst_status = as.factor(LUAXSTAT)) %>% 
-  select(SEQN, elst_status)
-
-# pesticide use
-puq = read.xport(here('nhanes/data/NHANES 2017-20/P_PUQMEC.XPT')) %>% 
-  mutate(pest_use = recode(as.factor(PUQ100), '7' = '9')) %>% 
-  select(SEQN, pest_use)
-
-# hepA
-hepa = read.xport(here('nhanes/data/NHANES 2017-20/P_HEPA.XPT')) %>%
-  mutate(hepA_ind = as.factor(LBXHA)) %>%
-  select(SEQN, hepA_ind)
-
-# hepB antibody
-hepb_ab = read.xport(here('nhanes/data/NHANES 2017-20/P_HEPB_S.XPT')) %>%
-  mutate(hepB_ind = as.factor(LBXHBS)) %>%
-  select(SEQN, hepB_ind)
-
-# told have AIDS
-hsq = read.xport(here('nhanes/data/NHANES 2017-20/P_HSQ.XPT')) %>%
-  mutate(hiv_ind = as.factor(HSQ590)) %>%
-  select(SEQN, hiv_ind)
-
-# asthma indicator
-mcq = read.xport(here('nhanes/data/NHANES 2017-20/P_MCQ.XPT')) %>%
-  mutate(asth_ind = as.factor(MCQ010)) %>%
-  select(SEQN, asth_ind)
-
-
-fulldat = left_join(lux, puq, by='SEQN') %>% 
-  left_join(., hepa, by="SEQN") %>%
-  left_join(., hepb_ab, by="SEQN") %>%
-  left_join(., hsq, by="SEQN") %>% 
-  left_join(., mcq, by="SEQN") 
-
-nhnew = left_join(nhdata, fulldat, by="SEQN") %>% 
-  na.omit() 
-
-saveRDS(nhnew, file=here("nhanes/data/nhnew.rds"))
-
-
-
-names(nhnew)
-corInd = c(2:19,28:33) 
-nhnew %>% 
-  mutate_if(is.factor, as.numeric) %>% 
-  select(corInd) %>% 
-  cor(.)
-
-
-str(nhnew)
-nhtest = nhnew[,corInd]
-nhtest = nhdata[,c(2:19,28:34) ]
-glm(high_bp~., data = nhtest, family="binomial") %>% summary(.)
-
-
-
+saveRDS(nhdata_full, file=here("nhanes/data/nhdata_full.rds"))

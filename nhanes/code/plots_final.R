@@ -5,7 +5,7 @@ library(tidyverse)
 library(brms)
 library(survey)
 source(here('02-super popn approach/functions.R'))
-nhfinal = readRDS(file="nhanes/data/nhanes_final.rds")
+nhfinal = readRDS(file="nhanes/data/nhanes_final_gen.rds")
 
 nhsub_dr2 = nhfinal %>% 
   filter(incl_dr2 == 1) 
@@ -13,12 +13,14 @@ nhsub_dr2 = nhfinal %>%
 nhsub_fas = nhfinal %>% 
   filter(incl_fas == 1) 
 
+nhsub_gen = nhfinal %>% 
+  filter(incl_gen == 1) 
+
 # make MRP estimates
 popn_ps = nhfinal %>% 
   group_by(age, ethnicity, gender, educ, marital_status, 
-           phys_act, overweight, BMI_range, alc_exc, diabetes, 
-           trb_sleep, pov_level, smk_tobcig, sodium_lvl, elst_status,
-           hiv_test, urn_vol) %>% 
+           phys_act, overweight, diabetes, trb_sleep, pov_level,
+           smk_tobcig, sodium_lvl, elst_status, hiv_test, urn_vol) %>% 
   summarise(Nj = n()) %>% 
   ungroup() 
 
@@ -178,14 +180,98 @@ popnest_tab_fas = popnest_tab_fas %>%
          sample = "Fasting")
 
 
-# PLOT mrp ----------------------------------------------------------------
+# Generated -----------------------------------------------------------------
+nhmodel_allvar_gen = readRDS(file=here('nhanes/data/gen_allvar.rds'))
+nhmodel_biasprec_gen = readRDS(file=here('nhanes/data/gen_biasprec.rds'))
+nhmodel_bias_gen = readRDS(file=here('nhanes/data/gen_bias.rds'))
+nhmodel_prec_gen = readRDS(file=here('nhanes/data/gen_prec.rds'))
+nhmodel_inc_gen = readRDS(file=here('nhanes/data/gen_inc.rds'))
+nhmodel_ign_gen = readRDS(file=here('nhanes/data/gen_ign.rds'))
+
+loo_allvar_gen = loo(nhmodel_allvar_gen)
+loo_biasprec_gen = loo(nhmodel_biasprec_gen)
+loo_bias_gen = loo(nhmodel_bias_gen)
+loo_prec_gen = loo(nhmodel_prec_gen)
+loo_inc_gen = loo(nhmodel_inc_gen)
+loo_ign_gen = loo(nhmodel_ign_gen)
+
+loo_all_gen = list(loo_allvar_gen, loo_biasprec_gen, loo_bias_gen, loo_prec_gen,  loo_inc_gen, loo_ign_gen)
+loo_tab_gen = loo_all_gen %>%  # extracting elpd_loo estimates
+  lapply(., function(x)x[[1]][1,]) %>% 
+  do.call(rbind, .) %>% 
+  as.data.frame(.) %>% 
+  mutate(model = modelnames) %>% 
+  rename(elpd_loo = Estimate, 
+         elpd_SE = SE)
+
+# creating survey raked weights
+svy_rake = svydesign(ids=~1, # cluster id, ~1 for no clusters
+                     weights=~wts_gen, # including raked weights in the survey design
+                     data=nhsub_gen)
+
+# calculating loo_wtd
+wtd_loo_tab_gen = lapply(loo_all_gen, function(x)loo_wtd(x,svy_rake)) %>%
+  do.call(rbind,.) %>%
+  data.frame(.) %>%
+  mutate(model = modelnames) %>%
+  rename(wtdElpd_loo = wtd_elpd_loo)
+
+
+# getting prediction for MRP - for poststrat table
+modelallvar_predict_gen = posterior_linpred(nhmodel_allvar_gen, newdata = popn_ps, transform = T) # getting model estimate for each cell
+modelallvar_popnest_gen = apply(modelallvar_predict_gen, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
+
+modelbiasprec_predict_gen = posterior_linpred(nhmodel_biasprec_gen, newdata = popn_ps, transform = T) # getting model estimate for each cell
+modelbiasprec_popnest_gen = apply(modelbiasprec_predict_gen, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
+
+modelbias_predict_gen = posterior_linpred(nhmodel_bias_gen, newdata = popn_ps, transform = T) # getting model estimate for each cell
+modelbias_popnest_gen = apply(modelbias_predict_gen, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
+
+modelprec_predict_gen = posterior_linpred(nhmodel_prec_gen, newdata = popn_ps, transform = T) # getting model estimate for each cell
+modelprec_popnest_gen = apply(modelprec_predict_gen, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
+
+modelinc_predict_gen = posterior_linpred(nhmodel_inc_gen, newdata = popn_ps, transform = T) # getting model estimate for each cell
+modelinc_popnest_gen = apply(modelinc_predict_gen, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
+
+modelign_predict_gen = posterior_linpred(nhmodel_ign_gen, newdata = popn_ps, transform = T) # getting model estimate for each cell
+modelign_popnest_gen = apply(modelign_predict_gen, 1, function(x)sum(x*popn_ps$Nj)/sum(popn_ps$Nj)) # prob of outcome in the popn.
+
+
+popnest_all_gen = list(modelallvar_popnest_gen, modelbiasprec_popnest_gen, modelbias_popnest_gen,
+                       modelprec_popnest_gen, modelinc_popnest_gen, modelign_popnest_gen)
+
+popnest_tab_gen = lapply(popnest_all_gen, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
+  do.call(rbind, .) %>% 
+  data.frame(.) %>% 
+  rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.) %>% 
+  mutate(model = modelnames)
+
+# intervalScr 
+alph = 0.1
+popnest_tab_gen = popnest_tab_gen %>%  
+  mutate(mean_yObs = mean(as.numeric(nhfinal$high_bp)-1), # to revert to level 0, 1
+         popn_ci_width = as.numeric(popnestX95 - popnestX5),
+         MRP_intervalScr = (popnestX95 - popnestX5) + 
+           ((2 / alph * (popnestX5 - mean_yObs)) * ifelse(mean_yObs < popnestX5, 1, 0)) + 
+           ((2 / alph * (mean_yObs - popnestX95)) * ifelse(mean_yObs > popnestX95, 1, 0)),
+         sample = "Generated")
+
+
+# *PLOT mrp ----------------------------------------------------------------
 # combine all four together
-join1_dr2 = left_join(loo_tab_dr2, popnest_tab_dr2, by = "model")
-popn_all_tab_dr2 = join1_dr2 %>% 
+join1_dr2 = left_join(loo_tab_dr2, wtd_loo_tab_dr2, by = "model")
+join2_dr2 = left_join(join1_dr2, popnest_tab_dr2, by = "model")
+popn_all_tab_dr2 = join2_dr2 %>% 
   mutate(MRP_intScr_scaled = (MRP_intervalScr - min(MRP_intervalScr)) / (max(MRP_intervalScr) - min(MRP_intervalScr)))
 
-join1_fas = left_join(loo_tab_fas, popnest_tab_fas, by = "model")
-popn_all_tab_fas = join1_fas %>% 
+join1_fas = left_join(loo_tab_fas, wtd_loo_tab_fas, by = "model")
+join2_fas = left_join(join1_fas, popnest_tab_fas, by = "model")
+popn_all_tab_fas = join2_fas %>% 
+  mutate(MRP_intScr_scaled = (MRP_intervalScr - min(MRP_intervalScr)) / (max(MRP_intervalScr) - min(MRP_intervalScr)))
+
+join1_gen = left_join(loo_tab_gen, wtd_loo_tab_gen, by = "model")
+join2_gen = left_join(join1_gen, popnest_tab_gen, by = "model")
+popn_all_tab_gen = join2_gen %>% 
   mutate(MRP_intScr_scaled = (MRP_intervalScr - min(MRP_intervalScr)) / (max(MRP_intervalScr) - min(MRP_intervalScr)))
 
 # colour for samples, shapes for models
@@ -204,10 +290,10 @@ bd_col = c(`All variables` =  "black",
            `Ignorable` = "black")
 
 scales::show_col(ggthemes::colorblind_pal()(8))
-colour_palette_var_base2 = c('#F0E442', '#D55E00') # ,'#CC79A7', '#009E73')
+colour_palette_var_base2 = c('#F0E442', '#D55E00', '#CC79A7') # '#009E73')
 
 
-( g1 = rbind(popn_all_tab_dr2, popn_all_tab_fas) %>% 
+( g1 = rbind(popn_all_tab_dr2, popn_all_tab_fas, popn_all_tab_gen) %>% 
     mutate(model = case_when(model == 'allvar' ~ "All variables",
                              model == 'biasprec' ~ "Bias-precision",
                              model == 'bias' ~ "Bias-only",
@@ -216,15 +302,15 @@ colour_palette_var_base2 = c('#F0E442', '#D55E00') # ,'#CC79A7', '#009E73')
                              model == 'ign' ~ "Ignorable"),
            model = fct_relevel(model, c("All variables", "Bias-precision", "Bias-only", "Precision-only",
                                         "Inconsequential", "Ignorable"))) %>% 
-    mutate(elpd_loo_std = (elpd_loo - min(elpd_loo)) / (max(elpd_loo) - min(elpd_loo))) %>% 
-    #        wtdElpd_loo_std = (wtdElpd_loo - min(wtdElpd_loo)) / (max(wtdElpd_loo) - min(wtdElpd_loo))) %>% 
-    # pivot_longer(cols = c("elpd_loo_std","wtdElpd_loo_std"), names_to = "type", values_to = "model_score") %>%
-    # mutate(type = factor(type),
-    #        type = fct_recode(type, `PSIS-LOO` = "elpd_loo_std", `WTD-PSIS-LOO` = "wtdElpd_loo_std")) %>% 
-    ggplot(., aes(x = elpd_loo, y = MRP_intervalScr, group=sample, shape = model, fill = sample, colour = sample)) +
-    # facet_grid(~type, scales = "free")+
-    geom_line(alpha=0.6) + 
-    geom_point(size=4, alpha = .7) + 
+    mutate(elpd_loo_std = (elpd_loo - min(elpd_loo)) / (max(elpd_loo) - min(elpd_loo)),
+           wtdElpd_loo_std = (wtdElpd_loo - min(wtdElpd_loo)) / (max(wtdElpd_loo) - min(wtdElpd_loo))) %>%
+    pivot_longer(cols = c("elpd_loo_std","wtdElpd_loo_std"), names_to = "type", values_to = "model_score") %>%
+    mutate(type = factor(type),
+           type = fct_recode(type, `PSIS-LOO` = "elpd_loo_std", `WTD-PSIS-LOO` = "wtdElpd_loo_std")) %>%
+    ggplot(., aes(x = model_score, y = MRP_intScr_scaled, group=sample, shape = model, fill = sample, colour = sample)) +
+    facet_grid(~type, scales = "free")+
+    geom_line(alpha=0.8) + 
+    geom_point(size=4, alpha = .8) + 
     theme_bw(base_size = 15)  +
     scale_shape_manual(values = shape_base) +
     scale_fill_manual(values = colour_palette_var_base2) +
@@ -236,7 +322,7 @@ colour_palette_var_base2 = c('#F0E442', '#D55E00') # ,'#CC79A7', '#009E73')
            shape = guide_legend("Model")) +
     ggtitle('MRP interval score') +
     theme(legend.title = element_text(size=15, face="bold"),
-          legend.text = element_text(size=15)))
+          legend.text = element_text(size=15)) )
 
 ggsave(g1, width=14, height=8, file=here("nhanes/figures/elpd_MRP_all.png"))
 
@@ -539,6 +625,157 @@ pred_popnInd_fas = list(modelallvar_pred_popnInd_fas, modelbiasprec_pred_popnInd
          sample = "Fasting") 
 
 
+# Generated ---------------------------------------------------------------
+pred_allvar_sampInd_gen = posterior_predict(nhmodel_allvar_gen, newdata = nhsub_gen)  # getting outcome estimate for each sample indv
+
+modelallvar_pred_sampInd_gen = matrix(NA)
+for (i in 1:nrow(nhsub_gen)){
+  modelallvar_pred_sampInd_gen[i] = mean(pred_allvar_sampInd_gen[,i] == nhsub_gen$high_bp[i])
+}
+modelallvar_pred_sampInd_gen = modelallvar_pred_sampInd_gen %>% 
+  as_tibble %>% 
+  mutate(model="allvar") %>% 
+  rename(prob_pred_out = value)
+
+# all var - popn
+pred_allvar_popnInd_gen = posterior_predict(nhmodel_allvar_gen, newdata = nhfinal)  # getting outcome estimate for each sample indv
+modelallvar_pred_popnInd_gen = matrix(NA)
+for (i in 1:nrow(nhsub_gen)){
+  modelallvar_pred_popnInd_gen[i] = mean(pred_allvar_popnInd_gen[,i] == nhfinal$high_bp[i])
+}
+modelallvar_pred_popnInd_gen = modelallvar_pred_popnInd_gen %>% 
+  as_tibble %>% 
+  mutate(model="allvar") %>% 
+  rename(prob_pred_out = value)
+
+# biasprec - sample
+pred_biasprec_sampInd_gen = posterior_predict(nhmodel_biasprec_gen, newdata = nhsub_gen)  # getting outcome estimate for each sample indv
+modelbiasprec_pred_sampInd_gen = matrix(NA)
+for (i in 1:nrow(nhsub_gen)){
+  modelbiasprec_pred_sampInd_gen[i] = mean(pred_biasprec_sampInd_gen[,i] == nhsub_gen$high_bp[i])
+}
+modelbiasprec_pred_sampInd_gen = modelbiasprec_pred_sampInd_gen %>% 
+  as_tibble %>% 
+  mutate(model="biasprec") %>% 
+  rename(prob_pred_out = value)
+
+# biasprec - popn
+pred_biasprec_popnInd_gen = posterior_predict(nhmodel_biasprec_gen, newdata = nhfinal)  # getting outcome estimate for each sample indv
+modelbiasprec_pred_popnInd_gen = matrix(NA)
+for (i in 1:nrow(nhsub_gen)){
+  modelbiasprec_pred_popnInd_gen[i] = mean(pred_biasprec_popnInd_gen[,i] == nhfinal$high_bp[i])
+}
+modelbiasprec_pred_popnInd_gen = modelbiasprec_pred_popnInd_gen %>% 
+  as_tibble %>% 
+  mutate(model="biasprec") %>% 
+  rename(prob_pred_out = value)
+
+# bias - sample
+pred_bias_sampInd_gen = posterior_predict(nhmodel_bias_gen, newdata = nhsub_gen)  # getting outcome estimate for each sample indv
+modelbias_pred_sampInd_gen = matrix(NA)
+for (i in 1:nrow(nhsub_gen)){
+  modelbias_pred_sampInd_gen[i] = mean(pred_bias_sampInd_gen[,i] == nhsub_gen$high_bp[i])
+}
+modelbias_pred_sampInd_gen = modelbias_pred_sampInd_gen %>% 
+  as_tibble %>% 
+  mutate(model="bias") %>% 
+  rename(prob_pred_out = value)
+
+# bias - popn
+pred_bias_popnInd_gen = posterior_predict(nhmodel_bias_gen, newdata = nhfinal)  # getting outcome estimate for each sample indv
+modelbias_pred_popnInd_gen = matrix(NA)
+for (i in 1:nrow(nhsub_gen)){
+  modelbias_pred_popnInd_gen[i] = mean(pred_bias_popnInd_gen[,i] == nhfinal$high_bp[i])
+}
+modelbias_pred_popnInd_gen = modelbias_pred_popnInd_gen %>% 
+  as_tibble %>% 
+  mutate(model="bias") %>% 
+  rename(prob_pred_out = value)
+
+# precision - sample
+pred_prec_sampInd_gen = posterior_predict(nhmodel_prec_gen, newdata = nhsub_gen)  # getting outcome estimate for each sample indv
+modelprec_pred_sampInd_gen = matrix(NA)
+for (i in 1:nrow(nhsub_gen)){
+  modelprec_pred_sampInd_gen[i] = mean(pred_prec_sampInd_gen[,i] == nhsub_gen$high_bp[i])
+}
+modelprec_pred_sampInd_gen = modelprec_pred_sampInd_gen %>% 
+  as_tibble %>% 
+  mutate(model="prec") %>% 
+  rename(prob_pred_out = value)
+
+# precision - popn
+pred_prec_popnInd_gen = posterior_predict(nhmodel_prec_gen, newdata = nhfinal)  # getting outcome estimate for each sample indv
+modelprec_pred_popnInd_gen = matrix(NA)
+for (i in 1:nrow(nhsub_gen)){
+  modelprec_pred_popnInd_gen[i] = mean(pred_prec_popnInd_gen[,i] == nhfinal$high_bp[i])
+}
+modelprec_pred_popnInd_gen = modelprec_pred_popnInd_gen %>% 
+  as_tibble %>% 
+  mutate(model="prec") %>% 
+  rename(prob_pred_out = value)
+
+# inconsequential - sample
+pred_inc_sampInd_gen = posterior_predict(nhmodel_inc_gen, newdata = nhsub_gen)  # getting outcome estimate for each sample indv
+modelinc_pred_sampInd_gen = matrix(NA)
+for (i in 1:nrow(nhsub_gen)){
+  modelinc_pred_sampInd_gen[i] = mean(pred_inc_sampInd_gen[,i] == nhsub_gen$high_bp[i])
+}
+modelinc_pred_sampInd_gen = modelinc_pred_sampInd_gen %>% 
+  as_tibble %>% 
+  mutate(model="inc") %>% 
+  rename(prob_pred_out = value)
+# inconsequential - popn
+pred_inc_popnInd_gen = posterior_predict(nhmodel_inc_gen, newdata = nhfinal)  # getting outcome estimate for each sample indv
+modelinc_pred_popnInd_gen = matrix(NA)
+for (i in 1:nrow(nhsub_gen)){
+  modelinc_pred_popnInd_gen[i] = mean(pred_inc_popnInd_gen[,i] == nhfinal$high_bp[i])
+}
+modelinc_pred_popnInd_gen = modelinc_pred_popnInd_gen %>% 
+  as_tibble %>% 
+  mutate(model="inc") %>% 
+  rename(prob_pred_out = value)
+
+# ignorable - sample
+pred_ign_sampInd_gen = posterior_predict(nhmodel_ign_gen, newdata = nhsub_gen)  # getting outcome estimate for each sample indv
+modelign_pred_sampInd_gen = matrix(NA)
+for (i in 1:nrow(nhsub_gen)){
+  modelign_pred_sampInd_gen[i] = mean(pred_ign_sampInd_gen[,i] == nhsub_gen$high_bp[i])
+}
+modelign_pred_sampInd_gen = modelign_pred_sampInd_gen %>% 
+  as_tibble %>% 
+  mutate(model="ign") %>% 
+  rename(prob_pred_out = value)
+# ignorable - popn
+pred_ign_popnInd_gen = posterior_predict(nhmodel_ign_gen, newdata = nhfinal)  # getting outcome estimate for each sample indv
+modelign_pred_popnInd_gen = matrix(NA)
+for (i in 1:nrow(nhsub_gen)){
+  modelign_pred_popnInd_gen[i] = mean(pred_ign_popnInd_gen[,i] == nhfinal$high_bp[i])
+}
+modelign_pred_popnInd_gen = modelign_pred_popnInd_gen %>% 
+  as_tibble %>% 
+  mutate(model="ign") %>% 
+  rename(prob_pred_out = value)
+
+pred_sampInd_gen = list(modelallvar_pred_sampInd_gen, modelbiasprec_pred_sampInd_gen,
+                        modelbias_pred_sampInd_gen, modelprec_pred_sampInd_gen, 
+                        modelinc_pred_sampInd_gen, modelign_pred_sampInd_gen) %>% 
+  do.call(rbind, .) %>% 
+  group_by(model) %>% 
+  summarise(mean_prob_pred_out = mean(prob_pred_out)) %>% 
+  mutate(popnInd = 0,
+         sample = "Generated") 
+
+pred_popnInd_gen = list(modelallvar_pred_popnInd_gen, modelbiasprec_pred_popnInd_gen, 
+                        modelbias_pred_popnInd_gen, modelprec_pred_popnInd_gen, 
+                        modelinc_pred_popnInd_gen, modelign_pred_popnInd_gen) %>% 
+  do.call(rbind, .) %>% 
+  group_by(model) %>% 
+  summarise(mean_prob_pred_out = mean(prob_pred_out)) %>% 
+  mutate(popnInd = 1,
+         sample = "Generated") 
+
+
+
 j1_dr2 = left_join(pred_sampInd_dr2, loo_tab_dr2, by="model")
 t1_dr2 =left_join(j1_dr2, wtd_loo_tab_dr2, by="model")
 
@@ -551,8 +788,16 @@ t1_fas =left_join(j1_fas, wtd_loo_tab_fas, by="model")
 j2_fas = left_join(pred_popnInd_fas, loo_tab_fas, by="model")
 t2_fas =left_join(j2_fas, wtd_loo_tab_fas, by="model") 
 
-# PLOT individuals --------------------------------------------------------------------
-(g2 = rbind(j1_dr2, j2_dr2, j1_fas, j2_fas) %>%
+j1_gen = left_join(pred_sampInd_gen, loo_tab_gen, by="model")
+t1_gen =left_join(j1_gen, wtd_loo_tab_gen, by="model")
+
+j2_gen = left_join(pred_popnInd_gen, loo_tab_gen, by="model")
+t2_gen =left_join(j2_gen, wtd_loo_tab_gen, by="model") 
+
+
+# *PLOT individuals --------------------------------------------------------------------
+(g2 = rbind(t1_dr2, t2_dr2, t1_fas, t2_fas,
+            t1_gen, t2_gen) %>%
    mutate(model = case_when(model == 'allvar' ~ "All variables",
                             model == 'biasprec' ~ "Bias-precision",
                             model == 'bias' ~ "Bias-only",
@@ -562,19 +807,19 @@ t2_fas =left_join(j2_fas, wtd_loo_tab_fas, by="model")
           model = fct_relevel(model, c("All variables", "Bias-precision", "Bias-only", "Precision-only",
                                        "Inconsequential", "Ignorable"))) %>% 
    mutate(popnInd = factor(popnInd),
-          popnInd = fct_recode(popnInd, `Sample` = "0", `Population` = "1")) %>% 
-          # elpd_loo_std = (elpd_loo - min(elpd_loo)) / (max(elpd_loo) - min(elpd_loo)),
-          # wtdElpd_loo_std = (wtdElpd_loo - min(wtdElpd_loo)) / (max(wtdElpd_loo) - min(wtdElpd_loo))) %>% 
-   # pivot_longer(cols = c("elpd_loo","wtdElpd_loo"), names_to = "type", values_to = "model_score") %>%
-   # mutate(type = factor(type),
-   #        type = fct_recode(type, `PSIS-LOO` = "elpd_loo", `WTD-PSIS-LOO` = "wtdElpd_loo"))  %>% 
-   ggplot(., aes(x = elpd_loo, y = 1-mean_prob_pred_out, colour = sample, shape = factor(model), fill = sample, group=sample)) +
-   geom_line(alpha=0.6) +
-   geom_point(size=3, alpha = .7) + 
+          popnInd = fct_recode(popnInd, `Sample` = "0", `Population` = "1"),
+          elpd_loo_std = (elpd_loo - min(elpd_loo)) / (max(elpd_loo) - min(elpd_loo)),
+          wtdElpd_loo_std = (wtdElpd_loo - min(wtdElpd_loo)) / (max(wtdElpd_loo) - min(wtdElpd_loo))) %>%
+   pivot_longer(cols = c("elpd_loo_std","wtdElpd_loo_std"), names_to = "type", values_to = "model_score") %>%
+   mutate(type = factor(type),
+          type = fct_recode(type, `PSIS-LOO` = "elpd_loo_std", `WTD-PSIS-LOO` = "wtdElpd_loo_std"))  %>%
+   ggplot(., aes(x = model_score, y = 1-mean_prob_pred_out, colour = sample, shape = factor(model), fill = sample, group=sample)) +
+   geom_line(alpha=0.8) +
+   geom_point(size=3, alpha = .8) + 
    scale_shape_manual(values = shape_base) +
    scale_fill_manual(values = colour_palette_var_base2) +
    scale_colour_manual(values = colour_palette_var_base2) +
-   facet_grid(popnInd~., scales = "free") +
+   facet_grid(popnInd~type, scales = "free") +
    theme_bw(base_size = 15) +
    ggtitle('Individual mean prediction of outcome') +
    ylab('1 - mean of prediction of outcome') +

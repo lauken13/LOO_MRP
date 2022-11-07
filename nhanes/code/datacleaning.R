@@ -459,7 +459,7 @@ nhdata_full %>%
 nhdata_full %>% 
   group_by(age) %>% 
   summarise(sum_n = n(),
-            sum_wts_fas = sum(wts_fas), 
+            sum_wts_fas = sum(wts_fas),
             sum_wts_dr2 = sum(wts_dr2),
             sum_wts_voc = sum(wts_voc),
             sum_wts_env = sum(wts_env))
@@ -488,10 +488,11 @@ View(abs(corM2[63:89,84:89])) # ranking the variables
 # model matrix for lasso
 names(dat4)
 dat5 = dat4 %>% 
-  select(-c(pest_use)) # after looking at correlation
+  select(-c(pest_use)) %>% # after looking at correlation 
+  select(-c(BMI_range, alc_exc)) # correlated with overweight
 names(dat5)
 
-covInd = c(2:23)[-c(6)] # removing high bp 
+covInd = c(2:21)[-c(6)] # removing high bp 
 m = model.matrix(~ . -1, data = dat5[,covInd], contrasts.arg = lapply(dat5[,covInd], contrasts, contrasts=FALSE))
 y = as.numeric(dat5[,7]) - 1 # high bp
 
@@ -515,7 +516,7 @@ dat6 = dat5 %>%
 
 names(dat6)
 
-covInd = c(2:19)[-c(6)] # removing high bp 
+covInd = c(2:17)[-c(6)] # removing high bp 
 m = model.matrix(~ . -1, data = dat6[,covInd], contrasts.arg = lapply(dat6[,covInd], contrasts, contrasts=FALSE))
 y = as.numeric(dat6[,7]) - 1 # high bp
 
@@ -532,6 +533,60 @@ for(i in 1:ncol(ysel)){
 colnames(coef_mat) = c('high_bp', 'dietary', 'fas')
 coef_mat
 
+sort(abs(coef_mat[,1]), decreasing=T)
+
 saveRDS(dat6, file=here("nhanes/data/nhanes_final.rds"))
 
+source(here("nhanes/code/gen_samp.R"), echo=TRUE)
+
+# assessing generated sample ---------------------------------------------
+nhanes_gen = join1
+
+names(nhanes_gen)
+
+covInd = c(2:17)[-c(6)] # removing high bp 
+m = model.matrix(~ . -1, data = nhanes_gen[,covInd], contrasts.arg = lapply(nhanes_gen[,covInd], contrasts, contrasts=FALSE))
+y = as.numeric(nhanes_gen[,7]) - 1 # high bp
+
+# fixing foldids
+nfolds = 15
+foldid = 1 + (1:nrow(m) %% nfolds) # no need to specify seed if setting fold ID
+ysel = cbind(y, nhanes_gen$incl_dr2, nhanes_gen$incl_fas, nhanes_gen$incl_gen)
+coef_mat = NULL
+for(i in 1:ncol(ysel)){
+  (lmb = cv.glmnet(m,ysel[,i],alpha = 1, family = "binomial", intercept=T, type.measure ="auc",foldid=foldid)$lambda.1se)
+  coef_vec = glmnet(x=m, y=ysel[,i], family="binomial", intercept=T, type.measure = "auc", lambda = lmb) %>% coef(.)
+  coef_mat = cbind(coef_mat, coef_vec)
+}
+colnames(coef_mat) = c('high_bp', 'dietary', 'fas', 'gen')
+coef_mat
+
+sort(abs(coef_mat[,1]), decreasing=T)
+
+# weights  ---------------------------------------------------------------------
+# gen
+nhsub_gen = nhanes_gen %>% 
+  filter(incl_gen == 1) 
+
+x_gen = nhanes_gen %>% 
+  select(-c(SEQN, high_bp, names(nhanes_gen)[grep('incl_*', names(nhanes_gen))], 
+            names(nhanes_gen)[grep('wts_*', names(nhanes_gen))])) 
+
+y_gen = as.numeric(nhanes_gen$incl_gen)
+
+nhsub2_gen = nhsub_gen %>% 
+  select(-c(SEQN, high_bp, names(nhsub_gen)[grep('incl_*', names(nhsub_gen))], 
+            names(nhanes_gen)[grep('wts_*', names(nhanes_gen))]))  
+
+bartfit_gen = bart(x_gen, y_gen, keeptrees=T) 
+bartpred_gen = predict(bartfit_gen, newdata = nhsub2_gen)
+bartpred_med_gen = apply(bartpred_gen,2,median)
+
+hist(bartpred_med_gen)
+hist(as.numeric(nhanes_gen$incl_gen))
+
+nhanes_gen_full = nhanes_gen %>% 
+  mutate(wts_gen = ifelse(incl_gen ==1, 1/bartpred_med_gen, 0))
+
+saveRDS(nhanes_gen_full, file=here("nhanes/data/nhanes_final_gen.rds"))
 

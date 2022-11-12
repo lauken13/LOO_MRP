@@ -5,6 +5,8 @@ library(tidyverse)
 library(questionr) # recode.na()
 library(GGally) # ggpairs()
 library(forcats) #fct_relevel
+library(survey)
+library(dbarts)
 # https://www.aihw.gov.au/reports/risk-factors/risk-factors-to-health/contents/high-blood-pressure
 # https://www.mayoclinic.org/diseases-conditions/high-blood-pressure/symptoms-causes/syc-20373410
 
@@ -350,9 +352,6 @@ names(dat4)
 
 
 # weights -----------------------------------------------------------------
-library(survey)
-library(dbarts)
-
 # creating weights for the population
 nhdata = dat4
 
@@ -439,32 +438,6 @@ nhdata_full = nhdata %>%
          wts_dr2 = ifelse(incl_dr2 ==1, 1/bartpred_med_dr2, 0),
          wts_fas = ifelse(incl_fas ==1, 1/bartpred_med_fas, 0))
 
-# checking counts using the weights -----------------------------------
-nhdata_full %>% 
-  group_by(gender) %>% 
-  summarise(sum_n = n(),
-            sum_wts_fas = sum(wts_fas),
-            sum_wts_dr2 = sum(wts_dr2),
-            sum_wts_voc = sum(wts_voc),
-            sum_wts_env = sum(wts_env))
-
-nhdata_full %>% 
-  group_by(ethnicity) %>% 
-  summarise(sum_n = n(),
-            sum_wts_fas = sum(wts_fas),
-            sum_wts_dr2 = sum(wts_dr2),
-            sum_wts_voc = sum(wts_voc),
-            sum_wts_env = sum(wts_env))
-
-nhdata_full %>% 
-  group_by(age) %>% 
-  summarise(sum_n = n(),
-            sum_wts_fas = sum(wts_fas),
-            sum_wts_dr2 = sum(wts_dr2),
-            sum_wts_voc = sum(wts_voc),
-            sum_wts_env = sum(wts_env))
-
-
 saveRDS(nhdata_full, file=here("nhanes/data/nhdata_full.rds"))
 
 
@@ -480,8 +453,6 @@ dat4 = dat4 %>%
 m2 = model.matrix(~., dat4[corIncl], contrasts.arg = lapply(dat4[,corIncl], contrasts, contrasts=FALSE)) # making model matrix without a baseline category for the variables
 corM2 = cor(m2[,-1])
 
-# View(abs(corM2))
-View(abs(corM2[81:89,81:89]))
 View(abs(corM2[63:89,84:89])) # ranking the variables 
 
 
@@ -537,11 +508,11 @@ sort(abs(coef_mat[,1]), decreasing=T)
 
 saveRDS(dat6, file=here("nhanes/data/nhanes_final.rds"))
 
+# assessing generated sample ---------------------------------------------
+dat6 = readRDS(file=here("nhanes/data/nhanes_final.rds"))
 source(here("nhanes/code/gen_samp.R"), echo=TRUE)
 
-# assessing generated sample ---------------------------------------------
 nhanes_gen = join1
-
 names(nhanes_gen)
 
 covInd = c(2:17)[-c(6)] # removing high bp 
@@ -563,17 +534,19 @@ coef_mat
 
 sort(abs(coef_mat[,1]), decreasing=T)
 
-# weights  ---------------------------------------------------------------------
-# gen
+# weights for generated sample ------------------------------------------------------------------
 nhsub_gen = nhanes_gen %>% 
   filter(incl_gen == 1) 
 
+# popn
 x_gen = nhanes_gen %>% 
   select(-c(SEQN, high_bp, names(nhanes_gen)[grep('incl_*', names(nhanes_gen))], 
             names(nhanes_gen)[grep('wts_*', names(nhanes_gen))])) 
 
 y_gen = as.numeric(nhanes_gen$incl_gen)
 
+
+# sample
 nhsub2_gen = nhsub_gen %>% 
   select(-c(SEQN, high_bp, names(nhsub_gen)[grep('incl_*', names(nhsub_gen))], 
             names(nhanes_gen)[grep('wts_*', names(nhanes_gen))]))  
@@ -588,5 +561,37 @@ hist(as.numeric(nhanes_gen$incl_gen))
 nhanes_gen_full = nhanes_gen %>% 
   mutate(wts_gen = ifelse(incl_gen ==1, 1/bartpred_med_gen, 0))
 
+# checking counts using the weights -----------------------------------
+nhanes_gen_full %>% 
+  group_by(gender) %>% 
+  summarise(sum_n = n(),
+            sum_wts_fas = sum(wts_fas),
+            sum_wts_dr2 = sum(wts_dr2),
+            sum_wts_gen = sum(wts_gen))
+
+nhanes_gen_full %>% 
+  group_by(ethnicity) %>% 
+  summarise(sum_n = n(),
+            sum_wts_fas = sum(wts_fas),
+            sum_wts_dr2 = sum(wts_dr2),
+            sum_wts_gen = sum(wts_gen))
+
+nhanes_gen_full %>% 
+  group_by(age) %>% 
+  summarise(sum_n = n(),
+            sum_wts_fas = sum(wts_fas),
+            sum_wts_dr2 = sum(wts_dr2),
+            sum_wts_gen = sum(wts_gen))
+
+
 saveRDS(nhanes_gen_full, file=here("nhanes/data/nhanes_final_gen.rds"))
 
+# for tabulating 
+test = data.frame(matrix(coef_mat, ncol=4)) 
+rownames(test) = rownames(coef_mat)
+colnames(test) = colnames(coef_mat)
+
+test %>% 
+  signif(., 3) 
+
+  

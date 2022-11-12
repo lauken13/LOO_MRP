@@ -87,18 +87,16 @@ modelign_popnest_dr2 = apply(modelign_predict_dr2, 1, function(x)sum(x*popn_ps$N
 popnest_all_dr2 = list(modelallvar_popnest_dr2, modelbiasprec_popnest_dr2, modelbias_popnest_dr2, 
                        modelprec_popnest_dr2, modelinc_popnest_dr2, modelign_popnest_dr2)
 
+alph = 0.1
+
 popnest_tab_dr2 = lapply(popnest_all_dr2, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
   do.call(rbind, .) %>% 
   data.frame(.) %>% 
   rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.) %>% 
-  mutate(model = modelnames)
-
-# intervalScr 
-alph = 0.1
-popnest_tab_dr2 = popnest_tab_dr2 %>%  
-  mutate(mean_yObs = mean(as.numeric(nhfinal$high_bp)-1), # to revert to level 0, 1
+  mutate(model = modelnames,
+         mean_yObs = mean(as.numeric(nhfinal$high_bp)-1), # to revert to level 0, 1
          popn_ci_width = as.numeric(popnestX95 - popnestX5),
-         MRP_intervalScr = (popnestX95 - popnestX5) + 
+         MRP_intervalScr = (popnestX95 - popnestX5) +  # intervalScr 
            ((2 / alph * (popnestX5 - mean_yObs)) * ifelse(mean_yObs < popnestX5, 1, 0)) + 
            ((2 / alph * (mean_yObs - popnestX95)) * ifelse(mean_yObs > popnestX95, 1, 0)),
          sample = "Dietary")
@@ -167,12 +165,8 @@ popnest_tab_fas = lapply(popnest_all_fas, function(x)quantile(x,c(0.05, 0.5, 0.9
   do.call(rbind, .) %>% 
   data.frame(.) %>% 
   rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.) %>% 
-  mutate(model = modelnames)
-
-# intervalScr 
-alph = 0.1
-popnest_tab_fas = popnest_tab_fas %>%  
-  mutate(mean_yObs = mean(as.numeric(nhfinal$high_bp)-1), # to revert to level 0, 1
+  mutate(model = modelnames,
+         mean_yObs = mean(as.numeric(nhfinal$high_bp)-1), # to revert to level 0, 1
          popn_ci_width = as.numeric(popnestX95 - popnestX5),
          MRP_intervalScr = (popnestX95 - popnestX5) + 
            ((2 / alph * (popnestX5 - mean_yObs)) * ifelse(mean_yObs < popnestX5, 1, 0)) + 
@@ -240,16 +234,14 @@ modelign_popnest_gen = apply(modelign_predict_gen, 1, function(x)sum(x*popn_ps$N
 popnest_all_gen = list(modelallvar_popnest_gen, modelbiasprec_popnest_gen, modelbias_popnest_gen,
                        modelprec_popnest_gen, modelinc_popnest_gen, modelign_popnest_gen)
 
+alph = 0.1
+
 popnest_tab_gen = lapply(popnest_all_gen, function(x)quantile(x,c(0.05, 0.5, 0.95))) %>% 
   do.call(rbind, .) %>% 
   data.frame(.) %>% 
   rename(popnestX5 = X5., popnestX50 = X50., popnestX95 = X95.) %>% 
-  mutate(model = modelnames)
-
-# intervalScr 
-alph = 0.1
-popnest_tab_gen = popnest_tab_gen %>%  
-  mutate(mean_yObs = mean(as.numeric(nhfinal$high_bp)-1), # to revert to level 0, 1
+  mutate(model = modelnames,
+         mean_yObs = mean(as.numeric(nhfinal$high_bp)-1), # to revert to level 0, 1
          popn_ci_width = as.numeric(popnestX95 - popnestX5),
          MRP_intervalScr = (popnestX95 - popnestX5) + 
            ((2 / alph * (popnestX5 - mean_yObs)) * ifelse(mean_yObs < popnestX5, 1, 0)) + 
@@ -260,28 +252,23 @@ popnest_tab_gen = popnest_tab_gen %>%
 # *PLOT mrp ----------------------------------------------------------------
 # combine all four together
 join1_dr2 = left_join(loo_tab_dr2, wtd_loo_tab_dr2, by = "model")
-join2_dr2 = left_join(join1_dr2, popnest_tab_dr2, by = "model")
-popn_all_tab_dr2 = join2_dr2 %>% 
-  mutate(MRP_intScr_scaled = (MRP_intervalScr - min(MRP_intervalScr)) / (max(MRP_intervalScr) - min(MRP_intervalScr)))
+popn_all_tab_dr2 = left_join(join1_dr2, popnest_tab_dr2, by = "model")
 
 join1_fas = left_join(loo_tab_fas, wtd_loo_tab_fas, by = "model")
-join2_fas = left_join(join1_fas, popnest_tab_fas, by = "model")
-popn_all_tab_fas = join2_fas %>% 
-  mutate(MRP_intScr_scaled = (MRP_intervalScr - min(MRP_intervalScr)) / (max(MRP_intervalScr) - min(MRP_intervalScr)))
+popn_all_tab_fas = left_join(join1_fas, popnest_tab_fas, by = "model")
 
 join1_gen = left_join(loo_tab_gen, wtd_loo_tab_gen, by = "model")
-join2_gen = left_join(join1_gen, popnest_tab_gen, by = "model")
-popn_all_tab_gen = join2_gen %>% 
-  mutate(MRP_intScr_scaled = (MRP_intervalScr - min(MRP_intervalScr)) / (max(MRP_intervalScr) - min(MRP_intervalScr)))
+popn_all_tab_gen = left_join(join1_gen, popnest_tab_gen, by = "model")
+ 
+popn_all_tab = rbind(popn_all_tab_dr2, popn_all_tab_fas, popn_all_tab_gen) %>% 
+  group_by(sample) %>% 
+  mutate(elpd_loo_std = (elpd_loo - min(elpd_loo)) / (max(elpd_loo) - min(elpd_loo)),
+         wtdElpd_loo_std = (wtdElpd_loo - min(wtdElpd_loo)) / (max(wtdElpd_loo) - min(wtdElpd_loo)),
+         MRP_intScr_scaled = (MRP_intervalScr - min(MRP_intervalScr)) / (max(MRP_intervalScr) - min(MRP_intervalScr)))
 
 # colour for samples, shapes for models
 shape_base  = c(21, 22, 24, 23, 25, 4)
-colour_palette_var_base  =  c(`All variables` =  "#4477AA",
-                              `Bias-precision` = "#88CCEE", 
-                              `Bias-only` = "#CC6677",
-                              `Precision-only` = "#228833", 
-                              `Inconsequential` = "#BBBBBB", 
-                              `Ignorable` = '#DDDDDD')
+
 bd_col = c(`All variables` =  "black",
            `Bias-precision` = "black", 
            `Bias-only` = "black",
@@ -290,10 +277,10 @@ bd_col = c(`All variables` =  "black",
            `Ignorable` = "black")
 
 scales::show_col(ggthemes::colorblind_pal()(8))
-colour_palette_var_base2 = c('#F0E442', '#D55E00', '#CC79A7') # '#009E73')
+colour_palette_var_base2 = c('#E69F00', '#009E73', '#CC79A7') # '#009E73')
 
 
-( g1 = rbind(popn_all_tab_dr2, popn_all_tab_fas, popn_all_tab_gen) %>% 
+( g1 = popn_all_tab %>% 
     mutate(model = case_when(model == 'allvar' ~ "All variables",
                              model == 'biasprec' ~ "Bias-precision",
                              model == 'bias' ~ "Bias-only",
@@ -302,21 +289,19 @@ colour_palette_var_base2 = c('#F0E442', '#D55E00', '#CC79A7') # '#009E73')
                              model == 'ign' ~ "Ignorable"),
            model = fct_relevel(model, c("All variables", "Bias-precision", "Bias-only", "Precision-only",
                                         "Inconsequential", "Ignorable"))) %>% 
-    mutate(elpd_loo_std = (elpd_loo - min(elpd_loo)) / (max(elpd_loo) - min(elpd_loo)),
-           wtdElpd_loo_std = (wtdElpd_loo - min(wtdElpd_loo)) / (max(wtdElpd_loo) - min(wtdElpd_loo))) %>%
     pivot_longer(cols = c("elpd_loo_std","wtdElpd_loo_std"), names_to = "type", values_to = "model_score") %>%
     mutate(type = factor(type),
            type = fct_recode(type, `PSIS-LOO` = "elpd_loo_std", `WTD-PSIS-LOO` = "wtdElpd_loo_std")) %>%
     ggplot(., aes(x = model_score, y = MRP_intScr_scaled, group=sample, shape = model, fill = sample, colour = sample)) +
     facet_grid(~type, scales = "free")+
     geom_line(alpha=0.8) + 
-    geom_point(size=4, alpha = .8) + 
+    geom_point(size=4, alpha = 0.7) + 
     theme_bw(base_size = 15)  +
     scale_shape_manual(values = shape_base) +
     scale_fill_manual(values = colour_palette_var_base2) +
     scale_colour_manual(values = colour_palette_var_base2) +
     ylab("Scaled interval score for MRP estimates") +
-    xlab("Model score") + 
+    xlab("Scaled model score") + 
     guides(fill = guide_legend("Sample", override.aes=list(color=colour_palette_var_base2)),
            colour = "none",
            shape = guide_legend("Model")) +
@@ -774,10 +759,8 @@ pred_popnInd_gen = list(modelallvar_pred_popnInd_gen, modelbiasprec_pred_popnInd
   mutate(popnInd = 1,
          sample = "Generated") 
 
-
-
 j1_dr2 = left_join(pred_sampInd_dr2, loo_tab_dr2, by="model")
-t1_dr2 =left_join(j1_dr2, wtd_loo_tab_dr2, by="model")
+t1_dr2 = left_join(j1_dr2, wtd_loo_tab_dr2, by="model") 
 
 j2_dr2 = left_join(pred_popnInd_dr2, loo_tab_dr2, by="model")
 t2_dr2 = left_join(j2_dr2, wtd_loo_tab_dr2, by="model")
@@ -794,10 +777,15 @@ t1_gen =left_join(j1_gen, wtd_loo_tab_gen, by="model")
 j2_gen = left_join(pred_popnInd_gen, loo_tab_gen, by="model")
 t2_gen =left_join(j2_gen, wtd_loo_tab_gen, by="model") 
 
+t1_all = rbind(t1_dr2, t2_dr2, 
+               t1_fas, t2_fas,
+               t1_gen, t2_gen) %>% 
+  group_by(popnInd, sample) %>% 
+  mutate(elpd_loo_std = (elpd_loo - min(elpd_loo)) / (max(elpd_loo) - min(elpd_loo)),
+         wtdElpd_loo_std = (wtdElpd_loo - min(wtdElpd_loo)) / (max(wtdElpd_loo) - min(wtdElpd_loo)))
 
 # *PLOT individuals --------------------------------------------------------------------
-(g2 = rbind(t1_dr2, t2_dr2, t1_fas, t2_fas,
-            t1_gen, t2_gen) %>%
+( g2 =  t1_all %>%
    mutate(model = case_when(model == 'allvar' ~ "All variables",
                             model == 'biasprec' ~ "Bias-precision",
                             model == 'bias' ~ "Bias-only",
@@ -807,9 +795,7 @@ t2_gen =left_join(j2_gen, wtd_loo_tab_gen, by="model")
           model = fct_relevel(model, c("All variables", "Bias-precision", "Bias-only", "Precision-only",
                                        "Inconsequential", "Ignorable"))) %>% 
    mutate(popnInd = factor(popnInd),
-          popnInd = fct_recode(popnInd, `Sample` = "0", `Population` = "1"),
-          elpd_loo_std = (elpd_loo - min(elpd_loo)) / (max(elpd_loo) - min(elpd_loo)),
-          wtdElpd_loo_std = (wtdElpd_loo - min(wtdElpd_loo)) / (max(wtdElpd_loo) - min(wtdElpd_loo))) %>%
+          popnInd = fct_recode(popnInd, `Sample` = "0", `Population` = "1")) %>% 
    pivot_longer(cols = c("elpd_loo_std","wtdElpd_loo_std"), names_to = "type", values_to = "model_score") %>%
    mutate(type = factor(type),
           type = fct_recode(type, `PSIS-LOO` = "elpd_loo_std", `WTD-PSIS-LOO` = "wtdElpd_loo_std"))  %>%
@@ -821,9 +807,9 @@ t2_gen =left_join(j2_gen, wtd_loo_tab_gen, by="model")
    scale_colour_manual(values = colour_palette_var_base2) +
    facet_grid(popnInd~type, scales = "free") +
    theme_bw(base_size = 15) +
-   ggtitle('Individual mean prediction of outcome') +
-   ylab('1 - mean of prediction of outcome') +
-   xlab("Model score") +
+   ggtitle('Mean of correctly predicting individual outcomes') +
+   ylab('1 - mean of correctly predicting the outcome') +
+   xlab("Scaled model score") +
    guides(fill = guide_legend("Sample", override.aes=list(color=colour_palette_var_base2)),
           colour = "none",
           shape = guide_legend("Model")) +

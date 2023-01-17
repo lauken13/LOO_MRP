@@ -444,6 +444,7 @@ saveRDS(nhdata_full, file=here("nhanes/data/nhdata_full.rds"))
 # lasso -------------------------------------------------------------------
 library(glmnet)
 
+# population
 dat4 = readRDS(file=here("nhanes/data/nhdata_full.rds"))
 
 # checking correlation with inclusion
@@ -453,8 +454,7 @@ dat4 = dat4 %>%
 m2 = model.matrix(~., dat4[corIncl], contrasts.arg = lapply(dat4[,corIncl], contrasts, contrasts=FALSE)) # making model matrix without a baseline category for the variables
 corM2 = cor(m2[,-1])
 
-View(abs(corM2[63:89,84:89])) # ranking the variables 
-
+# View(abs(corM2[63:89,84:89])) # ranking the variables 
 
 # model matrix for lasso
 names(dat4)
@@ -467,7 +467,7 @@ covInd = c(2:21)[-c(6)] # removing high bp
 m = model.matrix(~ . -1, data = dat5[,covInd], contrasts.arg = lapply(dat5[,covInd], contrasts, contrasts=FALSE))
 y = as.numeric(dat5[,7]) - 1 # high bp
 
-# fixing foldids
+# fixing foldids to reduce uncertainty with cv.glmnet
 nfolds = 15
 foldid = 1 + (1:nrow(m) %% nfolds) # no need to specify seed if setting fold ID
 ysel = cbind(y, dat5$incl_dr2, dat5$incl_fas, dat5$incl_voc, dat5$incl_env)
@@ -495,14 +495,14 @@ y = as.numeric(dat6[,7]) - 1 # high bp
 nfolds = 15
 foldid = 1 + (1:nrow(m) %% nfolds) # no need to specify seed if setting fold ID
 ysel = cbind(y, dat6$incl_dr2, dat6$incl_fas)
-coef_mat = NULL
+coef_mat2 = NULL
 for(i in 1:ncol(ysel)){
   (lmb = cv.glmnet(m,ysel[,i],alpha = 1, family = "binomial", intercept=T, type.measure ="auc",foldid=foldid)$lambda.1se)
   coef_vec = glmnet(x=m, y=ysel[,i], family="binomial", intercept=T, type.measure = "auc", lambda = lmb) %>% coef(.)
-  coef_mat = cbind(coef_mat, coef_vec)
+  coef_mat2 = cbind(coef_mat2, coef_vec)
 }
-colnames(coef_mat) = c('high_bp', 'dietary', 'fas')
-coef_mat
+colnames(coef_mat2) = c('high_bp', 'dietary', 'fas')
+coef_mat2
 
 sort(abs(coef_mat[,1]), decreasing=T)
 
@@ -523,16 +523,16 @@ y = as.numeric(nhanes_gen[,7]) - 1 # high bp
 nfolds = 15
 foldid = 1 + (1:nrow(m) %% nfolds) # no need to specify seed if setting fold ID
 ysel = cbind(y, nhanes_gen$incl_dr2, nhanes_gen$incl_fas, nhanes_gen$incl_gen)
-coef_mat = NULL
+coef_mat3 = NULL
 for(i in 1:ncol(ysel)){
   (lmb = cv.glmnet(m,ysel[,i],alpha = 1, family = "binomial", intercept=T, type.measure ="auc",foldid=foldid)$lambda.1se)
   coef_vec = glmnet(x=m, y=ysel[,i], family="binomial", intercept=T, type.measure = "auc", lambda = lmb) %>% coef(.)
-  coef_mat = cbind(coef_mat, coef_vec)
+  coef_mat3 = cbind(coef_mat3, coef_vec)
 }
-colnames(coef_mat) = c('high_bp', 'dietary', 'fas', 'gen')
-coef_mat
+colnames(coef_mat3) = c('high_bp', 'dietary', 'fas', 'gen')
+coef_mat3
 
-sort(abs(coef_mat[,1]), decreasing=T)
+sort(abs(coef_mat3[,1]), decreasing=T)
 
 # weights for generated sample ------------------------------------------------------------------
 nhsub_gen = nhanes_gen %>% 

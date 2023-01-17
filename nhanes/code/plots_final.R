@@ -4,6 +4,7 @@ library(loo)
 library(tidyverse)
 library(brms)
 library(survey)
+library(cowplot)
 source(here('02-super popn approach/functions.R'))
 nhfinal = readRDS(file="nhanes/data/nhanes_final_gen.rds")
 
@@ -279,19 +280,20 @@ bd_col = c(`All variables` =  "black",
 scales::show_col(ggthemes::colorblind_pal()(8))
 colour_palette_var_base2 = c('#E69F00', '#009E73', '#CC79A7') # '#009E73')
 
+plot_tab = popn_all_tab %>% 
+  mutate(model = case_when(model == 'allvar' ~ "All variables",
+                           model == 'biasprec' ~ "Bias-precision",
+                           model == 'bias' ~ "Bias-only",
+                           model == 'prec' ~ "Precision-only",
+                           model == 'inc' ~ "Inconsequential",
+                           model == 'ign' ~ "Ignorable"),
+         model = fct_relevel(model, c("All variables", "Bias-precision", "Bias-only", "Precision-only",
+                                      "Inconsequential", "Ignorable"))) %>% 
+  pivot_longer(cols = c("elpd_loo_std","wtdElpd_loo_std"), names_to = "type", values_to = "model_score") %>%
+  mutate(type = factor(type),
+         type = fct_recode(type, `PSIS-LOO` = "elpd_loo_std", `WTD-PSIS-LOO` = "wtdElpd_loo_std"))
 
-( g1 = popn_all_tab %>% 
-    mutate(model = case_when(model == 'allvar' ~ "All variables",
-                             model == 'biasprec' ~ "Bias-precision",
-                             model == 'bias' ~ "Bias-only",
-                             model == 'prec' ~ "Precision-only",
-                             model == 'inc' ~ "Inconsequential",
-                             model == 'ign' ~ "Ignorable"),
-           model = fct_relevel(model, c("All variables", "Bias-precision", "Bias-only", "Precision-only",
-                                        "Inconsequential", "Ignorable"))) %>% 
-    pivot_longer(cols = c("elpd_loo_std","wtdElpd_loo_std"), names_to = "type", values_to = "model_score") %>%
-    mutate(type = factor(type),
-           type = fct_recode(type, `PSIS-LOO` = "elpd_loo_std", `WTD-PSIS-LOO` = "wtdElpd_loo_std")) %>%
+( g1 =  plot_tab %>%
     ggplot(., aes(x = model_score, y = MRP_intScr_scaled, group=sample, shape = model, fill = sample, colour = sample)) +
     facet_grid(~type, scales = "free")+
     geom_line(alpha=0.8) + 
@@ -301,15 +303,116 @@ colour_palette_var_base2 = c('#E69F00', '#009E73', '#CC79A7') # '#009E73')
     scale_fill_manual(values = colour_palette_var_base2) +
     scale_colour_manual(values = colour_palette_var_base2) +
     ylab("Scaled interval score for MRP estimates") +
-    xlab("Scaled model score") + 
-    guides(fill = guide_legend("Sample", override.aes=list(color=colour_palette_var_base2)),
-           colour = "none",
-           shape = guide_legend("Model")) +
+    xlab("Scaled PSIS-LOO-based model score") + 
     ggtitle('MRP interval score') +
-    theme(legend.title = element_text(size=15, face="bold"),
-          legend.text = element_text(size=15)) )
+    theme( plot.tag.position = c(0.52, -0.05),
+           plot.tag = element_text(size=15, face="bold"),
+           plot.margin = margin(10, 20, 80, 10),
+           legend.text.align = 0,
+          legend.title = element_text(size=15, face="bold"),
+          legend.text = element_text(size=13)) + 
+    guides(fill = guide_legend("Sample", override.aes=list(color=colour_palette_var_base2)),
+           colour = "none" ,
+           shape = "none") +
+    labs(tag = paste0(str_pad("Bias-precision", 36, "right"),
+                      str_pad("Bias-only", 15, "right"), 
+                      str_pad("Precision-only", 21, "right"), 
+                      str_pad("Irrelevant", 22, "right"))) +
+    cowplot::panel_border())
 
-ggsave(g1, width=14, height=8, file=here("nhanes/figures/elpd_MRP_all.png"))
+mod = c("All variables", "Bias-precision")
+leg_lab = c(bquote(bold("Bias")~"+"~bold("Precision")),
+            bquote("Ign. + "~bold("Precision")~"+ Inc. +"~bold("Bias")), 
+            bquote(bold("Bias        ")),
+            bquote(bold("Precision ")), 
+            "Inconsequential (Inc.)",
+            "Ignorable (Ign.)")
+
+( g2a = plot_tab %>% 
+    filter(model %in% mod ) %>%
+    ggplot(., aes(x = model_score,, y = MRP_intScr_scaled, group=sample, shape = model, fill = sample, colour = sample)) +
+    facet_grid(~type, scales = "free")+
+    geom_line(alpha=0.8) + 
+    geom_point(size=4, alpha = 0.7) + 
+    theme_bw(base_size = 15)  +
+    scale_shape_manual(values = shape_base[c(2,1)], label=leg_lab[1:2]) +
+    scale_fill_manual(values = colour_palette_var_base2) +
+    scale_colour_manual(values = colour_palette_var_base2) +
+    ylab("Scaled interval score for MRP estimates") +
+    xlab("Scaled PSIS-LOO-based model score") + 
+    ggtitle('MRP interval score') +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          legend.margin =  margin(10, 20, 10, 10),
+          legend.text = element_text(size=13),
+          legend.justification = c(0.2, 1),
+          legend.background = element_rect(fill='transparent'), #transparent legend bg
+          plot.tag.position = c(0.527, 0.12),
+          plot.tag = element_text(size=18, face="bold")) + 
+    guides(fill = "none",
+           colour = "none" ,
+           shape = guide_legend(override.aes = list(size=3), nrow=2)) )
+
+
+( g2b = plot_tab %>% 
+    filter(model==c("Bias-only", "Precision-only")) %>%
+    ggplot(., aes(x = model_score, y = MRP_intScr_scaled, group=sample, shape = model, fill = sample, colour = sample)) +
+    facet_grid(~type, scales = "free")+
+    geom_line(alpha=0.8) + 
+    geom_point(size=4, alpha = 0.7) + 
+    theme_bw(base_size = 15)  +
+    scale_shape_manual(values = shape_base[3:4], labels = leg_lab[3:4]) +
+    scale_fill_manual(values = colour_palette_var_base2) +
+    scale_colour_manual(values = colour_palette_var_base2) +
+    ylab("Scaled interval score for MRP estimates") +
+    xlab("Scaled PSIS-LOO-based model score") + 
+    ggtitle('MRP interval score') +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          legend.text = element_text(size=13),
+          legend.justification = c(0.55, 1), 
+          legend.margin =  margin(10, 20, 10, 10),
+          legend.background = element_rect(fill='transparent'), #transparent legend bg       
+          plot.margin = margin(10, 70, 10, 10),
+          plot.tag.position = c(0.527, 0.12),
+          plot.tag = element_text(size=18, face="bold"),) + 
+    guides(fill = "none",
+           colour = "none" ,
+           shape = guide_legend(override.aes = list(size=3), nrow=1)) )
+
+( g2c = plot_tab %>% 
+    filter(model==c("Inconsequential", "Ignorable")) %>%
+    ggplot(., aes(x = model_score, y = MRP_intScr_scaled, group=sample, shape = model, fill = sample, colour = sample)) +
+    facet_grid(~type, scales = "free")+
+    geom_line(alpha=0.8) + 
+    geom_point(size=4, alpha = 0.7) + 
+    theme_bw(base_size = 15)  +
+    scale_shape_manual(values = shape_base[5:6], labels=leg_lab[5:6]) +
+    scale_fill_manual(values = colour_palette_var_base2) +
+    scale_colour_manual(values = colour_palette_var_base2) +
+    ylab("Scaled interval score for MRP estimates") +
+    xlab("Scaled PSIS-LOO-based model score") + 
+    ggtitle('MRP interval score') +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          legend.text = element_text(size=13),
+          legend.justification = c(0.9, 1), 
+          legend.margin =  margin(10, 20, 10, 10),
+          legend.background = element_rect(fill='transparent'), #transparent legend bg       
+          legend.text.align = 0,
+          plot.tag.position = c(0.55, 0.12),
+          plot.tag = element_text(size=18, face="bold"),) + 
+    guides(fill = "none",
+           colour = "none" ,
+           shape = guide_legend(override.aes = list(size=3), nrow=2)) )
+
+g3 = ggdraw() +
+  draw_plot(g1, 0, .1, 1, .9) +
+  draw_plot(get_legend(g2a), 0, 0, 0.92, .2) + 
+  draw_plot(get_legend(g2b), 0, 0, 0.97, .2) + 
+  draw_plot(get_legend(g2c), 0, 0, 0.98, .2) 
+
+ggsave(g3, width=11, height=8, file=here("nhanes/figures/elpd_MRP_all.png"))
 
 
 # dr2 ####
@@ -782,23 +885,25 @@ t1_all = rbind(t1_dr2, t2_dr2,
                t1_gen, t2_gen) %>% 
   group_by(popnInd, sample) %>% 
   mutate(elpd_loo_std = (elpd_loo - min(elpd_loo)) / (max(elpd_loo) - min(elpd_loo)),
-         wtdElpd_loo_std = (wtdElpd_loo - min(wtdElpd_loo)) / (max(wtdElpd_loo) - min(wtdElpd_loo)))
+         wtdElpd_loo_std = (wtdElpd_loo - min(wtdElpd_loo)) / (max(wtdElpd_loo) - min(wtdElpd_loo))) %>% 
+  mutate(model = case_when(model == 'allvar' ~ "All variables",
+                           model == 'biasprec' ~ "Bias-precision",
+                           model == 'bias' ~ "Bias-only",
+                           model == 'prec' ~ "Precision-only",
+                           model == 'inc' ~ "Inconsequential",
+                           model == 'ign' ~ "Ignorable"),
+         model = fct_relevel(model, c("All variables", "Bias-precision", "Bias-only", "Precision-only",
+                                      "Inconsequential", "Ignorable"))) %>% 
+  mutate(popnInd = factor(popnInd),
+         popnInd = fct_recode(popnInd, `Sample` = "0", `Population` = "1")) %>% 
+  pivot_longer(cols = c("elpd_loo_std","wtdElpd_loo_std"), names_to = "type", values_to = "model_score") %>%
+  mutate(type = factor(type),
+         type = fct_recode(type, `PSIS-LOO` = "elpd_loo_std", `WTD-PSIS-LOO` = "wtdElpd_loo_std")) 
 
 # *PLOT individuals --------------------------------------------------------------------
-( g2 =  t1_all %>%
-   mutate(model = case_when(model == 'allvar' ~ "All variables",
-                            model == 'biasprec' ~ "Bias-precision",
-                            model == 'bias' ~ "Bias-only",
-                            model == 'prec' ~ "Precision-only",
-                            model == 'inc' ~ "Inconsequential",
-                            model == 'ign' ~ "Ignorable"),
-          model = fct_relevel(model, c("All variables", "Bias-precision", "Bias-only", "Precision-only",
-                                       "Inconsequential", "Ignorable"))) %>% 
-   mutate(popnInd = factor(popnInd),
-          popnInd = fct_recode(popnInd, `Sample` = "0", `Population` = "1")) %>% 
-   pivot_longer(cols = c("elpd_loo_std","wtdElpd_loo_std"), names_to = "type", values_to = "model_score") %>%
-   mutate(type = factor(type),
-          type = fct_recode(type, `PSIS-LOO` = "elpd_loo_std", `WTD-PSIS-LOO` = "wtdElpd_loo_std"))  %>%
+
+# no bottom legend
+( g4 =  t1_all  %>%
    ggplot(., aes(x = model_score, y = 1-mean_prob_pred_out, colour = sample, shape = factor(model), fill = sample, group=sample)) +
    geom_line(alpha=0.8) +
    geom_point(size=3, alpha = .8) + 
@@ -809,12 +914,106 @@ t1_all = rbind(t1_dr2, t2_dr2,
    theme_bw(base_size = 15) +
    ggtitle('Mean of correctly predicting individual outcomes') +
    ylab('1 - mean of correctly predicting the outcome') +
-   xlab("Scaled model score") +
+   xlab("Scaled PSIS-LOO-based model score") +
    guides(fill = guide_legend("Sample", override.aes=list(color=colour_palette_var_base2)),
           colour = "none",
-          shape = guide_legend("Model")) +
+          shape = "none") +
    theme(legend.title = element_text(size=15, face="bold"),
-         legend.text = element_text(size=15)) )
+         legend.text = element_text(size=15),
+         plot.tag.position = c(0.52, -0.05),
+         plot.tag = element_text(size=15, face="bold"),
+         plot.margin = margin(10, 20, 80, 10)) +
+    labs(tag = paste0(str_pad("Bias-precision", 36, "right"),
+                      str_pad("Bias-only", 15, "right"), 
+                      str_pad("Precision-only", 21, "right"), 
+                      str_pad("Irrelevant", 22, "right"))) +
+    panel_border())
 
-ggsave(g2, width=14, height=8, file=here("nhanes/figures/elpd_indv_pred_outcome.png"))
+# first legend group
+( g4a =  t1_all  %>%
+    filter(model %in% mod ) %>%
+    ggplot(., aes(x = model_score, y = 1-mean_prob_pred_out, colour = sample, shape = factor(model), fill = sample, group=sample)) +
+    geom_line(alpha=0.8) +
+    geom_point(size=3, alpha = .8) + 
+    scale_shape_manual(values = shape_base[c(2,1)], label = leg_lab[1:2]) +
+    scale_fill_manual(values = colour_palette_var_base2) +
+    scale_colour_manual(values = colour_palette_var_base2) +
+    facet_grid(popnInd~type, scales = "free") +
+    theme_bw(base_size = 15) +
+    ggtitle('Mean of correctly predicting individual outcomes') +
+    ylab('1 - mean of correctly predicting the outcome') +
+    xlab("Scaled PSIS-LOO-based model score") +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          legend.margin =  margin(10, 20, 10, 10),
+          legend.text = element_text(size=13),
+          legend.justification = c(0.2, 1),
+          legend.background = element_rect(fill='transparent'), #transparent legend bg
+          plot.tag.position = c(0.527, 0.12),
+          plot.tag = element_text(size=18, face="bold")) + 
+    guides(fill = "none",
+           colour = "none" ,
+           shape = guide_legend(override.aes = list(size=3), nrow=2)) )
+
+# second legend group
+( g4b =  t1_all  %>%
+    filter(model==c("Bias-only", "Precision-only")) %>%
+    ggplot(., aes(x = model_score, y = 1-mean_prob_pred_out, colour = sample, shape = factor(model), fill = sample, group=sample)) +
+    geom_line(alpha=0.8) +
+    geom_point(size=3, alpha = .8) + 
+    scale_shape_manual(values = shape_base[3:4], label = leg_lab[3:4]) +
+    scale_fill_manual(values = colour_palette_var_base2) +
+    scale_colour_manual(values = colour_palette_var_base2) +
+    facet_grid(popnInd~type, scales = "free") +
+    theme_bw(base_size = 15) +
+    ggtitle('Mean of correctly predicting individual outcomes') +
+    ylab('1 - mean of correctly predicting the outcome') +
+    xlab("Scaled PSIS-LOO-based model score") +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          legend.text = element_text(size=13),
+          legend.justification = c(0.55, 1), 
+          legend.margin =  margin(10, 20, 10, 10),
+          legend.background = element_rect(fill='transparent'), #transparent legend bg       
+          plot.margin = margin(10, 70, 10, 10),
+          plot.tag.position = c(0.527, 0.12),
+          plot.tag = element_text(size=18, face="bold"),) + 
+    guides(fill = "none",
+           colour = "none" ,
+           shape = guide_legend(override.aes = list(size=3), nrow=1)) )
+
+# third legend group
+( g4c =  t1_all  %>%
+    filter(model==c("Bias-only", "Precision-only")) %>%
+    ggplot(., aes(x = model_score, y = 1-mean_prob_pred_out, colour = sample, shape = factor(model), fill = sample, group=sample)) +
+    geom_line(alpha=0.8) +
+    geom_point(size=3, alpha = .8) + 
+    scale_shape_manual(values = shape_base[5:6], label = leg_lab[5:6]) +
+    scale_fill_manual(values = colour_palette_var_base2) +
+    scale_colour_manual(values = colour_palette_var_base2) +
+    facet_grid(popnInd~type, scales = "free") +
+    theme_bw(base_size = 15) +
+    ggtitle('Mean of correctly predicting individual outcomes') +
+    ylab('1 - mean of correctly predicting the outcome') +
+    xlab("Scaled PSIS-LOO-based model score") +
+    theme(legend.position = "bottom",
+          legend.title = element_blank(),
+          legend.text = element_text(size=13),
+          legend.justification = c(0.9, 1), 
+          legend.margin =  margin(10, 20, 10, 10),
+          legend.background = element_rect(fill='transparent'), #transparent legend bg       
+          legend.text.align = 0,
+          plot.tag.position = c(0.55, 0.12),
+          plot.tag = element_text(size=18, face="bold"),) + 
+    guides(fill = "none",
+           colour = "none" ,
+           shape = guide_legend(override.aes = list(size=3), nrow=2)) )
+
+g5 = ggdraw() +
+  draw_plot(g4, 0, .1, 1, .9) +
+  draw_plot(get_legend(g4a), 0, 0, 0.92, .2) + 
+  draw_plot(get_legend(g4b), 0, 0, 0.97, .2) + 
+  draw_plot(get_legend(g4c), 0, 0, 0.98, .2) 
+
+ggsave(g5, width=11, height=8, file=here("nhanes/figures/elpd_indv_pred_outcome.png"))
 

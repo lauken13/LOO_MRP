@@ -4,17 +4,16 @@
 .Ruserdata
 .DS_Store
 data/
-01-finite popn approach/
-02-super popn approach/experiment1_baseWtdloo/03-data
-02-super popn approach/experiment1_baseWtdloo/02-results/temp
-02-super popn approach/experiment2_binomialModel/03-data
-02-super popn approach/experiment3_ARprior/03-data
-02-super popn approach/experiment4_SAE/03-data/temp
-02-super popn approach/experiment4_SAE/01-code/temp
-02-super popn approach/experiment4_SAE/02-results/temp
+code/experiment1_baseWtdloo/03-data
+code/experiment1_baseWtdloo/02-results/temp
+code/experiment2_binomialModel/03-data
+code/experiment3_ARprior/03-data
+code/experiment4_SAE/03-data/temp
+code/experiment4_SAE/01-code/temp
+code/experiment4_SAE/02-results/temp
 /*/.Rhistory
-02-super popn approach/experiment3_ARprior/01-code/extra stuff
-02-super popn approach/experiment3_ARprior/02-results/brms code
+code/experiment3_ARprior/01-code/extra stuff
+code/experiment3_ARprior/02-results/brms code
 arxiv/
 tests/
 figures/main_paper.html

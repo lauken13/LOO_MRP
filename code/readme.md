@@ -17,3 +17,5 @@ trialling binomial model (leave-one-GROUP/CELL-out rather than individual)
   ### stan code
   - cutting down to 6 models (choosing the largest model from each group of models)
 
+## experiment4
+- Prior selection simulation design II 

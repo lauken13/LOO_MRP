@@ -2,7 +2,7 @@
 library(tidyverse)
 
 ## data file
-load(here::here("02-super popn approach/experiment1_baseWtdloo/03-data/temp/loo_N02_1000.RData"))
+load(here::here("code/experiment1_baseWtdloo/03-data/temp/loo_N02_1000.RData"))
 iter = 1:100
 # getting bias at popn level ----------------------------------------------
 # bias, sum elpd, coverage (0 or 1), truth and lower/upper CI quantile and interval score

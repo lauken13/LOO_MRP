@@ -5,7 +5,7 @@
 library(tidyverse)
 
 ## data file
-load(here::here("02-super popn approach/experiment1_baseWtdloo/03-data/temp/loo_N02_1000.RData"))
+load(here::here("code/simDesign1/data/temp/loo_N02_1000.RData"))
 
 names(samp_data_list[[1]])
 
@@ -17,4 +17,4 @@ for(iter in 1:100){
   colnames(samp_wts[[iter]]) = c('iteration', 'wts')
 }
 
-saveRDS(samp_wts, file='02-super popn approach/experiment1_baseWtdloo/03-data/samp_wts.rds')
+saveRDS(samp_wts, file='code/simDesign1/data/temp/samp_wts.rds')

@@ -3,10 +3,10 @@ library(loo)
 library(posterior) # to convert draws_array() objects 
 
 # sourcing gen_dat()
-source("gen_dat_function.R")
+source("func_gen_dat.R")
 
 # sourcing loo_wtd()
-source("loo_wtd_functions.R")
+source("func_loo_wtd.R")
 
 ## empty matrices
 # for mrp est
@@ -537,7 +537,7 @@ for(ite in iter){
   samp_data_list[[ite]]$elpd_loo_14 = loo_14$pointwise[,1]
   samp_data_list[[ite]]$elpd_loo_15 = loo_15$pointwise[,1]
 
-  
+  samp_data_list[[ite]]$wts = samp_data$wts
 }  
 
 save.image(file="loo_N02_1000.RData", compress=T)

@@ -1,7 +1,7 @@
 ## plotting results
 library(tidyverse)
 
-res_list1 <- readRDS(here::here("02-super popn approach/experiment1_baseWtdloo/03-data/res_list1.rds"))
+res_list1 <- readRDS(here::here("code/simDesign1/data/res_list1.rds"))
 
 indv_all_tab = res_list1$indv_all_tab
 popn_indv_tab = res_list1$popn_indv_tab

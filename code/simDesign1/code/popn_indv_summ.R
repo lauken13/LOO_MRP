@@ -1,9 +1,8 @@
 library(dplyr)
 library(ggplot2)
 
-res_list_N02_1000 <- readRDS(here::here("02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_1000.rds"))
-samp_wts <- readRDS(here::here("02-super popn approach/experiment1_baseWtdloo/03-data/samp_wts.rds"))
-
+res_list_N02_1000 <- readRDS(here::here("code/simDesign1/data/res_list_N02_1000.rds"))
+samp_wts <- readRDS(here::here("code/simDesign1/data/samp_wts.rds"))
 
 ls(res_list_N02_1000)
 indv_all_tab = res_list_N02_1000$indv_all_tab

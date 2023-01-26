@@ -5,7 +5,7 @@ setwd('/mnt/lustre/projects/Mona0085/skuh/02-super/exp_N02')
 
 # data generation ---------------------------------------------------------
 # function to generate data
-source("00-gen_dat_func_base.R") 
+source("func_gen_dat.R") 
 
 # # iteration number (ITE) from cluster
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')

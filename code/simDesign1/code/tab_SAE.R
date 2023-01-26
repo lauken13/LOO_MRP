@@ -6,8 +6,8 @@ library(ggplot2)
 library(survey)
 
 ## elpd_SAE
-source(here::here("02-super popn approach/experiment1_baseWtdloo/01-code/SAE_elpd_all.R"), echo=T)
-source(here::here("02-super popn approach/experiment1_baseWtdloo/01-code/SAE_elpd_wtd.R"), echo=T)
+source(here::here("code/simDesign1/code/tab_SAE_elpd_all.R"), echo=T)
+source(here::here("code/simDesign1/code/tab_SAE_elpd_wtd.R"), echo=T)
 
 # SAE calculations --------------------------------------------------------
 X1_group_mean_list =

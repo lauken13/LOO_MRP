@@ -1,23 +1,16 @@
-# LOO_MRP
-Code to investigate MRP model validation using LOO. The work is documented on our arxiv paper [here](https://arxiv.org/abs/2209.01773).
+# Using LOO for MRP
+Code to explore and investigate validating multilevel regression and poststratification (MRP) models using leave-one-out cross validation (LOO). The work is documented on our arxiv paper [here](https://arxiv.org/abs/2209.01773).
 
 ## How to navigate the folders and run the code 
 
-In R, first open `LOO_MRP.Rproj`, this will help set the working directory. 
+In RStudio, first open `LOO_MRP.Rproj`, this will help set the working directory. 
 
-`script_cluster.R` was used to generate simulated data 100 times on the Monash (MonARCH)[https://docs.monarch.erc.monash.edu/] cluster. The code has been adapted to run locally (note: possibily long run times on local computers!) 
-
-Run `read_bash_loop.R` to generate data using `gen_dat_function.R` and `loo_wtd_functions.R` to compare results from 15 different models.
+The ``../code`` folder contains three folders ``simDesign1``, ``simDesign2``, and ``nhanes`` for the two simulation designs and the NHANES data application.
 
 
+## Figures in the paper 
 
+`../figures`:
 
-
-Run `gen_dat_function.R` to generate simulated MRP data. 
-
-
-code > 
-
-
-
-(The original code were ran using batch scripts)
+- `main_paper.Rmd` is the RMarkdown file for generating the figures in the paper
+- uses `res_list_N02_1000.rds`, `res_list_sae_1000_wtd.rds`, and `res_list_sae_500_wtd.rds` (for plots in the appendix).

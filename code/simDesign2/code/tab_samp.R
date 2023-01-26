@@ -5,7 +5,7 @@ library(tidyverse)
 alph=0.1
 sampest_list = list()
 for(i in iter){
-  sampest_tab_all[[i]]$y_prob = rep(as.numeric(samp_data_list[[i]]$y_prob), 8) # repeat for 15 models
+  sampest_tab_all[[i]]$y_prob = rep(as.numeric(samp_data_list[[i]]$y_prob), 8) # repeat for 8 models
   sampest_tab_all[[i]]$wts = rep(as.numeric(samp_data_list[[i]]$wts), 8)
   
   sampest_list[[i]] = mutate(sampest_tab_all[[i]],

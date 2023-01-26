@@ -1,16 +1,15 @@
-## script for stan files
+## script for running stan files
 ## running for all six models
-
-setwd('/mnt/lustre/projects/Mona0085/skuh/02-super/exp_N02')
-
-# data generation ---------------------------------------------------------
-# function to generate data
-source("func_gen_dat.R") 
+# setwd('/mnt/lustre/projects/Mona0085/skuh/02-super/exp_N02')
 
 # # iteration number (ITE) from cluster
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 iter = as.numeric(slurm_arrayid)
 
+### EXTRACT CODE BELOW TO RUN IN A FOR LOOP LOCALLY ####
+# data generation ---------------------------------------------------------
+  # function to generate data
+  source("func_gen_dat.R") 
 
   # generating data using gen_dat()
   set.seed(65438)
@@ -148,3 +147,5 @@ iter = as.numeric(slurm_arrayid)
        sampest_06, sampest_07, sampest_08, sampest_09, sampest_10,
        sampest_11, sampest_12, sampest_13, sampest_14, sampest_15,
        file = paste0('LOO_arPrior_', iter, '.RData'), compress=T)
+  
+## END OF LOOP ####

@@ -5,8 +5,7 @@ library(tidyverse)
 library(brms)
 library(survey)
 library(cowplot)
-source(here('02-super popn approach/functions.R'))
-nhfinal = readRDS(file="nhanes/data/nhanes_final_gen.rds")
+nhfinal = readRDS(file="code/nhanes/data/nhanes_final_gen.rds")
 
 nhsub_dr2 = nhfinal %>% 
   filter(incl_dr2 == 1) 
@@ -27,12 +26,12 @@ popn_ps = nhfinal %>%
 
 
 # dr2 ---------------------------------------------------------------------
-nhmodel_allvar_dr2 = readRDS(file=here('nhanes/data/dr2_allvar.rds'))
-nhmodel_biasprec_dr2 = readRDS(file=here('nhanes/data/dr2_biasprec.rds'))
-nhmodel_bias_dr2 = readRDS(file=here('nhanes/data/dr2_bias.rds'))
-nhmodel_prec_dr2 = readRDS(file=here('nhanes/data/dr2_prec.rds'))
-nhmodel_inc_dr2 = readRDS(file=here('nhanes/data/dr2_inc.rds'))
-nhmodel_ign_dr2 = readRDS(file=here('nhanes/data/dr2_ign.rds'))
+nhmodel_allvar_dr2 = readRDS(file=here('code/nhanes/data/dr2_allvar.rds'))
+nhmodel_biasprec_dr2 = readRDS(file=here('code/nhanes/data/dr2_biasprec.rds'))
+nhmodel_bias_dr2 = readRDS(file=here('code/nhanes/data/dr2_bias.rds'))
+nhmodel_prec_dr2 = readRDS(file=here('code/nhanes/data/dr2_prec.rds'))
+nhmodel_inc_dr2 = readRDS(file=here('code/nhanes/data/dr2_inc.rds'))
+nhmodel_ign_dr2 = readRDS(file=here('code/nhanes/data/dr2_ign.rds'))
 
 loo_allvar_dr2 = loo(nhmodel_allvar_dr2)
 loo_biasprec_dr2 = loo(nhmodel_biasprec_dr2)
@@ -103,12 +102,12 @@ popnest_tab_dr2 = lapply(popnest_all_dr2, function(x)quantile(x,c(0.05, 0.5, 0.9
          sample = "Dietary")
 
 # Fasting -----------------------------------------------------------------
-nhmodel_allvar_fas = readRDS(file=here('nhanes/data/fas_allvar.rds'))
-nhmodel_biasprec_fas = readRDS(file=here('nhanes/data/fas_biasprec.rds'))
-nhmodel_bias_fas = readRDS(file=here('nhanes/data/fas_bias.rds'))
-nhmodel_prec_fas = readRDS(file=here('nhanes/data/fas_prec.rds'))
-nhmodel_inc_fas = readRDS(file=here('nhanes/data/fas_inc.rds'))
-nhmodel_ign_fas = readRDS(file=here('nhanes/data/fas_ign.rds'))
+nhmodel_allvar_fas = readRDS(file=here('code/nhanes/data/fas_allvar.rds'))
+nhmodel_biasprec_fas = readRDS(file=here('code/nhanes/data/fas_biasprec.rds'))
+nhmodel_bias_fas = readRDS(file=here('code/nhanes/data/fas_bias.rds'))
+nhmodel_prec_fas = readRDS(file=here('code/nhanes/data/fas_prec.rds'))
+nhmodel_inc_fas = readRDS(file=here('code/nhanes/data/fas_inc.rds'))
+nhmodel_ign_fas = readRDS(file=here('code/nhanes/data/fas_ign.rds'))
 
 loo_allvar_fas = loo(nhmodel_allvar_fas)
 loo_biasprec_fas = loo(nhmodel_biasprec_fas)
@@ -176,12 +175,12 @@ popnest_tab_fas = lapply(popnest_all_fas, function(x)quantile(x,c(0.05, 0.5, 0.9
 
 
 # Generated -----------------------------------------------------------------
-nhmodel_allvar_gen = readRDS(file=here('nhanes/data/gen_allvar.rds'))
-nhmodel_biasprec_gen = readRDS(file=here('nhanes/data/gen_biasprec.rds'))
-nhmodel_bias_gen = readRDS(file=here('nhanes/data/gen_bias.rds'))
-nhmodel_prec_gen = readRDS(file=here('nhanes/data/gen_prec.rds'))
-nhmodel_inc_gen = readRDS(file=here('nhanes/data/gen_inc.rds'))
-nhmodel_ign_gen = readRDS(file=here('nhanes/data/gen_ign.rds'))
+nhmodel_allvar_gen = readRDS(file=here('code/nhanes/data/gen_allvar.rds'))
+nhmodel_biasprec_gen = readRDS(file=here('code/nhanes/data/gen_biasprec.rds'))
+nhmodel_bias_gen = readRDS(file=here('code/nhanes/data/gen_bias.rds'))
+nhmodel_prec_gen = readRDS(file=here('code/nhanes/data/gen_prec.rds'))
+nhmodel_inc_gen = readRDS(file=here('code/nhanes/data/gen_inc.rds'))
+nhmodel_ign_gen = readRDS(file=here('code/nhanes/data/gen_ign.rds'))
 
 loo_allvar_gen = loo(nhmodel_allvar_gen)
 loo_biasprec_gen = loo(nhmodel_biasprec_gen)
@@ -412,7 +411,7 @@ g3 = ggdraw() +
   draw_plot(get_legend(g2b), 0, 0, 0.97, .2) + 
   draw_plot(get_legend(g2c), 0, 0, 0.98, .2) 
 
-ggsave(g3, width=11, height=8, file=here("nhanes/figures/elpd_MRP_all.png"))
+ggsave(g3, width=11, height=8, file=here("code/nhanes/figures/elpd_MRP_all.png"))
 
 
 # dr2 ####
@@ -1015,5 +1014,5 @@ g5 = ggdraw() +
   draw_plot(get_legend(g4b), 0, 0, 0.97, .2) + 
   draw_plot(get_legend(g4c), 0, 0, 0.98, .2) 
 
-ggsave(g5, width=11, height=8, file=here("nhanes/figures/elpd_indv_pred_outcome.png"))
+ggsave(g5, width=11, height=8, file=here("code/nhanes/figures/elpd_indv_pred_outcome.png"))
 

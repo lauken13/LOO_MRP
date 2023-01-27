@@ -1,10 +1,8 @@
 library(brms)
-library(survey) # svydesign()
 library(here)
 library(tidyverse)
 library(ggpubr)
-source(here('02-super popn approach/functions.R'))
-nhfinal = readRDS(file="nhanes/data/nhanes_final_gen.rds")
+nhfinal = readRDS(file="code/nhanes/data/nhanes_final_gen.rds")
 
 nhsub_dr2 = nhfinal %>% 
   filter(incl_dr2 == 1) 
@@ -1037,7 +1035,7 @@ ggarrange(g1_pl, g2_pl, g1_sl, g2_sl,
           ncol=2, nrow=8, widths=c(0.5, 1),
           common.legend=T)
 
-ggsave(filename = here('nhanes/figures/plot2.png'), device = "png", 
+ggsave(filename = here('code/nhanes/figures/plot2.png'), device = "png", 
        height=45, width=30, units="cm")
 
 

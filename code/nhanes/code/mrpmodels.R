@@ -2,8 +2,7 @@ library(brms)
 library(survey) # svydesign()
 library(here)
 library(tidyverse)
-source(here('02-super popn approach/functions.R'))
-nhfinal = readRDS(file="nhanes/data/nhanes_final.rds")
+nhfinal = readRDS(file="code/nhanes/data/nhanes_final.rds")
 
 nhsub_dr2 = nhfinal %>% 
   filter(incl_dr2 == 1) 
@@ -23,7 +22,7 @@ nhmodel_allvar_dr2 = brm(high_bp ~  (1|age) + (1|ethnicity)  + phys_act + overwe
                          cores = 4,
                          family = bernoulli(link = "logit"),
                          control = list(adapt_delta = 0.99),
-                         file=here('nhanes/data/dr2_allvar.rds'),
+                         file=here('code/nhanes/data/dr2_allvar.rds'),
                          file_refit="always")
 
 
@@ -37,7 +36,7 @@ nhmodel_biasprec_dr2 = brm(high_bp ~  (1|age) + (1|ethnicity)  + phys_act + over
                            cores = 4,
                            family = bernoulli(link = "logit"),
                            control = list(adapt_delta = 0.98),
-                           file=here('nhanes/data/dr2_biasprec.rds'),
+                           file=here('code/nhanes/data/dr2_biasprec.rds'),
                            file_refit="always")
 
 # fitting bias only 
@@ -49,7 +48,7 @@ nhmodel_bias_dr2 = brm(high_bp ~  (1|age) + (1|ethnicity)  + phys_act + overweig
                        cores = 4,
                        family = bernoulli(link = "logit"),
                        control = list(adapt_delta = 0.99),
-                       file=here('nhanes/data/dr2_bias.rds'),
+                       file=here('code/nhanes/data/dr2_bias.rds'),
                        file_refit="always")
 
 # fitting precision only 
@@ -61,7 +60,7 @@ nhmodel_prec_dr2 = brm(high_bp ~ (1|marital_status) + trb_sleep,
                        cores = 4,
                        family = bernoulli(link = "logit"),
                        control = list(adapt_delta = 0.98),
-                       file=here('nhanes/data/dr2_prec.rds'),
+                       file=here('code/nhanes/data/dr2_prec.rds'),
                        file_refit="always")
 
 # inconsequential
@@ -74,7 +73,7 @@ nhmodel_inc_dr2 = brm(high_bp ~ (1|educ) + (1|pov_level) +  (1|sodium_lvl) + (1|
                       cores = 4,
                       family = bernoulli(link = "logit"),
                       control = list(adapt_delta = 0.98), 
-                      file=here('nhanes/data/dr2_inc.rds'),
+                      file=here('code/nhanes/data/dr2_inc.rds'),
                       file_refit="always")
 
 # ignorable 
@@ -86,7 +85,7 @@ nhmodel_ign_dr2 = brm(high_bp ~ gender  +  smk_tobcig,
                       cores = 4,
                       family = bernoulli(link = "logit"),
                       control = list(adapt_delta = 0.99), 
-                      file=here('nhanes/data/dr2_ign.rds'),
+                      file=here('code/nhanes/data/dr2_ign.rds'),
                       file_refit="always")
 
 # fas subsample -----------------------------------------------------------
@@ -101,7 +100,7 @@ nhmodel_allvar_fas = brm(high_bp ~  (1|ethnicity) + overweight + (1|age) + (1|ma
                          cores = 4,
                          family = bernoulli(link = "logit"),
                          control = list(adapt_delta = 0.99),
-                         file=here('nhanes/data/fas_allvar.rds'),
+                         file=here('code/nhanes/data/fas_allvar.rds'),
                          file_refit="always")
 
 
@@ -115,7 +114,7 @@ nhmodel_biasprec_fas = brm(high_bp ~   (1|ethnicity) + overweight + (1|age) + (1
                            cores = 4,
                            family = bernoulli(link = "logit"),
                            control = list(adapt_delta = 0.98),
-                           file=here('nhanes/data/fas_biasprec.rds'),
+                           file=here('code/nhanes/data/fas_biasprec.rds'),
                            file_refit="always")
 
 # fitting bias only 
@@ -127,7 +126,7 @@ nhmodel_bias_fas = brm(high_bp ~ (1|ethnicity) + overweight,
                        cores = 4,
                        family = bernoulli(link = "logit"),
                        control = list(adapt_delta = 0.98),
-                       file=here('nhanes/data/fas_bias.rds'),
+                       file=here('code/nhanes/data/fas_bias.rds'),
                        file_refit="always")
 
 # fitting precision only 
@@ -139,7 +138,7 @@ nhmodel_prec_fas = brm(high_bp ~  (1|age) + (1|marital_status)  + phys_act + (1|
                        cores = 4,
                        family = bernoulli(link = "logit"),
                        control = list(adapt_delta = 0.98),
-                       file=here('nhanes/data/fas_prec.rds'),
+                       file=here('code/nhanes/data/fas_prec.rds'),
                        file_refit="always")
 
 # fitting inconsequential
@@ -151,7 +150,7 @@ nhmodel_inc_fas = brm(high_bp ~ (1|elst_status) +  (1|urn_vol),
                       cores = 4,
                       family = bernoulli(link = "logit"),
                       control = list(adapt_delta = 0.995), 
-                      file=here('nhanes/data/fas_inc.rds'),
+                      file=here('code/nhanes/data/fas_inc.rds'),
                       file_refit="always")
 
 # fitting ignorable
@@ -163,7 +162,7 @@ nhmodel_ign_fas = brm(high_bp ~ gender +  (1|educ) + (1|pov_level) + smk_tobcig 
                       cores = 4,
                       family = bernoulli(link = "logit"),
                       control = list(adapt_delta = 0.99), 
-                      file=here('nhanes/data/fas_ign.rds'),
+                      file=here('code/nhanes/data/fas_ign.rds'),
                       file_refit="always")
 
 # gen subsample -----------------------------------------------------------
@@ -178,7 +177,7 @@ nhmodel_allvar_gen = brm(high_bp ~  (1|ethnicity) + overweight + (1|age) + (1|ma
                          cores = 4,
                          family = bernoulli(link = "logit"),
                          control = list(adapt_delta = 0.99),
-                         file=here('nhanes/data/gen_allvar.rds'),
+                         file=here('code/nhanes/data/gen_allvar.rds'),
                          file_refit="always")
 
 
@@ -192,7 +191,7 @@ nhmodel_biasprec_gen = brm(high_bp ~   (1|ethnicity) + overweight + (1|age) + (1
                            cores = 4,
                            family = bernoulli(link = "logit"),
                            control = list(adapt_delta = 0.99),
-                           file=here('nhanes/data/gen_biasprec.rds'),
+                           file=here('code/nhanes/data/gen_biasprec.rds'),
                            file_refit="always")
 
 # fitting bias only 
@@ -204,7 +203,7 @@ nhmodel_bias_gen = brm(high_bp ~ (1|age) + (1|ethnicity) + overweight,
                        cores = 4,
                        family = bernoulli(link = "logit"),
                        control = list(adapt_delta = 0.98),
-                       file=here('nhanes/data/gen_bias.rds'),
+                       file=here('code/nhanes/data/gen_bias.rds'),
                        file_refit="always")
 
 # fitting precision only 
@@ -216,7 +215,7 @@ nhmodel_prec_gen = brm(high_bp ~ (1|marital_status)  + phys_act + (1|diabetes) +
                        cores = 4,
                        family = bernoulli(link = "logit"),
                        control = list(adapt_delta = 0.98),
-                       file=here('nhanes/data/gen_prec.rds'),
+                       file=here('code/nhanes/data/gen_prec.rds'),
                        file_refit="always")
 
 # fitting inconsequential
@@ -228,7 +227,7 @@ nhmodel_inc_gen = brm(high_bp ~ (1|elst_status) +  gender + (1|pov_level) + (1|s
                       cores = 4,
                       family = bernoulli(link = "logit"),
                       control = list(adapt_delta = 0.995), 
-                      file=here('nhanes/data/gen_inc.rds'),
+                      file=here('code/nhanes/data/gen_inc.rds'),
                       file_refit="always")
 
 # fitting ignorable
@@ -240,7 +239,7 @@ nhmodel_ign_gen = brm(high_bp ~ (1|educ) + (1|urn_vol) + smk_tobcig + (1|hiv_tes
                       cores = 4,
                       family = bernoulli(link = "logit"),
                       control = list(adapt_delta = 0.99), 
-                      file=here('nhanes/data/gen_ign.rds'),
+                      file=here('code/nhanes/data/gen_ign.rds'),
                       file_refit="always")
 
 

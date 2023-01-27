@@ -15,4 +15,4 @@ The code generates three `.rds` files (not stored on GitHub) to be used to plot 
 `../figures`:
 
 - `main_paper.Rmd` is the RMarkdown file for generating the figures in the paper
-- uses `res_list_N02_1000.rds`, `res_list_sae_1000_wtd.rds`, and `res_list_sae_500_wtd.rds` (for plots in the appendix).
+- uses `res_list_N02_1000.rds`, `res_list_sae_500_wtd.rds`, and `res_list_sae_1000_wtd.rds` (for the appendix).

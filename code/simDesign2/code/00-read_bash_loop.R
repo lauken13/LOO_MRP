@@ -440,5 +440,5 @@ for(ite in iter){
   
 }
 
-save.image(file="loo_sae_1000.RData", compress=T)
+save.image(file="loo_sae_500_wtd.RData", compress=T)
 

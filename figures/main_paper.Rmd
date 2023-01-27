@@ -12,13 +12,9 @@ library(ggplot2)
 library(tidyverse)
 library(forcats)
 library(here)
-library(facetscales)
 
-res_list_base <- readRDS(here('02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_1000.rds'))
-
-res_list_sae_1000 <- readRDS(here('02-super popn approach/experiment4_SAE/03-data/res_list_sae_1000_wtd.rds'))
-
-res_list_sae_500 <- readRDS(here('02-super popn approach/experiment4_SAE/03-data/res_list_sae_500_wtd.rds'))
+res_list_base <- readRDS(here('code/simDesign1/data/res_list_N02_1000.rds'))
+res_list_sae <- readRDS(here('code/simDesign2/data/res_list_sae_500_wtd.rds')) # change to *_sae_1000_wtd.rds for sample size n = 1000
 
 indv_all_tab = res_list_base$indv_all_tab
 popn_indv_tab = res_list_base$popn_indv_tab
@@ -30,18 +26,13 @@ model_sae_X2_tab_base = res_list_base$model_sae_X2_tab
 model_sae_X3_tab_base = res_list_base$model_sae_X3_tab
 model_sae_X4_tab_base = res_list_base$model_sae_X4_tab
 
-model_sae_X1_tab = res_list_sae_500$model_sae_X1_tab
-model_sae_X2_tab = res_list_sae_500$model_sae_X2_tab
-model_sae_X3_tab = res_list_sae_500$model_sae_X3_tab
-model_sae_X4_tab = res_list_sae_500$model_sae_X4_tab
+indv_all_tab_sae = res_list_sae$indv_all_tab
+popn_indv_tab_sae = res_list_sae$popn_indv_tab
 
-indv_all_tab_sae = res_list_sae_500$indv_all_tab
-popn_indv_tab_sae = res_list_sae_500$popn_indv_tab
-
-model_sae_X1_tab = res_list_sae_1000$model_sae_X1_tab
-model_sae_X2_tab = res_list_sae_1000$model_sae_X2_tab
-model_sae_X3_tab = res_list_sae_1000$model_sae_X3_tab
-model_sae_X4_tab = res_list_sae_1000$model_sae_X4_tab
+model_sae_X1_tab = res_list_sae$model_sae_X1_tab
+model_sae_X2_tab = res_list_sae$model_sae_X2_tab
+model_sae_X3_tab = res_list_sae$model_sae_X3_tab
+model_sae_X4_tab = res_list_sae$model_sae_X4_tab
 ```
 
 ## MRP bias and precision 
@@ -77,7 +68,6 @@ pc = popn_indv_tab %>%
   rename(pe_mean = popn_bias_X50,
          pe_low = popn_bias_X5, 
          pe_upp = popn_bias_X95) 
-
 
 # bias
 (g0 = ggplot(pc, aes(x = pe_mean, y = model, group = iteration, colour = model))+
@@ -176,7 +166,6 @@ t2$model = fct_relevel(t2$model, 'X2 + X4',
                          'X2 + X3', 'X1 + X2 + X3',
                          'X1', 'X3', 'X1 + X3')
 
-
 corr_popnindv_intervalscore <- union(t2,t3) %>%
   group_by(type, popnInd) %>%
   summarise(cor_val = paste0("cor: ",round(cor(model_score, intervalScr, use='complete.obs'),2))) %>% 
@@ -209,11 +198,9 @@ corr_popnindv_intervalscore <- union(t2,t3) %>%
     guides(colour = guide_legend(override.aes = list(size=3), nrow=4)) + 
     labs(tag = paste0(str_pad("Bias-precision", 27, "right"), str_pad("Bias-only", 21, "right"), str_pad("Precision-only", 20, "right"), "Irrelevant"), y = 'Interval score', x = 'PSIS-LOO-based model score'))
 
-
 ggsave(g1a, width=16, height=10, filename = here("figures/elpd_indv_popn.png"))
 
-
-
+# X4 plot
 ( g1b = t2 %>% 
     mutate(popnInd = factor(popnInd),
            popnInd = fct_recode(popnInd, `Sample` = "0", `Population` = "1")) %>% 
@@ -303,8 +290,8 @@ ggsave(g2, width=16, height=10, filename = here("figures/elpd_popn.png"))
 
 ## ELPD and population MRP interval score - X2 and X4 experiment
 ```{r X2 and X4 experiment}
-res_list_X2 <- readRDS(here('02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_X2.rds'))
-res_list_X4 <- readRDS(here('02-super popn approach/experiment1_baseWtdloo/03-data/res_list_N02_X4.rds'))
+res_list_X2 <- readRDS(here('code/simDesign1/data/res_list_N02_X2.rds'))
+res_list_X4 <- readRDS(here('code/simDesign1/data/res_list_N02_X4.rds'))
 
 popn_indv_tab_X2 = res_list_X2$popn_indv_tab %>% 
   mutate(var = "X2")
@@ -369,8 +356,6 @@ popn_indv_tab_all$model = fct_relevel(popn_indv_tab_all$model, 'X2 + X4',
   )
 
 ggsave(g2a, width=16, height=10, filename = here("figures/elpd_popn_X2X4.png"))
-
-
 ```
 
 ## Difference between variables - SAE
@@ -407,7 +392,6 @@ sae_clean_base <- rbind(saeX1_clean_base,saeX2_clean_base, saeX3_clean_base, sae
 
 ```{r, fig.width=10, fig.height=8}
 ## zoomed-in plot
-
 ( g3a = sae_clean_base %>%
     filter(group == 5) %>% 
     select(-full_model) %>%
@@ -435,9 +419,7 @@ sae_clean_base <- rbind(saeX1_clean_base,saeX2_clean_base, saeX3_clean_base, sae
     guides(colour = guide_legend(override.aes = list(size=5), nrow=4)) )
 
 ggsave(g3a, width=11, height=10, filename = here("figures/elpd_sae_1000_zoom.png"))
-
 ```
-
 
 ```{r, fig.width=10, fig.height=8}
 ( g3 = sae_clean_base %>%
@@ -469,15 +451,75 @@ ggsave(g3a, width=11, height=10, filename = here("figures/elpd_sae_1000_zoom.png
 ggsave(g3, width=11, height=10, filename = here("figures/elpd_sae_1000.png"))
 ```
 
-## Red-green plot --- Difference between priors - full model (AR prior setup)
+## Red-green plot -- Difference between priors - full model (AR prior setup)
 This one compares the AR prior against the non-AR prior for the full model. Axes are arranged so points in the top right quadrant are where ELPD and Interval Score agree. I thought the 3, 4 facets were kind of interesting because there's barely an improvement from the AR prior but the elpd seems relatively positive.
 
-
 ```{r, redgreen_popnindv}
-source(here("02-super popn approach/experiment4_SAE/01-code/popn_indv_redgreen.R"))
+## sample size n = 500 ####
+# elpd
+popn_indv_tab_sae_short = popn_indv_tab_sae %>% 
+  select(model, iteration, elpd_loo, wtdElpd_loo)
+
+alph = 0.1
+w1_AR = indv_all_tab_sae %>% 
+  filter(model == '*X1 + X2 + X3 + X4' | model == 'X1 + X2 + X3 + X4') %>%  
+  mutate(ar_prior = ifelse(model == '*X1 + X2 + X3 + X4', 1, 0)) %>% 
+  filter(ar_prior == 1) %>% 
+  mutate(ind_intervalScr_yprob = (sampestX95 - sampestX5) + 
+           ((2 / alph * (sampestX5 - y_prob)) * ifelse(y_prob < sampestX5, 1, 0)) + 
+           ((2 / alph * (y_prob - sampestX95)) * ifelse(y_prob > sampestX95, 1, 0))) %>% 
+  left_join(., popn_indv_tab_sae_short, by=c('model', 'iteration')) %>%  
+  group_by(iteration) %>% 
+  summarise('ind_intervalScr_yprob_*X1 + X2 + X3 + X4' = mean(ind_intervalScr_yprob),
+            'elpd_loo_*X1 + X2 + X3 + X4' = mean(elpd_loo),
+            'wtdElpd_loo_*X1 + X2 + X3 + X4' = mean(wtdElpd_loo)) %>% 
+  select(-iteration)
+
+w1_nonAR = indv_all_tab_sae %>% 
+  filter(model == '*X1 + X2 + X3 + X4' | model == 'X1 + X2 + X3 + X4') %>%  
+  mutate(ar_prior = ifelse(model == '*X1 + X2 + X3 + X4', 1, 0)) %>% 
+  filter(ar_prior == 0) %>% 
+  mutate(ind_intervalScr_yprob = (sampestX95 - sampestX5) + 
+           ((2 / alph * (sampestX5 - y_prob)) * ifelse(y_prob < sampestX5, 1, 0)) + 
+           ((2 / alph * (y_prob - sampestX95)) * ifelse(y_prob > sampestX95, 1, 0))) %>% 
+  left_join(., popn_indv_tab_sae_short, by=c('model', 'iteration')) %>% 
+  group_by(iteration) %>% 
+  summarise('ind_intervalScr_yprob_X1 + X2 + X3 + X4' = mean(ind_intervalScr_yprob),
+            'elpd_loo_X1 + X2 + X3 + X4' = mean(elpd_loo),
+            'wtdElpd_loo_X1 + X2 + X3 + X4' = mean(wtdElpd_loo)) %>% 
+  select(-iteration)
+
+w1_all = bind_cols(w1_AR, w1_nonAR) %>% 
+  mutate(elpd_diff = `elpd_loo_*X1 + X2 + X3 + X4` - `elpd_loo_X1 + X2 + X3 + X4`, 
+         wtdElpd_diff = `wtdElpd_loo_*X1 + X2 + X3 + X4` - `wtdElpd_loo_X1 + X2 + X3 + X4`, 
+         intScr_diff = -(`ind_intervalScr_yprob_*X1 + X2 + X3 + X4` - `ind_intervalScr_yprob_X1 + X2 + X3 + X4`)) %>% 
+  pivot_longer(cols = c("elpd_diff","wtdElpd_diff"), names_to = "type", values_to = "model_score") %>%
+  mutate(type = factor(type),
+         type = fct_recode(type, `PSIS-LOO` = "elpd_diff", `WTD-PSIS-LOO` = "wtdElpd_diff"))
+
+xloc1 = -57; xloc2 = 250; xloc3 = -1; xloc4 = 5.2
+yloc1 = -0.02; yloc2 = 0.15
+
+g4_indv = ggplot(w1_all, aes(x = model_score, y = intScr_diff)) + 
+  geom_rect(data =  w1_all[which(w1_all$type == 'WTD-PSIS-LOO'),], aes(xmin = xloc1, xmax = 0, ymin = yloc1, ymax = 0), fill="#98FB98",alpha = 0.02) + # green grid
+  geom_rect(data =  w1_all[which(w1_all$type == 'WTD-PSIS-LOO'),], aes(xmin = 0, xmax = xloc2, ymin = 0, ymax = yloc2), fill="#98FB98",alpha = 0.02) +
+  geom_rect(data =  w1_all[which(w1_all$type == 'WTD-PSIS-LOO'),], aes(xmin = xloc1, xmax = 0, ymin = 0, ymax = yloc2), fill="#FA8072",alpha = 0.007) + # red grid
+  geom_rect(data =  w1_all[which(w1_all$type == 'WTD-PSIS-LOO'),], aes(xmin = 0, xmax = xloc2, ymin = yloc1, ymax = 0), fill="#FA8072",alpha = 0.007) +
+  geom_rect(data =  w1_all[which(w1_all$type == 'PSIS-LOO'),], aes(xmin = xloc3, xmax = 0, ymin = yloc1, ymax = 0), fill="#98FB98",alpha = 0.02) + # green grid
+  geom_rect(data =  w1_all[which(w1_all$type == 'PSIS-LOO'),], aes(xmin = 0, xmax = xloc4, ymin = 0, ymax = yloc2), fill="#98FB98",alpha = 0.02) +
+  geom_rect(data =  w1_all[which(w1_all$type == 'PSIS-LOO'),], aes(xmin = xloc3, xmax = 0, ymin = 0, ymax = yloc2), fill="#FA8072",alpha = 0.007) + # red grid
+  geom_rect(data =  w1_all[which(w1_all$type == 'PSIS-LOO'),], aes(xmin = 0, xmax = xloc4, ymin = yloc1, ymax = 0), fill="#FA8072",alpha = 0.007) +
+  geom_point(alpha = .5, shape=16, size=3) + 
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  xlab("PSIS-LOO-based model score difference")+
+  ylab("Interval score difference")+
+  facet_grid(.~type, scales = "free") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme_bw(base_size = 17) +
+  scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) 
 
 ggsave(g4_indv, width=12, height=8, filename = here("figures/AR_indv_500.png"))
-
 ```
 
 ```{r, redgreen_MRP}
@@ -495,7 +537,6 @@ t5_nonAR = popn_indv_tab_sae %>%
   filter(ar_prior == 0) %>% 
   select(iteration, 'elpd_loo_X1 + X2 + X3 + X4', 'wtdElpd_loo_X1 + X2 + X3 + X4', 'popn_intervalScr_X1 + X2 + X3 + X4')
 
-
 t6 = left_join(t5_arPrior, t5_nonAR, by='iteration') %>% 
   mutate(elpd_diff = `elpd_loo_*X1 + X2 + X3 + X4` - `elpd_loo_X1 + X2 + X3 + X4`, 
          wtdElpd_diff = `wtdElpd_loo_*X1 + X2 + X3 + X4` - `wtdElpd_loo_X1 + X2 + X3 + X4`, 
@@ -503,7 +544,6 @@ t6 = left_join(t5_arPrior, t5_nonAR, by='iteration') %>%
   pivot_longer(cols = c("elpd_diff","wtdElpd_diff"), names_to = "type", values_to = "model_score") %>%
   mutate(type = factor(type),
          type = fct_recode(type, `PSIS-LOO` = "elpd_diff", `WTD-PSIS-LOO` = "wtdElpd_diff"))
-
 
 xloc3 = -0.7; xloc4 = 5.2; xloc1 = -51; xloc2 = 250;
 yloc1 = -0.03; yloc2 = 0.35
@@ -531,6 +571,7 @@ ggsave(g4_mrp, width=12, height=8, filename = here("figures/AR_mrp_500.png"))
 ```
 
 ```{r, redgreen_sae}
+# SAE calculations 
 saeX1_clean <- model_sae_X1_tab %>%
   rename(group = X1, elpdmean_sae = elpd_mean_X1sae, intervalScr_sae = intervalScr_X1sae,
            n_sae = n_X1sae, wtdElpdmean_sae = wtdMean_X1sae) %>%
@@ -558,7 +599,10 @@ saeX4_clean <- model_sae_X4_tab %>%
 sae_clean <- rbind(saeX1_clean,saeX2_clean, saeX3_clean, saeX4_clean)%>%
   mutate(full_model = grepl("X1 + X2 + X3 + X4",model, fixed = TRUE),
          ar_prior = grepl("*",model, fixed = TRUE))
+```
 
+```{r}
+# plot for sample size n = 500
 colour_palette_var  =  c( `X1 + X2 + X3` = "#ef6548",
                `X1 + X2 + X3 + X4` = "#014636", `X1 + X2 + X4 ` ="#02818a", `X2 + X3 + X4` = "#67a9cf",
                `X1 + X3` = "#fed976",
@@ -571,9 +615,7 @@ ar_tab = sae_clean %>%
   mutate(elpd_diff = (`elpdmean_sae_*X1 + X2 + X3 + X4`-`elpdmean_sae_X1 + X2 + X3 + X4`), # positive is favours * model
          intscr_diff = -(`intervalScr_sae_*X1 + X2 + X3 + X4`-`intervalScr_sae_X1 + X2 + X3 + X4`)) #positive favours * model
 
-
-xloc1 = -0.08; xloc2 = 0.17;
-yloc1 = -1.5; yloc2 = 1.8
+xloc1 = -0.08; xloc2 = 0.17; yloc1 = -1.5; yloc2 = 1.8
 ( g4 = ggplot(data=ar_tab, aes(x = elpd_diff, y = intscr_diff))+
     geom_rect(aes(xmin = xloc1, xmax = 0, ymin = yloc1, ymax = 0), fill="#98FB98",alpha = 0.02) + # green grid
     geom_rect(aes(xmin = 0, xmax = xloc2, ymin = 0, ymax = yloc2), fill="#98FB98",alpha = 0.02) +
@@ -589,17 +631,17 @@ yloc1 = -1.5; yloc2 = 1.8
     theme_bw(base_size = 17) +
     scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0)) )
 
-
 ggsave(g4, width=12, height=10, filename = here("figures/AR_sae_500.png"))
+```
 
-
-## wtdELpd_diff ####
+```{r}
+## sample size n = 1000 ####
+# rerun code from line 575-601 before running these
 ar_tab = sae_clean %>%
   filter(full_model, sae == "X4") %>%
   pivot_wider(names_from = model, values_from = c(intervalScr_sae, elpdmean_sae, wtdElpdmean_sae), names_sep = "_") %>%
   filter(ar_prior == 1) %>% 
   select(., -c(`wtdElpdmean_sae_X1 + X2 + X3 + X4`, `intervalScr_sae_X1 + X2 + X3 + X4`, `elpdmean_sae_X1 + X2 + X3 + X4`))
-
 
 ar_non_tab = sae_clean %>%
   filter(full_model, sae == "X4") %>%
@@ -633,14 +675,11 @@ ggsave(g4a, width=12, height=10, filename = here("figures/AR_wtd_sae_1000.png"))
 ```
 ### Mean sample size in each group 
 ```{r, echo=FALSE, warning=F, message=F}
-freq_sae_base = sae_clean_base %>%
+freq_sae_base = sae_clean_base %>% # run code 364-390 before
   group_by(sae, group) %>%
   summarise(mean_n = round(mean(n_sae)))
 ( t1 = freq_sae_base %>% 
   spread(., group, mean_n) %>% .[, c(2:6,1)] )
-  # %>% 
-  #   kableExtra::kbl(.)  %>% 
-  # kableExtra::kable_styling(full_width = F,position = "float_left") )
 
 ( t2 = popn_counts %>%
     rename(popn_mean_n = value, popn. = sae) %>% 

@@ -1,7 +1,4 @@
 ## calculating popn indv estimates
-
-
-## combining popn estimates for plotting (from Lauren's email)
 library(tidyverse)
 
 ## data file

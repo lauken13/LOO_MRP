@@ -1,13 +1,14 @@
 ## combining popn estimates for plotting 
 ## data file
-load(here::here('code/simDesign2/data/temp/loo_sae_500_wtd.RData')) # samp_size = 500
-load(here::here('code/simDesign2/data/temp/loo_sae_1000.RData')) # samp_size = 1000
-
 library(tidyverse)
+
+load(here::here('code/simDesign2/data/temp/loo_sae_500_wtd.RData')) # samp_size = 500
+# load(here::here('code/simDesign2/data/temp/loo_sae_1000.RData')) # samp_size = 1000
 
 # getting bias at popn level ----------------------------------------------
 # bias, sum elpd, coverage (0 or 1), truth and lower/upper CI quantile and interval score
 # calculating popnest and prob. of outcome for each iteration
+
 popnest_list = list()
 alph=0.1
 
@@ -39,7 +40,6 @@ popnest_all_tab = do.call(rbind, popnest_list) %>%
 source(here::here("code/simDesign2/code/tab_popn_elpd.R"), echo=TRUE)
 elpd_all_tab
 
-
 popn_all_tab = left_join(popnest_all_tab, elpd_all_tab, by=c('model', 'iteration')) %>% 
   left_join(., wtdElpd_all_tab, by=c('model', 'iteration')) 
 # View(popn_all_tab)
@@ -69,8 +69,9 @@ res_list_sae = list(indv_all_tab = indv_all_tab,
                     model_sae_X4_tab = model_sae_X4_tab, 
                     popn_counts = popn_counts,
                     samp_counts = samp_counts)
-saveRDS(res_list_sae, file=here::here("code/simDesign2/data/res_list_sae_1000_wtd.rds"), compress=T)                 
 
-# saveRDS(res_list_sae, file=here::here("code/simDesign2/data/res_list_sae_500_wtd.rds"), compress=T)
+
+saveRDS(res_list_sae, file=here::here("code/simDesign2/data/res_list_sae_500_wtd.rds"), compress=T)
+# saveRDS(res_list_sae, file=here::here("code/simDesign2/data/res_list_sae_1000_wtd.rds"), compress=T)                 
 
 

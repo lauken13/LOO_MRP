@@ -47,16 +47,16 @@ indv_summ_tab = indv_all_tab %>%
             ind_intervalScr_sd = sd(intervalScr_ind))
 
 
-# loo ------------------------------------------------------------
-source(here::here("code/simDesign2/code/samp_loo.R"), echo=T)
-
-indv_summ_tab = left_join(indv_summ_tab, elpd_all_tab, by=c('model', 'iteration')) %>%
-  left_join(., wtd_elpd_se_tab, by=c('model', 'iteration')) %>%
-  as_tibble() %>%
-  mutate(model = factor(model))
-
-indv_summ_tab$model = forcats::fct_relevel(indv_summ_tab$model, c('X1 + X2 + X3 + X4', '*X1 + X2 + X3 + X4', 
-                                                                'X1 + X3 + X4', '*X1 + X3 + X4',
-                                                                'X1 + X2 + X3', 'X1 + X2 + X4',
-                                                                'X2 + X3 + X4', 'X1 + X3'))
+# # loo ------------------------------------------------------------
+# source(here::here("code/simDesign2/code/samp_loo.R"), echo=T)
+# 
+# indv_summ_tab = left_join(indv_summ_tab, elpd_all_tab, by=c('model', 'iteration')) %>%
+#   left_join(., wtd_elpd_se_tab, by=c('model', 'iteration')) %>%
+#   as_tibble() %>%
+#   mutate(model = factor(model))
+# 
+# indv_summ_tab$model = forcats::fct_relevel(indv_summ_tab$model, c('X1 + X2 + X3 + X4', '*X1 + X2 + X3 + X4', 
+#                                                                 'X1 + X3 + X4', '*X1 + X3 + X4',
+#                                                                 'X1 + X2 + X3', 'X1 + X2 + X4',
+#                                                                 'X2 + X3 + X4', 'X1 + X3'))
 

@@ -222,12 +222,7 @@ fulldat = left_join(demo1720, bp, by='SEQN') %>%
   select(-c(smk2_ind, smk2_home, tob_last5, cig_now, preg_fem, sodium_intake1, sodium_intake2, potassium_intake1, potassium_intake2,
             sodium_avg, potassium_avg, preg_yes)) 
 
-
-saveRDS(fulldat, file=here("nhanes/data/fulldat.RDS"))
-
 # attempt to include more variables ---------------------------------------------
-fulldat = readRDS(file="nhanes/data/fulldat.rds") 
-
 # elastography
 lux = read.xport(here('nhanes/data/NHANES 2017-20/P_LUX.XPT')) %>%
   mutate(elst_status = recode(as.factor(LUAXSTAT), '1' = 'complete', '2' = 'partial', '3' = 'ineligible', '4' = 'not done')) %>%

@@ -7,6 +7,8 @@ In RStudio, first open `LOO_MRP.Rproj`, this will help set the working directory
 
 The ``../code`` folder contains three folders ``simDesign1``, ``simDesign2``, and ``nhanes`` for the two simulation designs and the NHANES data application.
 
+The code generates three `.rds` files (not stored on GitHub) to be used to plot the figures.
+
 
 ## Figures in the paper 
 

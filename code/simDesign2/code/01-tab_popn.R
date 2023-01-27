@@ -5,7 +5,7 @@ library(tidyverse)
 load(here::here('code/simDesign2/data/temp/loo_sae_500_wtd.RData')) # samp_size = 500
 # load(here::here('code/simDesign2/data/temp/loo_sae_1000.RData')) # samp_size = 1000
 
-# getting bias at popn level ----------------------------------------------
+# getting bias at popn level ---------------------------
 # bias, sum elpd, coverage (0 or 1), truth and lower/upper CI quantile and interval score
 # calculating popnest and prob. of outcome for each iteration
 
@@ -44,12 +44,12 @@ popn_all_tab = left_join(popnest_all_tab, elpd_all_tab, by=c('model', 'iteration
   left_join(., wtdElpd_all_tab, by=c('model', 'iteration')) 
 # View(popn_all_tab)
 
-## loading individual tab
+## loading individual tab ####
 source(here::here("code/simDesign2/code/tab_samp.R"), echo=TRUE)
 
 popn_indv_tab = left_join(popn_all_tab, indv_summ_tab, by=c('model', 'iteration')) 
 
-## loading SAE tab 
+## loading SAE tab ####
 source(here::here("code/simDesign2/code/tab_SAE.R"), echo=TRUE)
 
 model_sae_X1_tab

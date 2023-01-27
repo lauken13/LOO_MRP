@@ -54,9 +54,6 @@ source(here::here("code/simDesign1/code/tab_samp.R"), echo=TRUE)
 
 popn_indv_tab = left_join(popn_all_tab, indv_summ_tab, by=c('model', 'iteration')) 
 
-## calculating weighted interval score at the population
-popn_indv_wts = popn_indv_tab 
-
 ## loading SAE tab 
 source(here::here("code/simDesign1/code/tab_SAE.R"), echo=TRUE)
 
@@ -77,6 +74,5 @@ res_list_N02_1000 = list(indv_all_tab = indv_all_tab,
                  model_sae_X4_tab = model_sae_X4_tab, 
                  popn_counts = popn_counts,
                  samp_counts = samp_counts)
-saveRDS(res_list_N02_1000, file=here::here("code/simDesign1/data/res_list_N02_1000.rds"), compress=T)                 
-                 
 
+saveRDS(res_list_N02_1000, file=here::here("code/simDesign1/data/res_list_N02_1000.rds"), compress=T)                 

@@ -20,7 +20,7 @@
 `../simDesign2/code`:
 
 - Similar set up as Simulation design 1 above and generates `loo_sae_500_wtd.RData` (and `loo_sae_1000_wtd.RData` for the appendix).
-- Generates `.rds` files and are saved in the `/data` folder.
+- Generates `.rds` files and are saved in the `../simDesign2/data` folder.
 
 `../simDesign2/data`:
 - Two .rds files: `res_list_sae_500_wtd.rds` (and `res_list_sae_1000_wtd.rds` for the results in the appendix) contains the tables to plot the figures as in `../figures/main_paper.Rmd`.
